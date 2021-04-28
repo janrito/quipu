@@ -83,9 +83,9 @@ const deleteCard = () => {
 };
 
 const handleDragBookmarkConsider = event => {
-  const { id, trigger } = event.detail.info;
-  // find the dragged item
+  const { id } = event.detail.info;
 
+  // find the dragged item
   const draggedBookmark = event.detail.items.find(b => b[SHADOW_ITEM_MARKER_PROPERTY_NAME]);
   const draggedBookmarkInStore = bookmarks.findIndex(b => b.id === id);
 
