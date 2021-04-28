@@ -1,0 +1,31 @@
+{
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "webextensions": true,
+    "es6": true
+  },
+  "plugins": ["svelte3"],
+  "extends": ["eslint:recommended", "eslint-config-prettier"],
+  "overrides": [
+    {
+      "files": ["**/*.svelte"],
+      "processor": "svelte3/svelte3"
+    }
+  ],
+  "rules": {
+    "arrow-body-style": [2, "as-needed"],
+    "no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "browser"
+      }
+    ],
+    "import/extensions": "off",
+    "node/file-extension-in-import": "off"
+  }
+}
