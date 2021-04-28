@@ -1,6 +1,6 @@
 <style>
 .selected {
-  @apply border-b-2 border-gray-600 text-gray-800;
+  @apply border-b-2 border-gray-600 text-gray-800 bg-white;
 }
 
 :global(.active-draggable-tab-target) {
@@ -73,6 +73,12 @@ const handleReorderTabs = event => {
   dispatch("selectTab", { id: order.indexOf(selectedTabId) });
 };
 
+const styleDraggedTab = el => {
+  el.className = [
+    ...new Set(["bg-white", "shadow-xl", "bg-opacity-100", ...el.className.split(" ")]),
+  ].join(" ");
+};
+
 $: drawTabs = tabs;
 </script>
 
@@ -85,6 +91,7 @@ $: drawTabs = tabs;
         dropTargetStyle: {},
         dropTargetClasses: ['active-draggable-tab-target'],
         dropFromOthersDisabled: true,
+        transformDraggedElement: styleDraggedTab,
         dragDisabled: !editable,
       }}"
       on:consider="{handleReorderTabsConsider}"
@@ -101,7 +108,7 @@ $: drawTabs = tabs;
           <a
             class:selected="{tab.id === selectedTabId}"
             href="#page-{tab.name}"
-            class="mx-1.5 -mb-0.5 px-1.5 text-sm font-extralight text-gray-400 truncate"
+            class="mt-0 mx-0 -mb-0.5 px-3 text-sm font-extralight text-gray-400 truncate"
             on:click|preventDefault="{clickTabDispatcher(tab.id)}">{tab.name}</a>
         {/if}
       {/each}
