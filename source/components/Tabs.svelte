@@ -3,7 +3,7 @@ import browser from "webextension-polyfill";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
 import Bookmark from "./Bookmark.svelte";
-import { randomSuffix } from "../lib/utils";
+import { modifyElementClasses, randomSuffix } from "../lib/utils";
 import browserTabs from "../stores/browser-tabs";
 
 // keep track of temporary tabs, when one is being dragged
@@ -37,11 +37,8 @@ const handleDragTabConsider = event => {
     tempTabs = null;
   }
 };
-
-const styleDraggedTab = el => {
-  // TODO: for some reason this is not being called
-  el.className = [...new Set(["shadow-xl", ...el.className.split(" ")])].join(" ");
-};
+// TODO: for some reason this is not being called
+const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl"]);
 
 $: tabs = tempTabs ? tempTabs : [...$browserTabs];
 </script>

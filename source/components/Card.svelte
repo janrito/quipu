@@ -17,7 +17,7 @@ import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-
 
 import Bookmark from "./Bookmark.svelte";
 import TagEditor from "./TagEditor.svelte";
-import { browserTabToBookmark } from "../lib/utils";
+import { browserTabToBookmark, modifyElementClasses } from "../lib/utils";
 import settings from "../stores/settings.js";
 import createTagStore from "../stores/tags";
 
@@ -171,9 +171,7 @@ const handleDragBookmark = event => {
   }
 };
 
-const styleDraggedBookmark = el => {
-  el.className = [...new Set(["shadow-xl", ...el.className.split(" ")])].join(" ");
-};
+const styleDraggedBookmark = el => modifyElementClasses(el, ["shadow-xl"]);
 
 const handleAltKeyPressed = event => {
   altKeyActive = event.altKey;

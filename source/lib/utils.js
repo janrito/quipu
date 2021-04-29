@@ -30,3 +30,15 @@ export const browserTabToBookmark = browserTab => ({
   favIcon: browserTab.favIconUrl,
   tags: "",
 });
+
+/**
+ * Transforms an element by adding the classes in `add` and removing
+ * the classes in `remove`.
+ * It always returns the modified element
+ */
+export const modifyElementClasses = (element, add = [], remove = []) => {
+  element.className = [
+    ...new Set([...add, ...element.className.split(" ").filter(cls => !remove.includes(cls))]),
+  ].join(" ");
+  return element;
+};

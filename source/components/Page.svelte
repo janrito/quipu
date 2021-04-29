@@ -7,6 +7,7 @@ import Spinner from "./Spinner.svelte";
 import BookmarkEditor from "./BookmarkEditor.svelte";
 import Card from "./Card.svelte";
 
+import { modifyElementClasses } from "../lib/utils";
 import createBookmarksStore from "../stores/bookmarks.js";
 import settings from "../stores/settings.js";
 
@@ -102,6 +103,8 @@ const highLightBookmark = event => {
   detail = bookmarks.find(bookmark => bookmark.id === _id);
 };
 
+const styleDraggedCard = el => modifyElementClasses(el, ["shadow-xl", "bg-white"]);
+
 $: parentTags = [$settings.pinboardRootTag, $settings.pages[pageIndex].name].filter(tag => tag);
 $: bookmarksStore = createBookmarksStore($settings.pinboardAPIToken, parentTags);
 $: cards = tempCards
@@ -137,6 +140,7 @@ $: errors = $bookmarksStore.errors;
             items: cards,
             dropTargetStyle: {},
             dropFromOthersDisabled: true,
+            transformDraggedElement: styleDraggedCard,
           }}"
           on:consider="{handleReorderCardsConsider}"
           on:finalize="{handleReorderCards}">

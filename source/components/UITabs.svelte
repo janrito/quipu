@@ -15,6 +15,8 @@ import delay from "lodash/delay";
 
 import TagEditor from "./TagEditor.svelte";
 
+import { modifyElementClasses } from "../lib/utils";
+
 export let tabs;
 export let selectedTabId;
 export let editable = false;
@@ -73,11 +75,8 @@ const handleReorderTabs = event => {
   dispatch("selectTab", { id: order.indexOf(selectedTabId) });
 };
 
-const styleDraggedTab = el => {
-  el.className = [
-    ...new Set(["bg-white", "shadow-xl", "bg-opacity-100", ...el.className.split(" ")]),
-  ].join(" ");
-};
+const styleDraggedTab = el =>
+  modifyElementClasses(el, ["bg-white", "shadow-xl", "ring-1", "ring-gray-200"], ["selected"]);
 
 $: drawTabs = tabs;
 </script>
