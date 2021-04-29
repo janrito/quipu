@@ -4,10 +4,7 @@ export default new OptionsSync({
   defaults: {
     pinboardAPIToken: null,
     pinboardRootTag: ".quipu",
-    pages: [
-      { name: ".quipu:home", cards: ["Management_Strategy", "Clipboard"] },
-      { name: ".quipu:ai", cards: ["ai_in_retail"] },
-    ],
+    pages: [{ name: "Home", cards: ["Clipboard", "to-read"] }],
   },
   migrations: [OptionsSync.migrations.removeUnused],
   logging: true,
