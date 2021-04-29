@@ -1,8 +1,8 @@
 {
   "name": "Quipu",
-  "version": "0.0.0",
-  "description": "A tab session manager backed by pinboard",
-  "homepage_url": "https://github.com/janrito/pintab",
+  "version": "0.0.1",
+  "description": "A tab session manager powered by pinboard",
+  "homepage_url": "https://github.com/janrito/quipu",
   "manifest_version": 2,
   "minimum_chrome_version": "74",
   "applications": {
