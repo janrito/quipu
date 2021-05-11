@@ -1,7 +1,7 @@
 {
   "name": "Quipu",
   "version": "0.1.0",
-  "description": "A tab session manager powered by pinboard",
+  "description": "Quipu is a simple Pinboard powered session manager.",
   "homepage_url": "https://github.com/janrito/quipu",
   "manifest_version": 2,
   "minimum_chrome_version": "74",
