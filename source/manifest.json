@@ -1,6 +1,6 @@
 {
   "name": "Quipu",
-  "version": "0.0.1",
+  "version": "0.1.0.dev0",
   "description": "A tab session manager powered by pinboard",
   "homepage_url": "https://github.com/janrito/quipu",
   "manifest_version": 2,
