@@ -1,5 +1,7 @@
 # Quipu
 
+![quipu](source/icon.png)
+
 Quipu is a simple [Pinboard](http://pinboard.in) powered session manager.
 
 I have too many tabs open. I struggle to keep them organised. I need a tool that allows me to save some bookmarks for later, in groups, but that doesn't require me to spend too much time curating them. I also want to have those sessions available quickly.
