@@ -8,6 +8,7 @@ I have too many tabs open. I struggle to keep them organised. I need a tool that
 [Add to Chrome](https://chrome.google.com/webstore/detail/quipu/ekiaicefngglagjldocoldkinmhegnjo)
 
 Quipu uses tags to organise bookmarks in tabbed pages and cards. A bookmark can appear in multiple pages and cards, if it is so tagged. Pages and cards provide no hierarchical structure, they are for the user's visual convenience only. Bookmarks are ordered according to when they were added.
+<!-- [Add to Firefox]() -->
 
 ![Preview](media/previewer.png)
 
