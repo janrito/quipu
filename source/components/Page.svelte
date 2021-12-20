@@ -103,7 +103,7 @@ const highLightBookmark = event => {
   detail = bookmarks.find(bookmark => bookmark.id === _id);
 };
 
-const styleDraggedCard = el => modifyElementClasses(el, ["shadow-xl", "bg-white"]);
+const styleDraggedCard = el => modifyElementClasses(el, ["shadow-xl"]);
 
 $: parentTags = [$settings.pinboardRootTag, $settings.pages[pageIndex].name].filter(tag => tag);
 $: bookmarksStore = createBookmarksStore($settings.pinboardAPIToken, parentTags);

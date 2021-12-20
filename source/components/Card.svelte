@@ -3,7 +3,7 @@
   @apply text-gray-200;
 }
 
-:global(.active-draggable-card) {
+:global(.active-droppable-card) {
   @apply shadow-inner bg-gray-50;
 }
 </style>
@@ -183,7 +183,7 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
 
 <svelte:window on:keydown="{handleAltKeyPressed}" on:keyup="{handleAltKeyPressed}" />
 
-<div class="flex flex-col" bind:this="{cardElement}">
+<div class="flex flex-col bg-white" bind:this="{cardElement}">
   {#if editMode}
     <div class="ml-7 py-3 flex-shrink-0">
       <TagEditor
@@ -210,7 +210,7 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
     use:dndzone="{{
       items: bookmarksToDraw,
       dropTargetStyle: {},
-      dropTargetClasses: ['active-draggable-card'],
+      dropTargetClasses: ['active-droppable-card'],
       dropFromOthersDisabled: untagged,
       transformDraggedElement: styleDraggedBookmark,
       type: 'bookmark',

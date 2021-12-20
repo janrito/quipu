@@ -50,7 +50,7 @@ export const browserTabToBookmark = browserTab => ({
  */
 export const modifyElementClasses = (element, add = [], remove = []) => {
   element.className = [
-    ...new Set([...add, ...element.className.split(" ").filter(cls => !remove.includes(cls))]),
+    ...new Set([...element.className.split(" ").filter(cls => !remove.includes(cls)), ...add]),
   ].join(" ");
   return element;
 };

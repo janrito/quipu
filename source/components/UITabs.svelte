@@ -1,9 +1,9 @@
 <style>
 .selected {
-  @apply border-b-2 border-gray-600 text-gray-800 bg-white;
+  @apply border-gray-600 text-gray-800;
 }
 
-:global(.active-draggable-tab-target) {
+:global(.active-droppable-tab-target) {
   @apply bg-gray-50;
 }
 </style>
@@ -75,8 +75,7 @@ const handleReorderTabs = event => {
   dispatch("selectTab", { id: order.indexOf(selectedTabId) });
 };
 
-const styleDraggedTab = el =>
-  modifyElementClasses(el, ["bg-white", "shadow-xl", "ring-1", "ring-gray-200"], ["selected"]);
+const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl", "ring-1", "ring-gray-200"]);
 
 $: drawTabs = tabs;
 </script>
@@ -88,7 +87,7 @@ $: drawTabs = tabs;
       use:dndzone="{{
         items: drawTabs,
         dropTargetStyle: {},
-        dropTargetClasses: ['active-draggable-tab-target'],
+        dropTargetClasses: ['active-droppable-tab-target'],
         dropFromOthersDisabled: true,
         transformDraggedElement: styleDraggedTab,
         dragDisabled: !editable,
@@ -107,7 +106,7 @@ $: drawTabs = tabs;
           <a
             class:selected="{tab.id === selectedTabId}"
             href="#page-{tab.name}"
-            class="mt-0 mx-0 -mb-0.5 px-3 text-sm font-extralight text-gray-400 truncate"
+            class="mt-0 mx-0 -mb-0.5 px-3 text-sm font-extralight text-gray-400 border-b-2 bg-white truncate"
             on:click|preventDefault="{clickTabDispatcher(tab.id)}">{tab.name}</a>
         {/if}
       {/each}
