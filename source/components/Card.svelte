@@ -12,7 +12,7 @@
 import browser from "webextension-polyfill";
 import delay from "lodash/delay";
 import memoize from "lodash/memoize";
-import { onMount, createEventDispatcher } from "svelte";
+import { createEventDispatcher } from "svelte";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
 import Bookmark from "./Bookmark.svelte";
@@ -28,24 +28,9 @@ export let untagged = false;
 export let editMode = false;
 
 let tempBookmarks = null;
-let cardElement;
-let cols = 4;
 let altKeyActive = false;
 
 const dispatch = createEventDispatcher();
-
-const cardResizeObserver = new ResizeObserver(entries => {
-  for (let entry of entries) {
-    const position = entry.target?.getBoundingClientRect();
-    if (position) {
-      cols = Math.floor(position?.width / 175);
-    }
-  }
-});
-
-onMount(() => {
-  cardResizeObserver.observe(cardElement);
-});
 
 const currentTab = memoize(async () => await browser.tabs.getCurrent());
 
@@ -183,7 +168,7 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
 
 <svelte:window on:keydown="{handleAltKeyPressed}" on:keyup="{handleAltKeyPressed}" />
 
-<div class="flex flex-col bg-white" bind:this="{cardElement}">
+<div class="flex flex-col bg-white">
   {#if editMode}
     <div class="ml-7 py-3 flex-shrink-0">
       <TagEditor
@@ -206,7 +191,7 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
   {/if}
 
   <div
-    class="flex-grow w-full grid {cols ? `grid-cols-${cols}` : 'grid-cols-4'} gap-1 min-h-5"
+    class="flex-grow w-full gap-1 min-h-5 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))]"
     use:dndzone="{{
       items: bookmarksToDraw,
       dropTargetStyle: {},

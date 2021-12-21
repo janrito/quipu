@@ -1,18 +1,3 @@
-const purgecss = {
-  "@fullhuman/postcss-purgecss": {
-    content: [
-      "./source/**/*.html",
-      "./source/**/*.svg",
-      "./source/**/*.js",
-      "./source/**/*.svelte",
-    ],
-    safelist: [/svelte-/, /grid-cols-/],
-    defaultExtractor: content => [
-      ...(content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || []),
-      ...(content.match(/(?<=class:)[^=>\/\s]*/g) || []),
-    ],
-  },
-};
 module.exports = {
   plugins: {
     "postcss-import": {},
@@ -22,6 +7,6 @@ module.exports = {
     tailwindcss: "tailwind.config.js",
     autoprefixer: {},
     "postcss-nested": {},
-    ...(process.env.NODE_ENV === "production" ? purgecss : {}),
   },
+  ...(process.env.NODE_ENV === "production" ? { cssnano: {} } : {}),
 };

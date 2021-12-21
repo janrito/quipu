@@ -1,7 +1,7 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
 
 module.exports = {
-  purge: false,
+  content: ["./source/**/*.{js,svelte,html}"],
   theme: {
     fontFamily: {
       sans: [...defaultTheme.fontFamily.sans],
@@ -17,5 +17,4 @@ module.exports = {
       ...defaultTheme.minHeight,
     },
   },
-  variants: {},
 };
