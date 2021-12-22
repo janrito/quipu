@@ -1,7 +1,7 @@
 {
   "parser": "@babel/eslint-parser",
   "parserOptions": {
-    "ecmaVersion": 2020,
+    "ecmaVersion": "latest",
     "sourceType": "module"
   },
   "env": {
@@ -9,7 +9,7 @@
     "webextensions": true,
     "es6": true
   },
-  "plugins": ["svelte3"],
+  "plugins": ["svelte3", "prettier"],
   "extends": ["eslint:recommended", "eslint-config-prettier"],
   "overrides": [
     {
@@ -26,6 +26,9 @@
       }
     ],
     "import/extensions": "off",
-    "node/file-extension-in-import": "off"
-  }
+    "node/file-extension-in-import": "off",
+    "eqeqeq": "error",
+    "no-console": "warn"
+  },
+  "ignorePatterns": ["node_modules", "distribution"]
 }

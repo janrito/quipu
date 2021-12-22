@@ -2,5 +2,8 @@
   "svelte.plugin.css.diagnostics.enable": false,
   "css.validate": false,
   "eslint.validate": ["javascript", "svelte"],
-  "cSpell.words": ["Iosevka", "tailwindcss"]
+  "cSpell.words": ["Iosevka", "tailwindcss"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  }
 }
