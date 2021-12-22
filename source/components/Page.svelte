@@ -32,7 +32,11 @@ const filterBookmarksByTag = (bookmarks, tag) => {
 
   return bookmarks
     .filter(bookmark => bookmark.tags.includes(tag))
-    .map(bookmark => ({ ...bookmark, id: `${tag}|${bookmark.id}`, _cardTag: tag }));
+    .map(bookmark => ({
+      ...bookmark,
+      id: `${tag}|${bookmark.id}`,
+      _cardTag: tag,
+    }));
 };
 
 const filterBookmarksWithoutTags = (bookmarks, tags) => {
@@ -98,6 +102,10 @@ const addNewBookmark = event => {
     .catch(() => {});
 };
 
+const syncBookmarks = () => {
+  bookmarksStore.sync();
+};
+
 const highLightBookmark = event => {
   const [, _id] = event.detail.split("|", 2);
   detail = bookmarks.find(bookmark => bookmark.id === _id);
@@ -154,6 +162,7 @@ $: errors = $bookmarksStore.errors;
               on:createNewCard="{createNewCardDispatcher(card.id)}"
               on:deleteCard="{deleteCardDispatcher(card.id)}"
               on:addNewBookmark="{addNewBookmark}"
+              on:syncBookmarks="{syncBookmarks}"
               on:updateBookmarkDetails="{updateBookmarkDetails}" />
           {/each}
         </div>

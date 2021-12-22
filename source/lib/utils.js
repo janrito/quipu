@@ -14,6 +14,8 @@ export const tryParseJSON = jsonString => {
   return false;
 };
 
+export const formatDate = (date = new Date()) => date.toISOString().replace(/\.\d{3}Z$/g, "Z");
+
 /**
  * Encodes keys and values to be passed as URL parameters as expected by
  * the pinboard API.
@@ -41,6 +43,7 @@ export const browserTabToBookmark = browserTab => ({
   href: browserTab.url,
   favIcon: browserTab.favIconUrl,
   tags: "",
+  time: formatDate(),
 });
 
 /**

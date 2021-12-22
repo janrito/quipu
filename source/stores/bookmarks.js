@@ -10,6 +10,7 @@ const preprocessBookmark = data =>
     ...bookmark,
     id: `${BOOKMARK_PREFIX}-${idx}`,
     tags: bookmark.tags.split(" "),
+    time: Date.parse(bookmark.time),
   }));
 
 const createBookmarksStore = (apiToken, tags) => {
