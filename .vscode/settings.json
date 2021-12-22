@@ -1,5 +1,6 @@
 {
   "svelte.plugin.css.diagnostics.enable": false,
   "css.validate": false,
-  "eslint.validate": ["javascript", "svelte"]
+  "eslint.validate": ["javascript", "svelte"],
+  "cSpell.words": ["Iosevka", "tailwindcss"]
 }

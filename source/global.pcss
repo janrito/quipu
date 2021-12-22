@@ -1,6 +1,6 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   @font-face {
@@ -30,6 +30,7 @@
     src: url("fonts/iosevka/woff2/iosevka-regular.woff2") format("woff2"),
       url("fonts/iosevka/ttf/iosevka-regular.ttf") format("truetype");
   }
+
   input:focus {
     outline: none;
   }

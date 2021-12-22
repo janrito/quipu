@@ -1,5 +1,5 @@
 import cache from "webext-storage-cache";
-import { encodeParameters } from "./utils.js";
+import { encodeParameters, formatDate } from "./utils.js";
 
 // TODO: sublcass this error in order to enable error handling when appropriate
 // e.g. a bookmark that already exists, which can be modified instead
@@ -55,14 +55,16 @@ const cachedFetchAPI = async (apiToken, route, parameters = {}) =>
     });
   });
 
-const auth = fn => (apiToken, ...args) => {
-  if (!apiToken) {
-    return new Promise((_, reject) =>
-      reject(new PinboardAPIError(-1, "Pinboard API Token does not exist"))
-    );
-  }
-  return fn(apiToken, ...args);
-};
+const auth =
+  fn =>
+  (apiToken, ...args) => {
+    if (!apiToken) {
+      return new Promise((_, reject) =>
+        reject(new PinboardAPIError(-1, "Pinboard API Token does not exist"))
+      );
+    }
+    return fn(apiToken, ...args);
+  };
 
 export const postsUpdate = auth(async apiToken =>
   fetchAPI(apiToken, "posts/update").then(data => data.update_time)
@@ -81,8 +83,9 @@ export const postsAdd = auth(
       description,
       extended,
       tags,
-      replace,
+      dt: formatDate(new Date()),
       shared: "no",
+      replace,
     }).then(res => {
       const { result_code } = res;
       if (result_code !== "done") {

@@ -32,7 +32,11 @@ const filterBookmarksByTag = (bookmarks, tag) => {
 
   return bookmarks
     .filter(bookmark => bookmark.tags.includes(tag))
-    .map(bookmark => ({ ...bookmark, id: `${tag}|${bookmark.id}`, _cardTag: tag }));
+    .map(bookmark => ({
+      ...bookmark,
+      id: `${tag}|${bookmark.id}`,
+      _cardTag: tag,
+    }));
 };
 
 const filterBookmarksWithoutTags = (bookmarks, tags) => {
@@ -98,12 +102,16 @@ const addNewBookmark = event => {
     .catch(() => {});
 };
 
+const syncBookmarks = () => {
+  bookmarksStore.sync();
+};
+
 const highLightBookmark = event => {
   const [, _id] = event.detail.split("|", 2);
   detail = bookmarks.find(bookmark => bookmark.id === _id);
 };
 
-const styleDraggedCard = el => modifyElementClasses(el, ["shadow-xl", "bg-white"]);
+const styleDraggedCard = el => modifyElementClasses(el, ["shadow-xl"]);
 
 $: parentTags = [$settings.pinboardRootTag, $settings.pages[pageIndex].name].filter(tag => tag);
 $: bookmarksStore = createBookmarksStore($settings.pinboardAPIToken, parentTags);
@@ -154,6 +162,7 @@ $: errors = $bookmarksStore.errors;
               on:createNewCard="{createNewCardDispatcher(card.id)}"
               on:deleteCard="{deleteCardDispatcher(card.id)}"
               on:addNewBookmark="{addNewBookmark}"
+              on:syncBookmarks="{syncBookmarks}"
               on:updateBookmarkDetails="{updateBookmarkDetails}" />
           {/each}
         </div>

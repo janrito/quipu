@@ -3,7 +3,7 @@
   @apply text-gray-200;
 }
 
-:global(.active-draggable-card) {
+:global(.active-droppable-card) {
   @apply shadow-inner bg-gray-50;
 }
 </style>
@@ -12,7 +12,7 @@
 import browser from "webextension-polyfill";
 import delay from "lodash/delay";
 import memoize from "lodash/memoize";
-import { onMount, createEventDispatcher } from "svelte";
+import { createEventDispatcher } from "svelte";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
 import Bookmark from "./Bookmark.svelte";
@@ -27,25 +27,9 @@ export let parentTags = [];
 export let untagged = false;
 export let editMode = false;
 
-let tempBookmarks = null;
-let cardElement;
-let cols = 4;
 let altKeyActive = false;
 
 const dispatch = createEventDispatcher();
-
-const cardResizeObserver = new ResizeObserver(entries => {
-  for (let entry of entries) {
-    const position = entry.target?.getBoundingClientRect();
-    if (position) {
-      cols = Math.floor(position?.width / 175);
-    }
-  }
-});
-
-onMount(() => {
-  cardResizeObserver.observe(cardElement);
-});
 
 const currentTab = memoize(async () => await browser.tabs.getCurrent());
 
@@ -87,52 +71,30 @@ const handleDragBookmarkConsider = event => {
 
   // find the dragged item
   const draggedBookmark = event.detail.items.find(b => b[SHADOW_ITEM_MARKER_PROPERTY_NAME]);
-  const draggedBookmarkInStore = bookmarks.findIndex(b => b.id === id);
 
-  if (draggedBookmark && draggedBookmarkInStore >= 0) {
-    // dragged bookmark belongs in this card, let's keep the order
-    const draggedBookmarkIdx = event.detail.items.findIndex(
-      b => b[SHADOW_ITEM_MARKER_PROPERTY_NAME]
-    );
-    tempBookmarks = event.detail.items.filter(b => !b[SHADOW_ITEM_MARKER_PROPERTY_NAME]);
-    tempBookmarks.splice(draggedBookmarkInStore, 0, event.detail.items[draggedBookmarkIdx]);
-    tempBookmarks = tempBookmarks;
-  } else if (draggedBookmark && draggedBookmark.url) {
-    // bookmark comes from browser tabs
-    event.detail.items = [
+  if (draggedBookmark && draggedBookmark._cardTag != name) {
+    const newBookmark = draggedBookmark.url
+      ? browserTabToBookmark(draggedBookmark)
+      : draggedBookmark;
+    bookmarks = [
       {
-        // create a new temp fake bookmark to the end of the card
-        ...browserTabToBookmark(draggedBookmark),
+        ...newBookmark,
         id: id,
         tags: [...parentTags, name],
         [SHADOW_ITEM_MARKER_PROPERTY_NAME]: true,
       },
       ...event.detail.items.filter(b => !b[SHADOW_ITEM_MARKER_PROPERTY_NAME]),
-    ];
-    tempBookmarks = [...event.detail.items];
-  } else if (draggedBookmark) {
-    // bookmark comes from a different card
-    event.detail.items = [
-      { ...draggedBookmark },
-      ...event.detail.items.filter(b => !b[SHADOW_ITEM_MARKER_PROPERTY_NAME]),
-    ];
-    tempBookmarks = [...event.detail.items];
+    ].sort((a, b) => b.time - a.time);
   } else {
-    tempBookmarks = [...event.detail.items];
+    bookmarks = event.detail.items.sort((a, b) => b.time - a.time);
   }
 };
 
 const handleDragBookmark = event => {
   const { id, trigger } = event.detail.info;
   const droppedBookmark = event.detail.items.find(b => b.id === id);
-  const droppedBookmarkInStore = bookmarks.find(b => b.id === id);
 
-  // reset tempBookmarks
-  delay(() => {
-    tempBookmarks = null;
-  }, 1000);
-
-  if (droppedBookmark && !droppedBookmarkInStore && trigger === TRIGGERS.DROPPED_INTO_ZONE) {
+  if (droppedBookmark && trigger === TRIGGERS.DROPPED_INTO_ZONE) {
     // actual new bookmark, add it
     if (droppedBookmark.url) {
       dispatch("addNewBookmark", {
@@ -142,7 +104,8 @@ const handleDragBookmark = event => {
         },
         sourceTab: droppedBookmark,
       });
-    } else {
+    } else if (droppedBookmark._cardTag != name) {
+      // existing bookmark, update details
       dispatch("updateBookmarkDetails", {
         ...droppedBookmark,
         tags: [
@@ -158,16 +121,10 @@ const handleDragBookmark = event => {
           ]),
         ],
       });
+    } else {
+      // dragged from this card, dropped in the same card, sync from store
+      dispatch("syncBookmarks");
     }
-  } else if (
-    droppedBookmarkInStore &&
-    (!droppedBookmark || trigger === TRIGGERS.DROPPED_INTO_ANOTHER)
-  ) {
-    // here we would delete the bookmark, this should be handled by the update wherever it's dropped
-  } else if (droppedBookmark && droppedBookmarkInStore) {
-    // bookmark already in card, do nothing
-  } else {
-    // cannot find bookmark
   }
 };
 
@@ -176,14 +133,12 @@ const styleDraggedBookmark = el => modifyElementClasses(el, ["shadow-xl"]);
 const handleAltKeyPressed = event => {
   altKeyActive = event.altKey;
 };
-
-$: bookmarksToDraw = tempBookmarks ? tempBookmarks : bookmarks;
 $: tagStore = createTagStore($settings.pinboardAPIToken);
 </script>
 
 <svelte:window on:keydown="{handleAltKeyPressed}" on:keyup="{handleAltKeyPressed}" />
 
-<div class="flex flex-col" bind:this="{cardElement}">
+<div class="flex flex-col bg-white">
   {#if editMode}
     <div class="ml-7 py-3 flex-shrink-0">
       <TagEditor
@@ -206,18 +161,19 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
   {/if}
 
   <div
-    class="flex-grow w-full grid {cols ? `grid-cols-${cols}` : 'grid-cols-4'} gap-1 min-h-5"
+    class="flex-grow w-full gap-1 min-h-5 grid"
+    style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))"
     use:dndzone="{{
-      items: bookmarksToDraw,
+      items: bookmarks,
       dropTargetStyle: {},
-      dropTargetClasses: ['active-draggable-card'],
+      dropTargetClasses: ['active-droppable-card'],
       dropFromOthersDisabled: untagged,
       transformDraggedElement: styleDraggedBookmark,
       type: 'bookmark',
     }}"
     on:consider="{handleDragBookmarkConsider}"
     on:finalize="{handleDragBookmark}">
-    {#each bookmarksToDraw as bookmark (bookmark.id)}
+    {#each bookmarks as bookmark (bookmark.id)}
       <Bookmark
         title="{bookmark.description}"
         url="{bookmark.href}"
