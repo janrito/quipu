@@ -72,7 +72,7 @@ const handleDragBookmarkConsider = event => {
   // find the dragged item
   const draggedBookmark = event.detail.items.find(b => b[SHADOW_ITEM_MARKER_PROPERTY_NAME]);
 
-  if (draggedBookmark && draggedBookmark._cardTag != name) {
+  if (draggedBookmark && draggedBookmark._cardTag !== name) {
     const newBookmark = draggedBookmark.url
       ? browserTabToBookmark(draggedBookmark)
       : draggedBookmark;
@@ -104,7 +104,7 @@ const handleDragBookmark = event => {
         },
         sourceTab: droppedBookmark,
       });
-    } else if (droppedBookmark._cardTag != name) {
+    } else if (droppedBookmark._cardTag !== name) {
       // existing bookmark, update details
       dispatch("updateBookmarkDetails", {
         ...droppedBookmark,

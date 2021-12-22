@@ -46,7 +46,7 @@ $: currentTab = tabs.find(tab => tab.id === currentTabId);
 <UITabs tabs="{tabs}" selectedTabId="{currentTabId}" on:selectTab="{goToTab}">
   <div class="h-full flex flex-col overflow-y-auto overflow-x-hidden pr-3">
     <div class="flex flex-row flex-wrap">
-      {#if currentTab.name == "pinboard"}
+      {#if currentTab.name === "pinboard"}
         <label id="pinboard-api-token" class="w-1/2 p-1 pl-7 mt-5">
           <span>Pinboard API Token</span>
           <input
@@ -75,7 +75,11 @@ $: currentTab = tabs.find(tab => tab.id === currentTabId);
           <pre
             on:keyup="{updateAllSettings}"
             contenteditable="true"
-            class="w-full h-full ml-7 p-3 bg-gray-50 text-gray-400 text-xs ">{JSON.stringify($settings, null, "  ")}</pre>
+            class="w-full h-full ml-7 p-3 bg-gray-50 text-gray-400 text-xs ">{JSON.stringify(
+              $settings,
+              null,
+              "  "
+            )}</pre>
         </div>
       {:else if currentTab.name === "cache"}
         <div class="w-full flex-grow">
