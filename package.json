@@ -72,7 +72,7 @@
     "parcel": "^2.0.1",
     "parcel-transformer-svelte": "^1.2.3",
     "postcss": "^8.4.5",
-    "postcss-custom-properties": "^12.0.1",
+    "postcss-custom-properties": "^12.1.7",
     "postcss-fontpath": "^1.0.0",
     "postcss-import": "^14.0.2",
     "postcss-url": "^10.1.3",
