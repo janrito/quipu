@@ -58,7 +58,7 @@
     "@parcel/transformer-postcss": "^2.0.1",
     "@parcel/transformer-posthtml": "^2.0.1",
     "@parcel/transformer-webextension": "^2.0.1",
-    "autoprefixer": "^10.4.0",
+    "autoprefixer": "^10.4.7",
     "cssnano": "^5.0.14",
     "eslint": "^8.5.0",
     "eslint-config-prettier": "^8.3.0",
