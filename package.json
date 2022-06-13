@@ -89,7 +89,7 @@
     "svelte-check": "^2.2.11",
     "svelte-dnd-action": "^0.9.13",
     "svelte-preprocess": "^4.10.1",
-    "tailwindcss": "^3.0.7"
+    "tailwindcss": "^3.1.2"
   },
   "webExt": {
     "sourceDir": "distribution"
