@@ -2,8 +2,25 @@
   "svelte.plugin.css.diagnostics.enable": false,
   "css.validate": false,
   "eslint.validate": ["javascript", "svelte"],
-  "cSpell.words": ["Iosevka", "tailwindcss"],
+  "cSpell.words": [
+    "cssnano",
+    "esac",
+    "fontpath",
+    "fontsource",
+    "htmlnano",
+    "Iosevka",
+    "newtab",
+    "parens",
+    "pcss",
+    "quipu",
+    "stylelint",
+    "tailwindcss",
+    "webext",
+    "webextension",
+    "webstore"
+  ],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
-  }
+  },
+  "cSpell.ignoreWords": ["fregante"]
 }
