@@ -48,6 +48,7 @@
   "devDependencies": {
     "@babel/core": "^7.19.3",
     "@babel/eslint-parser": "^7.19.1",
+    "@fontsource/iosevka": "^4.5.4",
     "@parcel/config-webextension": "^2.7.0",
     "@parcel/optimizer-cssnano": "^2.7.0",
     "@parcel/optimizer-htmlnano": "^2.7.0",

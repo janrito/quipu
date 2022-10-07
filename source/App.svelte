@@ -1,4 +1,8 @@
 <script>
+import "@fontsource/iosevka/100.css";
+import "@fontsource/iosevka/200.css";
+import "@fontsource/iosevka/400.css";
+
 import Bookmarks from "./components/Bookmarks.svelte";
 import Settings from "./components/Settings.svelte";
 import Tabs from "./components/Tabs.svelte";

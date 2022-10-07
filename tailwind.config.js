@@ -6,7 +6,7 @@ module.exports = {
     fontFamily: {
       sans: [...defaultTheme.fontFamily.sans],
       serif: [...defaultTheme.fontFamily.serif],
-      mono: ["Iosevka Web", ...defaultTheme.fontFamily.mono],
+      mono: ["Iosevka", ...defaultTheme.fontFamily.mono],
     },
     minHeight: {
       5: "1.25rem",
