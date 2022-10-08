@@ -6,6 +6,7 @@
     "lint-fix": "run-p 'lint:* -- --fix'",
     "lint:css": "stylelint source/**/*.css source/**/*.pcss",
     "lint:js": "eslint --fix \"source/**/*.{js,svelte}\"",
+    "lint:prettier": "prettier --plugin-search-dir=. --check \"source/**/*.{js,svelte,pcss,css,html}\"",
     "test": "run-p lint:* build",
     "watch": "parcel watch source/manifest.json --dist-dir distribution --no-cache --no-hmr"
   },

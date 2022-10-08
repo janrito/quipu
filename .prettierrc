@@ -1,7 +1,7 @@
 {
   "arrowParens": "avoid",
   "bracketSpacing": true,
-  "jsxBracketSameLine": false,
+  "bracketSameLine": true,
   "printWidth": 100,
   "proseWrap": "preserve",
   "requirePragma": false,
@@ -12,7 +12,6 @@
   "tabWidth": 2,
   "svelteSortOrder": "options-styles-scripts-markup",
   "svelteStrictMode": true,
-  "svelteBracketNewLine": false,
-  "svelteAllowShorthand": false,
+  "svelteAllowShorthand": true,
   "svelteIndentScriptAndStyle": false
 }
