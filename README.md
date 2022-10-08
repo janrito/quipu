@@ -47,7 +47,7 @@ $. npm run build
 
 You can load a temporary extension on both Firefox and Chrome by pointing them to the `manifest.json` file on the `/distribution` directory after you have built it.
 
-Make sure that your code comforms to the lint settings
+Make sure that your code conforms to the lint settings
 
 ```
 $. npm run lint
