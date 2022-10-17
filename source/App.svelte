@@ -23,7 +23,7 @@ const toggleSettings = () => {
       </div>
       <div class="h-full flex-grow">
         <p class="ml-3 text-xs font-extralight text-gray-500">
-          <a class="" href="https://pinboard.in/" target="_blank">pinboard</a>
+          <a class="" href="https://pinboard.in/" target="_blank" rel="noreferrer">pinboard</a>
         </p>
       </div>
       <div class="flex-none w-56 h-full">
