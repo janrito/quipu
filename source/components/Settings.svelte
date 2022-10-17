@@ -57,7 +57,7 @@ $: currentTab = tabs.find(tab => tab.id === currentTabId);
 
           <p class="text-xs">
             You can find this in your
-            <a target="_blank" href="https://pinboard.in/settings/password"
+            <a target="_blank" href="https://pinboard.in/settings/password" rel="noreferrer"
               >pinboard password settings</a
             >.
           </p>
