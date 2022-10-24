@@ -61,7 +61,7 @@
     "@parcel/transformer-posthtml": "^2.7.0",
     "@parcel/transformer-webextension": "^2.7.0",
     "autoprefixer": "^10.4.12",
-    "eslint": "^8.25.0",
+    "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
