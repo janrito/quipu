@@ -5,20 +5,25 @@ import throttle from "lodash/throttle";
 import UITabs from "./UITabs.svelte";
 import IconDelete from "./IconDelete.svelte";
 import { clearEntireCache } from "../lib/cache.js";
-import { tryParseJSON } from "../lib/utils.js";
+import { tryParseJSON, formatHalfLife } from "../lib/utils.js";
 import settings from "../stores/settings.js";
 
 const dispatch = createEventDispatcher(),
   tabs = [
     { id: 0, name: "pinboard" },
-    { id: 1, name: "raw" },
-    { id: 2, name: "cache" },
+    { id: 1, name: "tab decay" },
+    { id: 2, name: "raw" },
+    { id: 3, name: "cache" },
   ];
 
 let currentTabId = tabs[0].id;
 
 const goToTab = event => {
   currentTabId = Number(event.detail.id);
+};
+let allSettingsEditMode = false;
+const enableallSettingsEditMode = () => {
+  allSettingsEditMode = true;
 };
 
 const updateAllSettings = throttle(
@@ -27,6 +32,29 @@ const updateAllSettings = throttle(
     if (newSettings) {
       $settings = newSettings;
     }
+    allSettingsEditMode = false;
+  },
+  100,
+  { trailing: true }
+);
+
+let tabDecayExceptionsEditMode = false;
+const enableTabDecayExceptionsEditMode = () => {
+  tabDecayExceptionsEditMode = true;
+};
+
+const updateTabDecayExemptions = throttle(
+  async event => {
+    const newTabDecayExemptions = event.target.innerText
+      .split("\n")
+      .map(line => line.trim())
+      .filter(line => line)
+      .sort();
+
+    if (newTabDecayExemptions) {
+      $settings = { ...$settings, tabDecayExceptions: [...new Set(newTabDecayExemptions)] };
+    }
+    tabDecayExceptionsEditMode = false;
   },
   100,
   { trailing: true }
@@ -47,7 +75,7 @@ $: currentTab = tabs.find(tab => tab.id === currentTabId);
   <div class="h-full flex flex-col overflow-y-auto overflow-x-hidden pr-3">
     <div class="flex flex-row flex-wrap">
       {#if currentTab.name === "pinboard"}
-        <label id="pinboard-api-token" class="w-1/2 p-1 pl-7 mt-5">
+        <label id="pinboard-api-token" for="pinboardAPITtoken" class="w-1/2 p-1 pl-7 mt-5">
           <span>Pinboard API Token</span>
           <input
             class="w-full bg-gray-100 border-b-2 border-gray-300"
@@ -62,7 +90,7 @@ $: currentTab = tabs.find(tab => tab.id === currentTabId);
             >.
           </p>
         </label>
-        <label id="pinboard-root-tag" class="w-1/2 p-1 mt-5">
+        <label id="pinboard-root-tag" for="pinboardRootTag" class="w-1/2 p-1 mt-5">
           <span>Pinboard Root Tag</span>
           <input
             type="text"
@@ -70,17 +98,57 @@ $: currentTab = tabs.find(tab => tab.id === currentTabId);
             name="pinboardRootTag"
             bind:value="{$settings.pinboardRootTag}" />
         </label>
+      {:else if currentTab.name === "tab decay"}
+        <label id="tab-decay-half-life" class="w-1/2 p-1 pl-7 mt-5">
+          <span>Half Life </span>
+          <input
+            class="w-full bg-gray-100 border-b-2 border-gray-300"
+            type="text"
+            name="tabDecayHalfLife"
+            bind:value="{$settings.tabDecayHalfLife}" />
+
+          <p class="text-xs">
+            Rate of decay of a tab. {formatHalfLife($settings.tabDecayHalfLife)}
+          </p>
+        </label>
+        <label id="tab-decay-exceptions" for="tabDecayExceptions" class="w-1/2 p-1 mt-5">
+          <span>Exceptions</span>
+          {#if tabDecayExceptionsEditMode}
+            <pre
+              class="w-full h-min-content p-3 bg-gray-100 text-gray-400 border-b-2 border-gray-300 text-xs"
+              contenteditable="true"
+              role="textbox"
+              on:focusout="{updateTabDecayExemptions}"
+              name="tabDecayExceptions">{$settings.tabDecayExceptions.join("\n")}</pre>
+          {:else}
+            <pre
+              class="w-full h-min-content p-3 bg-gray-50 text-gray-400 border-b-2 border-gray-300 text-xs "
+              on:click="{enableTabDecayExceptionsEditMode}"
+              on:keydown="{e => e.key === 'Enter' && enableTabDecayExceptionsEditMode()}"
+              name="tabDecayExceptions">{$settings.tabDecayExceptions.join("\n")}</pre>
+          {/if}
+          <p class="text-xs">
+            New line separated exact match or regex patterns for URLs to ignore Tab Decay
+          </p>
+        </label>
       {:else if currentTab.name === "raw"}
-        <div class="w-full flex-grow">
-          <pre
-            on:keyup="{updateAllSettings}"
-            contenteditable="true"
-            class="w-full h-full ml-7 p-3 bg-gray-50 text-gray-400 text-xs ">{JSON.stringify(
-              $settings,
-              null,
-              "  "
-            )}</pre>
-        </div>
+        <label id="all-settings" for="allSettings" class="w-full p-1 pl-7 mt-5">
+          <span>All Settings</span>
+          {#if allSettingsEditMode}
+            <pre
+              class="w-full h-min-content p-3 bg-gray-100 text-gray-400 border-b-2 border-gray-300 text-xs"
+              contenteditable="true"
+              role="textbox"
+              on:focusout="{updateAllSettings}"
+              name="allSettings">{JSON.stringify($settings, null, "  ")}</pre>
+          {:else}
+            <pre
+              class="w-full h-min-content p-3 bg-gray-50 text-gray-400 border-b-2 border-gray-300 text-xs "
+              on:click="{enableallSettingsEditMode}"
+              on:keydown="{e => e.key === 'Enter' && enableallSettingsEditMode()}"
+              name="allSettings">{JSON.stringify($settings, null, "  ")}</pre>
+          {/if}
+        </label>
       {:else if currentTab.name === "cache"}
         <div class="w-full flex-grow">
           <p class="ml-7 mt-5">
