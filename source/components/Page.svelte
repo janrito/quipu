@@ -157,7 +157,8 @@ $: errors = $bookmarksStore.errors;
               {...card}
               bookmarks="{filterBookmarksByTag(bookmarks, card.name)}"
               parentTags="{parentTags}"
-              on:highlight="{highLightBookmark}"
+              on:highlightBookmark="{highLightBookmark}"
+              on:deleteBookmark="{deleteBookmark}"
               on:renameCard="{renameCardDispatcher(card.id)}"
               on:createNewCard="{createNewCardDispatcher(card.id)}"
               on:deleteCard="{deleteCardDispatcher(card.id)}"
@@ -173,7 +174,8 @@ $: errors = $bookmarksStore.errors;
           bookmarks,
           cards.map(card => card.name)
         )}"
-        on:highlight="{highLightBookmark}"
+        on:highlightBookmark="{highLightBookmark}"
+        on:deleteBookmark="{deleteBookmark}"
         parentTags="{parentTags}"
         untagged="{true}"
         on:createNewCard="{createNewCardDispatcher(cards.length)}" />

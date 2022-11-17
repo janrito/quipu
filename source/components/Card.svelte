@@ -36,6 +36,10 @@ const currentTab = memoize(async () => await browser.tabs.getCurrent());
 const openBookmarkDispatcher = url => async () =>
   browser.tabs.create({ url, active: false, index: (await currentTab()).index + 1 });
 
+const closeBookmarkDispatcher = url => () => {
+  dispatch("deleteBookmark", { href: url });
+};
+
 const openAllBookmarks = () => bookmarks.map(bookmark => openBookmarkDispatcher(bookmark.href)());
 
 const enterEditMode = () => {
@@ -181,7 +185,8 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
         tags="{bookmark.tags}"
         favIcon="{bookmark.favIcon}"
         parentTags="{[...parentTags, name]}"
-        on:highlight
+        on:highlight="{e => dispatch('highlightBookmark', e.detail)}"
+        on:close="{closeBookmarkDispatcher(bookmark.href)}"
         on:open="{openBookmarkDispatcher(bookmark.href)}" />
     {/each}
   </div>

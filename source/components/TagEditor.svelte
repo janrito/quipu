@@ -76,7 +76,7 @@ $: contextMenuPosition = pos ? `top:${pos.bottom}px;left:${pos.left}px;width:${p
     on:keydown="{handleKeydown}"
     on:keyup="{handleKeyUp}"
     use:focus />
-  <button class="-ml-6 text-red-300" on:click|preventDefault="{handleDelete}"
+  <button class="-ml-6 text-red-300 hover:text-red-500" on:click|preventDefault="{handleDelete}"
     ><IconDelete /></button>
   {#if drawTags.length > 0}
     <div
@@ -87,6 +87,7 @@ $: contextMenuPosition = pos ? `top:${pos.bottom}px;left:${pos.left}px;width:${p
           <li
             class:selected="{selectedSuggestedTagIdx === tagIdx}"
             class="p-2"
+            on:keydown="{e => e.key === 'Enter' && selectSuggestedTag(tag)()}"
             on:click="{selectSuggestedTag(tag)}">
             {tag.name}
           </li>
