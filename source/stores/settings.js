@@ -36,14 +36,14 @@ const storable = () => {
       updateAndSave(value => {
         value.pages[pageIndex].cards = [
           ...currentCards.slice(0, _cardIndex),
-          newName(currentCards, "New-Card"),
+          newName(currentCards, "New"),
           ...currentCards.slice(_cardIndex),
         ];
         return value;
       });
     } else {
       updateAndSave(value => {
-        value.pages[pageIndex].cards = [newName([], "New-Card")];
+        value.pages[pageIndex].cards = [newName([], "New")];
         return value;
       });
     }
