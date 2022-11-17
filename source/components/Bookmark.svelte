@@ -12,6 +12,7 @@
 
 <script>
 import { createEventDispatcher } from "svelte";
+import IconDelete from "./IconDelete.svelte";
 
 export let key;
 export let title;
@@ -26,6 +27,7 @@ let hover = false;
 const dispatch = createEventDispatcher();
 const parsedUrl = new URL(url);
 const openBookmark = () => dispatch("open");
+const closeBookmark = () => dispatch("close");
 const highlightBookmark = () => key && dispatch("highlight", key);
 
 $: tagsToDraw = tags
@@ -42,18 +44,16 @@ $: tagsToDraw = tags
   on:click|preventDefault="{openBookmark}"
   on:mouseenter="{() => (hover = true)}"
   on:mouseleave="{() => (hover = false)}">
-  <div class="flex-none w-5 pr-1 pt-1 overflow-hidden">
-    {#if favIcon}
-      <img class="w-4 h-4" src="{favIcon}" alt="{title}" />
-    {:else}
-      <div class="w-4 h-4 -mt-1 ml-1">
-        <span
-          on:click|preventDefault|stopPropagation="{highlightBookmark}"
-          class="block align-top text-sm {hover ? 'text-blue-800' : 'text-gray-200'} cursor-pointer"
-          >¶</span>
+  {#if hover}
+    <div class="flex flex-row h-5 pl-1 ml-5 -mb-5 z-50 justify-end">
+      <div
+        on:keydown="{e => e.key === 'Enter' && closeBookmark()}"
+        on:click|preventDefault|stopPropagation|once="{closeBookmark}"
+        class="block align-top text-sm text-red-300 hover:text-red-500 cursor-pointer">
+        <IconDelete />
       </div>
-    {/if}
-  </div>
+    </div>
+  {/if}
   <div class="flex flex-row grow">
     <div class="flex-none w-5 pr-1 pt-1 overflow-hidden">
       {#if favIcon}

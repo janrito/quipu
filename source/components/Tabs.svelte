@@ -14,6 +14,10 @@ const switchToTabDispatcher = tabId => () => {
   browser.tabs.update(tabId, { active: true });
 };
 
+const removeTabDispatcher = tabId => () => {
+  browser.tabs.remove(tabId);
+};
+
 const handleDragTab = () => {
   tempTabs = null;
 };
@@ -71,6 +75,8 @@ $: tabs = tempTabs ? tempTabs : [...$browserTabs];
         url="{tab.url}"
         favIcon="{tab.favIconUrl}"
         decay="{calculateDecay(tab, $settings.tabDecayHalfLife)}"
+        on:open="{switchToTabDispatcher(tab._id)}"
+        on:close="{removeTabDispatcher(tab._id)}" />
     {/each}
   </div>
 </div>
