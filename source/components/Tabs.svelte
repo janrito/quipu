@@ -3,8 +3,9 @@ import browser from "webextension-polyfill";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
 import Bookmark from "./Bookmark.svelte";
-import { modifyElementClasses, randomSuffix } from "../lib/utils";
+import { modifyElementClasses, randomSuffix, pAlive } from "../lib/utils";
 import browserTabs from "../stores/browser-tabs";
+import settings from "../stores/settings.js";
 
 // keep track of temporary tabs, when one is being dragged
 let tempTabs = null;
@@ -16,6 +17,14 @@ const switchToTabDispatcher = tabId => () => {
 const handleDragTab = () => {
   tempTabs = null;
 };
+
+const calculateDecay = (tab, halfLife) => {
+  const now = new Date();
+  const lastAccessed = tab.lastAccessed.valueOf();
+  const pTabAlive = pAlive(now - lastAccessed, halfLife);
+  return 1 - pTabAlive;
+};
+
 const handleDragTabConsider = event => {
   const { trigger, id } = event.detail.info;
   // find index of dragged tab in the browser tabs store
@@ -39,7 +48,6 @@ const handleDragTabConsider = event => {
 };
 // TODO: for some reason this is not being called
 const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl"]);
-
 $: tabs = tempTabs ? tempTabs : [...$browserTabs];
 </script>
 
@@ -62,7 +70,7 @@ $: tabs = tempTabs ? tempTabs : [...$browserTabs];
         title="{tab.title}"
         url="{tab.url}"
         favIcon="{tab.favIconUrl}"
-        on:open="{switchToTabDispatcher(tab._id)}" />
+        decay="{calculateDecay(tab, $settings.tabDecayHalfLife)}"
     {/each}
   </div>
 </div>
