@@ -153,9 +153,9 @@ $: currentTab = tabs.find(tab => tab.id === currentTabId);
         <div class="w-full flex-grow">
           <p class="ml-7 mt-5">
             <button
-              class="px-1.5 bg-red-100 border-b-2 text-red-600 border-red-600"
+              class="px-1.5 border-b-2 bg-red-200 hover:bg-red-500 border-red-500 hover:border-red-200 text-red-500 hover:text-red-200"
               on:click|preventDefault="{clearCacheHandler}">
-              clear cache <IconDelete />
+              clear cache <span class="inline-block align-text-bottom"><IconDelete /></span>
             </button>
           </p>
         </div>
@@ -163,7 +163,7 @@ $: currentTab = tabs.find(tab => tab.id === currentTabId);
       <div class="w-3/4"></div>
       <div class="w-1/4 p-1">
         <button
-          class="bg-gray-200 border-b-2 border-gray-400 pr-1.5 pl-5 w-full text-left"
+          class="pr-1.5 pl-5 w-full text-left border-b-2 bg-gray-200 hover:bg-gray-500 border-gray-500 hover:border-gray-200 text-gray-500 hover:text-gray-200"
           on:click|preventDefault="{closeSettings}">
           done
         </button>
