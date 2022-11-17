@@ -29,20 +29,26 @@ Some notes on how to get things running:
 
 Install dependencies
 
-```
-$. npm install
+```sh
+npm install
 ```
 
 Interactively build the extension for development
 
+```sh
+npm run watch
 ```
-$. npm run watch
+
+Run a version of Firefox that hot-reloads the extension
+
+```sh
+web-ext run
 ```
 
 or just build it:
 
-```
-$. npm run build
+```sh
+npm run build
 ```
 
 You can load a temporary extension on both Firefox and Chrome by pointing them to the `manifest.json` file on the `/distribution` directory after you have built it.
@@ -50,5 +56,5 @@ You can load a temporary extension on both Firefox and Chrome by pointing them t
 Make sure that your code conforms to the lint settings
 
 ```
-$. npm run lint
+npm run lint
 ```
