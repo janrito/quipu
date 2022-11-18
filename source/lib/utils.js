@@ -101,7 +101,8 @@ export const formatHalfLife = halfLifeInMilliseconds => {
 export const pAlive = (lifetime, halfLife) => 2 ** (-lifetime / halfLife);
 
 /**
- * Samples whether to kill an object based on the probability of being alive
- * from a uniform distribution
+ * Samples a lifetime for half life
+ * e.g. for a half life of 30 days it produces a random lifetime that equally likely
+ * to be shorter than 30 days as is longer than 30 days
  */
-export const shouldKill = (lifetime, halfLife) => Math.random() > pAlive(lifetime, halfLife);
+export const sampleLifetime = halfLife => -(halfLife * Math.log2(Math.random()));
