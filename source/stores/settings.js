@@ -13,10 +13,15 @@ const newName = (currentNames, prefix = "New", n = 0) => {
 
 const storable = () => {
   let currentValue;
-  const { subscribe, set } = writable(currentValue, async set => {
-    currentValue = await optionsStorage.getAll();
-    set(currentValue);
-  });
+
+  const { subscribe, set } = writable(currentValue);
+
+  const read = async () => {
+    currentValue = await optionsStorage.getAll().then(value => {
+      currentValue = value;
+      set(value);
+    });
+  };
 
   const setAndSave = value => {
     optionsStorage.setAll(value).then(() => {
@@ -86,10 +91,13 @@ const storable = () => {
     }
   };
 
+  read();
+
   return {
     subscribe,
     set: setAndSave,
     update: updateAndSave,
+    read,
     newCard,
     renameCard,
     newPage,
