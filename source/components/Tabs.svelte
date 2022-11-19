@@ -2,7 +2,13 @@
 import browser from "webextension-polyfill";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
-import { modifyElementClasses, randomSuffix, pAlive } from "../lib/utils";
+import {
+  compileURLPattern,
+  findURLPattern,
+  modifyElementClasses,
+  pAlive,
+  randomSuffix,
+} from "../lib/utils";
 import browserTabs from "../stores/browser-tabs";
 import settings from "../stores/settings";
 import Bookmark from "./Bookmark.svelte";
@@ -22,11 +28,13 @@ const handleDragTab = () => {
   tempTabs = null;
 };
 
-const calculateDecay = (tab, halfLife) => {
+const calculateDecay = (tab, halfLife, exceptions) => {
   const now = new Date();
   const lastAccessed = tab.lastAccessed.valueOf();
   const pTabAlive = pAlive(now - lastAccessed, halfLife);
-  return 1 - pTabAlive;
+  const matchingException = findURLPattern(tab.url, exceptions.map(compileURLPattern));
+
+  return matchingException ? 0 : 1 - pTabAlive;
 };
 
 const handleDragTabConsider = event => {
@@ -74,7 +82,7 @@ $: tabs = tempTabs ? tempTabs : [...$browserTabs];
         title="{tab.title}"
         url="{tab.url}"
         favIcon="{tab.favIconUrl}"
-        decay="{calculateDecay(tab, $settings.tabDecayHalfLife)}"
+        decay="{calculateDecay(tab, $settings.tabDecayHalfLife, $settings.tabDecayExceptions)}"
         on:open="{switchToTabDispatcher(tab._id)}"
         on:close="{removeTabDispatcher(tab._id)}" />
     {/each}
