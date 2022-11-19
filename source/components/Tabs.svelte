@@ -34,7 +34,7 @@ const calculateDecay = (tab, halfLife, exceptions) => {
   const pTabAlive = pAlive(now - lastAccessed, halfLife);
   const matchingException = findURLPattern(tab.url, exceptions.map(compileURLPattern));
 
-  return matchingException ? 0 : 1 - pTabAlive;
+  return matchingException || tab.pinned ? 0 : 1 - pTabAlive;
 };
 
 const handleDragTabConsider = event => {
