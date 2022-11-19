@@ -86,7 +86,7 @@ const closeSettings = () => {
 };
 
 $: currentTab = tabs.find(tab => tab.id === currentTabId);
-$: currentMatcingExceptions = $browserTabs
+$: tabsMatchingLiveExceptions = $browserTabs
   .map(tab => findURLPattern(tab.url, currentTabDecayExemptions) && tab.url)
   .filter(url => url);
 </script>
@@ -131,31 +131,34 @@ $: currentMatcingExceptions = $browserTabs
             Rate of decay of a tab. {formatTimeDelta($settings.tabDecayHalfLife)}
           </p>
         </label>
-        <label id="tab-decay-exceptions" for="tabDecayExceptions" class="w-1/2 p-1 mt-5">
-          <span>Exceptions</span>
-          {#if tabDecayExceptionsEditMode}
-            <pre
-              class="w-full h-min-content p-3 bg-gray-100 text-gray-400 border-b-2 border-gray-300 text-xs"
-              contenteditable="true"
-              role="textbox"
-              on:focusout="{updateTabDecayExemptions}"
-              on:keyup="{liveReloadExceptionMatches}"
-              name="tabDecayExceptions">{$settings.tabDecayExceptions.join("\n")}</pre>
-          {:else}
-            <pre
-              class="w-full h-min-content p-3 bg-gray-50 text-gray-400 border-b-2 border-gray-300 text-xs "
-              on:click="{enableTabDecayExceptionsEditMode}"
-              on:keydown="{e => e.key === 'Enter' && enableTabDecayExceptionsEditMode()}"
-              name="tabDecayExceptions">{$settings.tabDecayExceptions.join("\n")}</pre>
-          {/if}
-          <p class="text-xs">
-            New line separated URLPatters to exempt from tab decay e.g. [*://*.google.*/*\?*#*]
-          </p>
-          <h3>matches</h3>
-          <pre class="bg-gray-100 p-3 text-xs whitespace-pre-wrap">{currentMatcingExceptions.join(
+        <div class="w-1/2 p-1 mt-5">
+          <label id="tab-decay-exceptions" for="tabDecayExceptions">
+            <span>Exceptions</span>
+            {#if tabDecayExceptionsEditMode}
+              <pre
+                class="w-full h-min-content p-3 bg-gray-100 text-gray-400 border-b-2 border-gray-300 text-xs"
+                contenteditable="true"
+                role="textbox"
+                on:focusout="{updateTabDecayExemptions}"
+                on:keyup="{liveReloadExceptionMatches}"
+                name="tabDecayExceptions">{$settings.tabDecayExceptions.join("\n")}</pre>
+            {:else}
+              <pre
+                class="w-full h-min-content p-3 bg-gray-50 text-gray-400 border-b-2 border-gray-300 text-xs"
+                on:click="{enableTabDecayExceptionsEditMode}"
+                on:keydown="{e => e.key === 'Enter' && enableTabDecayExceptionsEditMode()}"
+                name="tabDecayExceptions">{$settings.tabDecayExceptions.join("\n")}</pre>
+            {/if}
+            <p class="text-xs">
+              New line separated URLPatters to exempt from tab decay e.g. [*://*.google.*/*\?*#*]
+            </p>
+          </label>
+          <p class="text-sm mt-4 mb-1 ">Open tabs matching exceptions</p>
+          <pre
+            class="w-full h-min-content p-3 bg-gray-50 text-gray-400 border-b-2 border-gray-300 text-xs whitespace-pre-wrap">{tabsMatchingLiveExceptions.join(
               "\n"
             )}</pre>
-        </label>
+        </div>
       {:else if currentTab.name === "raw"}
         <label id="all-settings" for="allSettings" class="w-full p-1 pl-7 mt-5">
           <span>All Settings</span>
