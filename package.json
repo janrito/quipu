@@ -61,6 +61,7 @@
     "@parcel/transformer-postcss": "^2.8.0",
     "@parcel/transformer-posthtml": "^2.8.0",
     "@parcel/transformer-webextension": "^2.8.0",
+    "@trivago/prettier-plugin-sort-imports": "^3.4.0",
     "autoprefixer": "^10.4.13",
     "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",
