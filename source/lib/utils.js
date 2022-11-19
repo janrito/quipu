@@ -1,3 +1,5 @@
+import { URLPattern } from "urlpattern-polyfill";
+
 /**
  * Attempts to parse JSON from a string, otherwise returns false
  */
@@ -59,34 +61,56 @@ export const modifyElementClasses = (element, add = [], remove = []) => {
 };
 
 /**
+ * Convert a strings into valid URLPattern
+ */
+export const compileURLPattern = line => {
+  const trimmed = line.trim();
+  if (trimmed.startsWith("//")) {
+    // Ignore lines that start with double slashes
+    return undefined;
+  }
+  try {
+    // Attempt to create a pattern
+    return new URLPattern(trimmed);
+  } catch (error) {
+    // Return undefined on failure
+    return undefined;
+  }
+};
+/**
+ * Test if URL matches pattern
+ */
+export const findURLPattern = (url, patterns) => patterns.find(pattern => pattern.test(url));
+
+/**
  * Pretty format a half life
  */
-export const formatHalfLife = halfLifeInMilliseconds => {
-  const halfLifeWeeks = Math.floor(halfLifeInMilliseconds / (1000 * 60 * 60 * 24 * 7));
-  const halfLifeDays = Math.floor(
-    halfLifeInMilliseconds / (1000 * 60 * 60 * 24) - halfLifeWeeks * 7
+export const formatTimeDelta = timeDeltaInMilliseconds => {
+  const timeDeltaInWeeks = Math.floor(timeDeltaInMilliseconds / (1000 * 60 * 60 * 24 * 7));
+  const timeDeltaInDays = Math.floor(
+    timeDeltaInMilliseconds / (1000 * 60 * 60 * 24) - timeDeltaInWeeks * 7
   );
-  const halfLifeHours = Math.floor(
-    halfLifeInMilliseconds / (1000 * 60 * 60) - (halfLifeWeeks * 24 * 7 + halfLifeDays * 24)
+  const timeDeltaInHours = Math.floor(
+    timeDeltaInMilliseconds / (1000 * 60 * 60) - (timeDeltaInWeeks * 24 * 7 + timeDeltaInDays * 24)
   );
-  const halfLifeMinutes = Math.floor(
-    halfLifeInMilliseconds / (1000 * 60) -
-      (halfLifeWeeks * 60 * 24 * 7 + halfLifeDays * 60 * 24 + halfLifeHours * 60)
+  const timeDeltaInMinutes = Math.floor(
+    timeDeltaInMilliseconds / (1000 * 60) -
+      (timeDeltaInWeeks * 60 * 24 * 7 + timeDeltaInDays * 60 * 24 + timeDeltaInHours * 60)
   );
-  const halfLifeSeconds = Math.floor(
-    halfLifeInMilliseconds / 1000 -
-      (halfLifeWeeks * 60 * 60 * 24 * 7 +
-        halfLifeDays * 60 * 60 * 24 +
-        halfLifeHours * 60 * 60 +
-        halfLifeMinutes * 60)
+  const timeDeltaInSeconds = Math.floor(
+    timeDeltaInMilliseconds / 1000 -
+      (timeDeltaInWeeks * 60 * 60 * 24 * 7 +
+        timeDeltaInDays * 60 * 60 * 24 +
+        timeDeltaInHours * 60 * 60 +
+        timeDeltaInMinutes * 60)
   );
 
   return [
-    halfLifeWeeks ? `${halfLifeWeeks} week${halfLifeWeeks > 1 ? "s" : ""}` : "",
-    halfLifeDays ? `${halfLifeDays} day${halfLifeDays > 1 ? "s" : ""}` : "",
-    halfLifeHours ? `${halfLifeHours} hour${halfLifeHours > 1 ? "s" : ""}` : "",
-    halfLifeMinutes ? `${halfLifeMinutes} minute${halfLifeMinutes > 1 ? "s" : ""}` : "",
-    halfLifeSeconds ? `${halfLifeSeconds} second${halfLifeSeconds > 1 ? "s" : ""}` : "",
+    timeDeltaInWeeks ? `${timeDeltaInWeeks} week${timeDeltaInWeeks > 1 ? "s" : ""}` : "",
+    timeDeltaInDays ? `${timeDeltaInDays} day${timeDeltaInDays > 1 ? "s" : ""}` : "",
+    timeDeltaInHours ? `${timeDeltaInHours} hour${timeDeltaInHours > 1 ? "s" : ""}` : "",
+    timeDeltaInMinutes ? `${timeDeltaInMinutes} minute${timeDeltaInMinutes > 1 ? "s" : ""}` : "",
+    timeDeltaInSeconds ? `${timeDeltaInSeconds} second${timeDeltaInSeconds > 1 ? "s" : ""}` : "",
   ]
     .filter(a => a)
     .join(", ");

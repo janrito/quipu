@@ -5,8 +5,9 @@ import throttle from "lodash/throttle";
 import UITabs from "./UITabs.svelte";
 import IconDelete from "./IconDelete.svelte";
 import { clearEntireCache } from "../lib/cache.js";
-import { tryParseJSON, formatHalfLife } from "../lib/utils.js";
+import { tryParseJSON, formatTimeDelta, compileURLPattern, findURLPattern } from "../lib/utils.js";
 import settings from "../stores/settings.js";
+import browserTabs from "../stores/browser-tabs";
 
 const dispatch = createEventDispatcher(),
   tabs = [
@@ -43,18 +44,34 @@ const enableTabDecayExceptionsEditMode = () => {
   tabDecayExceptionsEditMode = true;
 };
 
-const updateTabDecayExemptions = throttle(
-  async event => {
-    const newTabDecayExemptions = event.target.innerText
-      .split("\n")
-      .map(line => line.trim())
-      .filter(line => line)
-      .sort();
+const updateTabDecayExemptions = async event => {
+  const newTabDecayExemptions = event.target.innerText
+    .split("\n")
+    .map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        return false;
+      }
 
-    if (newTabDecayExemptions) {
-      $settings = { ...$settings, tabDecayExceptions: [...new Set(newTabDecayExemptions)] };
-    }
-    tabDecayExceptionsEditMode = false;
+      return compileURLPattern(trimmed) || trimmed.startsWith("//") ? trimmed : `// ${line}`;
+    })
+    .filter(line => line)
+    .sort();
+
+  if (newTabDecayExemptions) {
+    $settings = { ...$settings, tabDecayExceptions: [...new Set(newTabDecayExemptions)] };
+  }
+  tabDecayExceptionsEditMode = false;
+};
+
+let currentTabDecayExemptions = $settings.tabDecayExceptions.map(compileURLPattern);
+
+const liveReloadExceptionMatches = throttle(
+  async event => {
+    currentTabDecayExemptions = event.target.innerText
+      .split("\n")
+      .map(compileURLPattern)
+      .filter(line => line);
   },
   100,
   { trailing: true }
@@ -69,6 +86,9 @@ const closeSettings = () => {
 };
 
 $: currentTab = tabs.find(tab => tab.id === currentTabId);
+$: currentMatcingExceptions = $browserTabs
+  .map(tab => findURLPattern(tab.url, currentTabDecayExemptions) && tab.url)
+  .filter(url => url);
 </script>
 
 <UITabs tabs="{tabs}" selectedTabId="{currentTabId}" on:selectTab="{goToTab}">
@@ -108,7 +128,7 @@ $: currentTab = tabs.find(tab => tab.id === currentTabId);
             bind:value="{$settings.tabDecayHalfLife}" />
 
           <p class="text-xs">
-            Rate of decay of a tab. {formatHalfLife($settings.tabDecayHalfLife)}
+            Rate of decay of a tab. {formatTimeDelta($settings.tabDecayHalfLife)}
           </p>
         </label>
         <label id="tab-decay-exceptions" for="tabDecayExceptions" class="w-1/2 p-1 mt-5">
@@ -119,6 +139,7 @@ $: currentTab = tabs.find(tab => tab.id === currentTabId);
               contenteditable="true"
               role="textbox"
               on:focusout="{updateTabDecayExemptions}"
+              on:keyup="{liveReloadExceptionMatches}"
               name="tabDecayExceptions">{$settings.tabDecayExceptions.join("\n")}</pre>
           {:else}
             <pre
@@ -128,8 +149,12 @@ $: currentTab = tabs.find(tab => tab.id === currentTabId);
               name="tabDecayExceptions">{$settings.tabDecayExceptions.join("\n")}</pre>
           {/if}
           <p class="text-xs">
-            New line separated exact match or regex patterns for URLs to ignore Tab Decay
+            New line separated URLPatters to exempt from tab decay e.g. [*://*.google.*/*\?*#*]
           </p>
+          <h3>matches</h3>
+          <pre class="bg-gray-100 p-3 text-xs whitespace-pre-wrap">{currentMatcingExceptions.join(
+              "\n"
+            )}</pre>
         </label>
       {:else if currentTab.name === "raw"}
         <label id="all-settings" for="allSettings" class="w-full p-1 pl-7 mt-5">
