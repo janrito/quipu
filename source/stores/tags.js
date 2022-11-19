@@ -1,7 +1,7 @@
-import { readable } from "svelte/store";
 import memoize from "lodash/memoize";
+import { readable } from "svelte/store";
 
-import { tagsGet } from "../lib/pinboard-api.js";
+import { tagsGet } from "../lib/pinboard-api";
 
 const preprocessTags = tags =>
   Object.entries(tags)

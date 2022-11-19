@@ -2,12 +2,12 @@
 import { createEventDispatcher } from "svelte";
 import throttle from "lodash/throttle";
 
-import UITabs from "./UITabs.svelte";
-import IconDelete from "./IconDelete.svelte";
-import { clearEntireCache } from "../lib/cache.js";
-import { tryParseJSON, formatTimeDelta, compileURLPattern, findURLPattern } from "../lib/utils.js";
-import settings from "../stores/settings.js";
+import { clearEntireCache } from "../lib/cache";
+import { tryParseJSON, formatTimeDelta, compileURLPattern, findURLPattern } from "../lib/utils";
 import browserTabs from "../stores/browser-tabs";
+import settings from "../stores/settings";
+import IconDelete from "./IconDelete.svelte";
+import UITabs from "./UITabs.svelte";
 
 const dispatch = createEventDispatcher(),
   tabs = [

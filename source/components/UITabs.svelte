@@ -13,9 +13,8 @@ import { onMount, createEventDispatcher } from "svelte";
 import { dndzone } from "svelte-dnd-action";
 import delay from "lodash/delay";
 
-import TagEditor from "./TagEditor.svelte";
-
 import { modifyElementClasses } from "../lib/utils";
+import TagEditor from "./TagEditor.svelte";
 
 export let tabs;
 export let selectedTabId;

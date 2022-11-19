@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 
-import optionsStorage from "../lib/options-storage.js";
+import optionsStorage from "../lib/options-storage";
 
 const newName = (currentNames, prefix = "New", n = 0) => {
   const _prefix = prefix.replaceAll(/\s+/gi, "-");

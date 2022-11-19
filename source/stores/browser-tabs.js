@@ -1,6 +1,6 @@
-import browser from "webextension-polyfill";
 import throttle from "lodash/throttle";
 import { readable } from "svelte/store";
+import browser from "webextension-polyfill";
 
 import { BROWSER_TAB_PREFIX, TAB_QUERY } from "../lib/constants";
 

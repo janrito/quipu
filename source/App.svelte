@@ -3,10 +3,10 @@ import "@fontsource/iosevka/100.css";
 import "@fontsource/iosevka/200.css";
 import "@fontsource/iosevka/400.css";
 
+import settings from "./stores/settings";
 import Bookmarks from "./components/Bookmarks.svelte";
 import Settings from "./components/Settings.svelte";
 import Tabs from "./components/Tabs.svelte";
-import settings from "./stores/settings";
 
 let settingsActive = false;
 

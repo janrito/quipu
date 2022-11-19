@@ -7,8 +7,8 @@
 <script>
 import { createEventDispatcher } from "svelte";
 
-import IconDelete from "./IconDelete.svelte";
 import { focus } from "../lib/actions";
+import IconDelete from "./IconDelete.svelte";
 
 const dispatch = createEventDispatcher();
 

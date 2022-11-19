@@ -1,7 +1,8 @@
 import cache from "webext-storage-cache";
-import { encodeParameters, formatDate } from "./utils.js";
 
-// TODO: sublcass this error in order to enable error handling when appropriate
+import { encodeParameters, formatDate } from "./utils";
+
+// TODO: subclass this error in order to enable error handling when appropriate
 // e.g. a bookmark that already exists, which can be modified instead
 class PinboardAPIError extends Error {
   constructor(status = -1, description = "Unknown Error", ...params) {

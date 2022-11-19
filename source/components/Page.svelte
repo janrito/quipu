@@ -3,13 +3,12 @@ import { beforeUpdate } from "svelte";
 import browser from "webextension-polyfill";
 import { dndzone } from "svelte-dnd-action";
 
-import Spinner from "./Spinner.svelte";
+import { modifyElementClasses } from "../lib/utils";
+import createBookmarksStore from "../stores/bookmarks";
+import settings from "../stores/settings";
 import BookmarkEditor from "./BookmarkEditor.svelte";
 import Card from "./Card.svelte";
-
-import { modifyElementClasses } from "../lib/utils";
-import createBookmarksStore from "../stores/bookmarks.js";
-import settings from "../stores/settings.js";
+import Spinner from "./Spinner.svelte";
 
 export let pageIndex;
 

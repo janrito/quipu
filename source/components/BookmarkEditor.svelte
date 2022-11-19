@@ -15,7 +15,9 @@
 
 <script>
 import { createEventDispatcher } from "svelte";
+
 import IconDelete from "./IconDelete.svelte";
+
 export let description;
 export let href;
 export let tags = [];

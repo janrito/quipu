@@ -12,6 +12,7 @@
 
 <script>
 import { createEventDispatcher } from "svelte";
+
 import IconDelete from "./IconDelete.svelte";
 
 export let key;

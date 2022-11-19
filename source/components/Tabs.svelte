@@ -2,10 +2,10 @@
 import browser from "webextension-polyfill";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
-import Bookmark from "./Bookmark.svelte";
 import { modifyElementClasses, randomSuffix, pAlive } from "../lib/utils";
 import browserTabs from "../stores/browser-tabs";
-import settings from "../stores/settings.js";
+import settings from "../stores/settings";
+import Bookmark from "./Bookmark.svelte";
 
 // keep track of temporary tabs, when one is being dragged
 let tempTabs = null;

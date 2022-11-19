@@ -15,11 +15,11 @@ import memoize from "lodash/memoize";
 import { createEventDispatcher } from "svelte";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
+import { browserTabToBookmark, modifyElementClasses } from "../lib/utils";
+import settings from "../stores/settings";
+import createTagStore from "../stores/tags";
 import Bookmark from "./Bookmark.svelte";
 import TagEditor from "./TagEditor.svelte";
-import { browserTabToBookmark, modifyElementClasses } from "../lib/utils";
-import settings from "../stores/settings.js";
-import createTagStore from "../stores/tags";
 
 export let name;
 export let bookmarks = [];
