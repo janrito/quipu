@@ -8,7 +8,9 @@ Quipu is a simple [Pinboard](http://pinboard.in) powered session manager.
 
 I have too many tabs open. I struggle to keep them organised. If I have to switch context, I often keep a group of tabs related to a topic open, or I save them in an email, or a slack message or a variety of different bookmarking services, and lose them. I fear my browser crashing and losing work.
 
-Quipu is a tool that allows me to save some tabs for later, arranged in a simple, two level hierarchy. It doesn't require me to spend too much time curating them, but it does make saving and having them available quickly.
+Quipu allows me to save some tabs for later, arranged in a simple, two level hierarchy. It doesn't require me to spend too much time curating them, but it does make saving and having them available quickly.
+
+Quipu also closes old tabs. It keeps track of the last time that a tab was active and defines a probabilistic lifetime – based on a half-life setting. The tab is 50% likely to be closed by the time the half-life has passed since the tab was last active.
 
 Quipu uses pinboard tags to organise bookmarks in pages and cards. A bookmark can appear in multiple pages and cards if it is so tagged. Pages and cards provide no formal structure, they are for the user's visual convenience only. Bookmarks are ordered according to when they were saved.
 
@@ -20,6 +22,14 @@ The name [quipu](https://en.wikipedia.org/wiki/Quipu) comes from an andean recor
 
 Built with [Svelte](https://svelte.dev/) & [Tailwind](https://tailwindcss.com/), the fantastic [Iosevka](https://typeof.net/Iosevka/) typeface, drag and drop via [svelte-dnd-action](https://github.com/isaacHagoel/svelte-dnd-action)
 scaffolding using [browser-extension-template](https://github.com/fregante/browser-extension-template)
+
+## Prior Art
+
+This extension was inspired by different tools that I have used in the past, but haven't quite done it. Here is a list of some of them:
+
+- [tab decay](https://github.com/benkehoe/tab-decay) - where the idea of using half-lives to decay old tabs came from.
+- [toby](https://www.gettoby.com/) – keep track of old bookmarks
+-
 
 ## Contributing
 
