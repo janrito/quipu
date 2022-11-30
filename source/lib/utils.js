@@ -1,4 +1,6 @@
+import memoize from "lodash/memoize";
 import { URLPattern } from "urlpattern-polyfill";
+import browser from "webextension-polyfill";
 
 /**
  * Attempts to parse JSON from a string, otherwise returns false
@@ -49,6 +51,33 @@ export const browserTabToBookmark = browserTab => ({
 });
 
 /**
+ * Close a tab
+ */
+export const closeTab = tabId => {
+  browser.tabs.remove(tabId);
+};
+
+/**
+ * Switch to a tab
+ */
+export const switchToTab = tabId => {
+  browser.tabs.update(tabId, { active: true });
+};
+
+/**
+ *  Memoized get current tab
+ * */
+
+const currentTab = memoize(async () => await browser.tabs.getCurrent());
+
+/**
+ * Open a url in a new tab next to the current one
+ */
+export const newTab = async url => {
+  browser.tabs.create({ url, active: false, index: (await currentTab()).index + 1 });
+};
+
+/**
  * Transforms an element by adding the classes in `add` and removing
  * the classes in `remove`.
  * It always returns the modified element
@@ -77,6 +106,14 @@ export const compileURLPattern = line => {
     return undefined;
   }
 };
+
+/**
+ * Compile all valid URLPatterns from a list.
+ * Discard any invalid ones and ones that start with `//
+ */
+export const compileValidURLPatterns = lines =>
+  lines.map(compileURLPattern).filter(pattern => pattern);
+
 /**
  * Test if URL matches pattern
  */

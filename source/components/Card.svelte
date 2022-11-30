@@ -11,11 +11,11 @@
 <script>
 import browser from "webextension-polyfill";
 import delay from "lodash/delay";
-import memoize from "lodash/memoize";
+
 import { createEventDispatcher } from "svelte";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
-import { browserTabToBookmark, modifyElementClasses } from "../lib/utils";
+import { browserTabToBookmark, modifyElementClasses, newTab } from "../lib/utils";
 import settings from "../stores/settings";
 import createTagStore from "../stores/tags";
 import Bookmark from "./Bookmark.svelte";
@@ -31,10 +31,7 @@ let altKeyActive = false;
 
 const dispatch = createEventDispatcher();
 
-const currentTab = memoize(async () => await browser.tabs.getCurrent());
-
-const openBookmarkDispatcher = url => async () =>
-  browser.tabs.create({ url, active: false, index: (await currentTab()).index + 1 });
+const openBookmarkDispatcher = url => newTab(url);
 
 const closeBookmarkDispatcher = url => () => {
   dispatch("deleteBookmark", { href: url });
