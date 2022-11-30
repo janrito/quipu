@@ -3,7 +3,13 @@ import { createEventDispatcher } from "svelte";
 import throttle from "lodash/throttle";
 
 import { clearEntireCache } from "../lib/cache";
-import { tryParseJSON, formatTimeDelta, compileURLPattern, findURLPattern } from "../lib/utils";
+import {
+  compileURLPattern,
+  compileValidURLPatterns,
+  findURLPattern,
+  formatTimeDelta,
+  tryParseJSON,
+} from "../lib/utils";
 import browserTabs from "../stores/browser-tabs";
 import settings from "../stores/settings";
 import IconDelete from "./IconDelete.svelte";
@@ -64,14 +70,11 @@ const updateTabDecayExemptions = async event => {
   tabDecayExceptionsEditMode = false;
 };
 
-let currentTabDecayExemptions = $settings.tabDecayExceptions.map(compileURLPattern);
+let currentTabDecayExemptions = compileValidURLPatterns($settings.tabDecayExceptions);
 
 const liveReloadExceptionMatches = throttle(
   async event => {
-    currentTabDecayExemptions = event.target.innerText
-      .split("\n")
-      .map(compileURLPattern)
-      .filter(line => line);
+    currentTabDecayExemptions = compileValidURLPatterns(event.target.innerText.split("\n"));
   },
   100,
   { trailing: true }
