@@ -22,6 +22,7 @@ export let tags = [];
 export let parentTags = [];
 export let favIcon = null;
 export let decay = 0;
+export let closeEnabled = true;
 
 let hover = false;
 
@@ -45,7 +46,7 @@ $: tagsToDraw = tags
   on:click|preventDefault="{openBookmark}"
   on:mouseenter="{() => (hover = true)}"
   on:mouseleave="{() => (hover = false)}">
-  {#if hover}
+  {#if hover && closeEnabled}
     <div class="flex flex-row h-5 pl-1 ml-5 -mb-5 z-50 justify-end">
       <div
         on:keydown="{e => e.key === 'Enter' && closeBookmark()}"
