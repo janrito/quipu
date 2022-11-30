@@ -3,13 +3,17 @@ import browser from "webextension-polyfill";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
 import {
-  compileURLPattern,
+  closeTab,
+  compileValidURLPatterns,
   findURLPattern,
   modifyElementClasses,
+  newTab,
   pAlive,
   randomSuffix,
+  switchToTab,
 } from "../lib/utils";
 import browserTabs from "../stores/browser-tabs";
+import decayedTabs from "../stores/decayed-tabs";
 import settings from "../stores/settings";
 import Bookmark from "./Bookmark.svelte";
 
@@ -17,12 +21,14 @@ import Bookmark from "./Bookmark.svelte";
 let tempTabs = null;
 
 const switchToTabDispatcher = tabId => () => {
-  browser.tabs.update(tabId, { active: true });
+  switchToTab(tabId);
 };
 
 const removeTabDispatcher = tabId => () => {
-  browser.tabs.remove(tabId);
+  closeTab(tabId);
 };
+
+const openDecayedTabDispatcher = url => newTab(url);
 
 const handleDragTab = () => {
   tempTabs = null;
@@ -32,7 +38,7 @@ const calculateDecay = (tab, halfLife, exceptions) => {
   const now = new Date();
   const lastAccessed = tab.lastAccessed.valueOf();
   const pTabAlive = pAlive(now - lastAccessed, halfLife);
-  const matchingException = findURLPattern(tab.url, exceptions.map(compileURLPattern));
+  const matchingException = findURLPattern(tab.url, exceptions);
 
   return matchingException || tab.pinned ? 0 : 1 - pTabAlive;
 };
@@ -82,9 +88,27 @@ $: tabs = tempTabs ? tempTabs : [...$browserTabs];
         title="{tab.title}"
         url="{tab.url}"
         favIcon="{tab.favIconUrl}"
-        decay="{calculateDecay(tab, $settings.tabDecayHalfLife, $settings.tabDecayExceptions)}"
+        decay="{calculateDecay(
+          tab,
+          $settings.tabDecayHalfLife,
+          compileValidURLPatterns($settings.tabDecayExceptions)
+        )}"
         on:open="{switchToTabDispatcher(tab._id)}"
         on:close="{removeTabDispatcher(tab._id)}" />
+    {/each}
+  </div>
+  <hr />
+  <h3 class="pl-5 mt-3 text-sm font-extralight">
+    Decayed Tabs <span class="text-gray-300">({$decayedTabs.length})</span>
+  </h3>
+  <div>
+    {#each $decayedTabs as decayedTab}
+      <Bookmark
+        title="{decayedTab.title}"
+        url="{decayedTab.url}"
+        favIcon="{decayedTab.favIconUrl}"
+        closeEnabled="{false}"
+        on:open="{openDecayedTabDispatcher(decayedTab.url)}" />
     {/each}
   </div>
 </div>
