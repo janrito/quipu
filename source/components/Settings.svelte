@@ -45,6 +45,10 @@ const updateAllSettings = throttle(
   { trailing: true }
 );
 
+let currentTabDecayHalfLife = $settings.tabDecayHalfLife;
+const updateTabDecayHalfLife = () => {
+  $settings.tabDecayHalfLife = currentTabDecayHalfLife;
+};
 let tabDecayExceptionsEditMode = false;
 const enableTabDecayExceptionsEditMode = () => {
   tabDecayExceptionsEditMode = true;
@@ -128,12 +132,13 @@ $: tabsMatchingLiveExceptions = $browserTabs
             class="w-full bg-gray-100 border-b-2 border-gray-300"
             type="text"
             name="tabDecayHalfLife"
-            bind:value="{$settings.tabDecayHalfLife}" />
+            on:focusout="{updateTabDecayHalfLife}"
+            bind:value="{currentTabDecayHalfLife}" />
 
           <p class="text-xs">
             Rate of decay of a tab –
-            {#if $settings.tabDecayHalfLife > 0}
-              {formatTimeDelta($settings.tabDecayHalfLife)}
+            {#if currentTabDecayHalfLife > 0}
+              {formatTimeDelta(currentTabDecayHalfLife)}
             {:else}
               OFF
             {/if}
