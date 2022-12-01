@@ -1,4 +1,5 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
+const colors = require("tailwindcss/colors");
 
 module.exports = {
   content: ["./source/**/*.{js,svelte,html}"],
@@ -15,6 +16,11 @@ module.exports = {
       "1/2": "50%",
       "3/4": "75%",
       ...defaultTheme.minHeight,
+    },
+    extend: {
+      colors: {
+        head: process.env.NODE_ENV === "production" ? colors.gray : colors.fuchsia,
+      },
     },
   },
 };

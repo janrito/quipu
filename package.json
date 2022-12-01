@@ -61,6 +61,7 @@
     "@parcel/transformer-postcss": "^2.8.0",
     "@parcel/transformer-posthtml": "^2.8.0",
     "@parcel/transformer-webextension": "^2.8.0",
+    "@trivago/prettier-plugin-sort-imports": "^3.4.0",
     "autoprefixer": "^10.4.13",
     "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",
@@ -90,7 +91,8 @@
     "svelte-check": "^2.9.2",
     "svelte-dnd-action": "^0.9.22",
     "svelte-preprocess": "^4.10.7",
-    "tailwindcss": "^3.2.4"
+    "tailwindcss": "^3.2.4",
+    "urlpattern-polyfill": "^6.0.2"
   },
   "webExt": {
     "sourceDir": "distribution"

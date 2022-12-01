@@ -1,8 +1,8 @@
-import { writable } from "svelte/store";
 import debounce from "lodash/debounce";
 import memoize from "lodash/memoize";
+import { writable } from "svelte/store";
 
-import { postsAll, postsAdd, postsDelete } from "../lib/pinboard-api.js";
+import { postsAdd, postsAll, postsDelete } from "../lib/pinboard-api";
 
 const BOOKMARK_PREFIX = `quipu-bookmark`;
 const preprocessBookmark = data =>

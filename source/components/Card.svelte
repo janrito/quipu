@@ -11,15 +11,15 @@
 <script>
 import browser from "webextension-polyfill";
 import delay from "lodash/delay";
-import memoize from "lodash/memoize";
+
 import { createEventDispatcher } from "svelte";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
+import { browserTabToBookmark, modifyElementClasses, newTab } from "../lib/utils";
+import settings from "../stores/settings";
+import createTagStore from "../stores/tags";
 import Bookmark from "./Bookmark.svelte";
 import TagEditor from "./TagEditor.svelte";
-import { browserTabToBookmark, modifyElementClasses } from "../lib/utils";
-import settings from "../stores/settings.js";
-import createTagStore from "../stores/tags";
 
 export let name;
 export let bookmarks = [];
@@ -31,10 +31,11 @@ let altKeyActive = false;
 
 const dispatch = createEventDispatcher();
 
-const currentTab = memoize(async () => await browser.tabs.getCurrent());
+const openBookmarkDispatcher = url => newTab(url);
 
-const openBookmarkDispatcher = url => async () =>
-  browser.tabs.create({ url, active: false, index: (await currentTab()).index + 1 });
+const closeBookmarkDispatcher = url => () => {
+  dispatch("deleteBookmark", { href: url });
+};
 
 const openAllBookmarks = () => bookmarks.map(bookmark => openBookmarkDispatcher(bookmark.href)());
 
@@ -181,7 +182,8 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
         tags="{bookmark.tags}"
         favIcon="{bookmark.favIcon}"
         parentTags="{[...parentTags, name]}"
-        on:highlight
+        on:highlight="{e => dispatch('highlightBookmark', e.detail)}"
+        on:close="{closeBookmarkDispatcher(bookmark.href)}"
         on:open="{openBookmarkDispatcher(bookmark.href)}" />
     {/each}
   </div>

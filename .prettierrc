@@ -13,5 +13,8 @@
   "svelteSortOrder": "options-styles-scripts-markup",
   "svelteStrictMode": true,
   "svelteAllowShorthand": true,
-  "svelteIndentScriptAndStyle": false
+  "svelteIndentScriptAndStyle": false,
+  "importOrder": ["^stores/(.*)$", "^lib/(.*)$", "^components/(.*)$", "^[./]"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
 }

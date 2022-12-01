@@ -1,6 +1,8 @@
 import { writable } from "svelte/store";
+import browser from "webextension-polyfill";
 
-import optionsStorage from "../lib/options-storage.js";
+import { UPDATED_SETTINGS_EVENT } from "../lib/constants";
+import optionsStorage from "../lib/options-storage";
 
 const newName = (currentNames, prefix = "New", n = 0) => {
   const _prefix = prefix.replaceAll(/\s+/gi, "-");
@@ -13,16 +15,22 @@ const newName = (currentNames, prefix = "New", n = 0) => {
 
 const storable = () => {
   let currentValue;
-  const { subscribe, set } = writable(currentValue, async set => {
-    currentValue = await optionsStorage.getAll();
-    set(currentValue);
-  });
+
+  const { subscribe, set } = writable(currentValue);
+
+  const read = async () => {
+    currentValue = await optionsStorage.getAll().then(value => {
+      currentValue = value;
+      set(value);
+    });
+  };
 
   const setAndSave = value => {
     optionsStorage.setAll(value).then(() => {
       set(value);
       currentValue = value;
     });
+    browser.runtime.sendMessage({ event: UPDATED_SETTINGS_EVENT });
   };
 
   const updateAndSave = fn => {
@@ -36,14 +44,14 @@ const storable = () => {
       updateAndSave(value => {
         value.pages[pageIndex].cards = [
           ...currentCards.slice(0, _cardIndex),
-          newName(currentCards, "New-Card"),
+          newName(currentCards, "New"),
           ...currentCards.slice(_cardIndex),
         ];
         return value;
       });
     } else {
       updateAndSave(value => {
-        value.pages[pageIndex].cards = [newName([], "New-Card")];
+        value.pages[pageIndex].cards = [newName([], "New")];
         return value;
       });
     }
@@ -86,10 +94,13 @@ const storable = () => {
     }
   };
 
+  read();
+
   return {
     subscribe,
     set: setAndSave,
     update: updateAndSave,
+    read,
     newCard,
     renameCard,
     newPage,

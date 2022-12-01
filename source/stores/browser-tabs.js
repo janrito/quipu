@@ -1,17 +1,14 @@
-import browser from "webextension-polyfill";
 import throttle from "lodash/throttle";
 import { readable } from "svelte/store";
+import browser from "webextension-polyfill";
 
-const BROWSER_TAB_PREFIX = "tab";
+import { BROWSER_TAB_PREFIX, TAB_QUERY, UPDATE_EVENT_TYPES } from "../lib/constants";
 
 export default readable([], set => {
-  const eventTypes = ["onAttached", "onDetached", "onMoved", "onRemoved", "onUpdated"];
   const updateTabs = throttle(
     async () => {
       const tabs = await browser.tabs
-        .query({
-          url: ["http://*/*", "https://*/*", "ws://*/*", "wss://*/*"],
-        })
+        .query(TAB_QUERY)
         .then(tabs =>
           tabs.map((tab, idx) => ({ ...tab, id: `${BROWSER_TAB_PREFIX}-${idx}`, _id: tab.id }))
         );
@@ -21,12 +18,12 @@ export default readable([], set => {
     { trailing: true }
   );
   const attachEvents = () => {
-    eventTypes.map(eventType => {
+    UPDATE_EVENT_TYPES.map(eventType => {
       browser.tabs[eventType].addListener(updateTabs);
     });
   };
   const detachEvents = () => {
-    eventTypes.map(eventType => {
+    UPDATE_EVENT_TYPES.map(eventType => {
       browser.tabs[eventType].removeListener(updateTabs);
     });
   };

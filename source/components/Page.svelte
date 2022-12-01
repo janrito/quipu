@@ -3,13 +3,12 @@ import { beforeUpdate } from "svelte";
 import browser from "webextension-polyfill";
 import { dndzone } from "svelte-dnd-action";
 
-import Spinner from "./Spinner.svelte";
+import { modifyElementClasses } from "../lib/utils";
+import createBookmarksStore from "../stores/bookmarks";
+import settings from "../stores/settings";
 import BookmarkEditor from "./BookmarkEditor.svelte";
 import Card from "./Card.svelte";
-
-import { modifyElementClasses } from "../lib/utils";
-import createBookmarksStore from "../stores/bookmarks.js";
-import settings from "../stores/settings.js";
+import Spinner from "./Spinner.svelte";
 
 export let pageIndex;
 
@@ -157,7 +156,8 @@ $: errors = $bookmarksStore.errors;
               {...card}
               bookmarks="{filterBookmarksByTag(bookmarks, card.name)}"
               parentTags="{parentTags}"
-              on:highlight="{highLightBookmark}"
+              on:highlightBookmark="{highLightBookmark}"
+              on:deleteBookmark="{deleteBookmark}"
               on:renameCard="{renameCardDispatcher(card.id)}"
               on:createNewCard="{createNewCardDispatcher(card.id)}"
               on:deleteCard="{deleteCardDispatcher(card.id)}"
@@ -173,7 +173,8 @@ $: errors = $bookmarksStore.errors;
           bookmarks,
           cards.map(card => card.name)
         )}"
-        on:highlight="{highLightBookmark}"
+        on:highlightBookmark="{highLightBookmark}"
+        on:deleteBookmark="{deleteBookmark}"
         parentTags="{parentTags}"
         untagged="{true}"
         on:createNewCard="{createNewCardDispatcher(cards.length)}" />

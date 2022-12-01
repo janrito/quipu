@@ -15,6 +15,9 @@
 
 <script>
 import { createEventDispatcher } from "svelte";
+
+import IconDelete from "./IconDelete.svelte";
+
 export let description;
 export let href;
 export let tags = [];
@@ -104,13 +107,14 @@ $: tagsToDraw = tags
   </div>
   <div class="flex flex-row justify-end">
     <button
-      class="max-w-1/3 my-2 mr-auto px-1.5 bg-red-200 border-b-2 border-red-400 text-red-400"
-      on:click="{onDelete}">delete</button>
+      class="max-w-1/3 my-2 mr-auto px-1.5 border-b-2 bg-red-200 hover:bg-red-500  border-red-500 hover:border-red-200 text-red-500 hover:text-red-200"
+      on:click="{onDelete}"
+      >delete <span class="inline-block align-text-bottom"><IconDelete /></span></button>
     <button
-      class="max-w-1/3 my-2 ml-2  px-1.5 bg-gray-200 border-b-2 border-gray-400 text-gray-400"
+      class="max-w-1/3 my-2 ml-2  px-1.5 border-b-2 bg-gray-200 hover:bg-gray-500  border-gray-500 hover:border-gray-200 text-gray-500 hover:text-gray-200"
       on:click="{onDone}">cancel</button>
     <button
-      class="max-w-1/3 my-2 ml-2 px-1.5 bg-blue-200 border-b-2 border-blue-400 text-blue-400"
+      class="max-w-1/3 my-2 ml-2 px-1.5 border-b-2 bg-blue-200 hover:bg-blue-500  border-blue-500 hover:border-blue-200 text-blue-500 hover:text-blue-200"
       on:click="{onSave}">save</button>
   </div>
 </div>

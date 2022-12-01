@@ -2,20 +2,53 @@
 import browser from "webextension-polyfill";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
-import Bookmark from "./Bookmark.svelte";
-import { modifyElementClasses, randomSuffix } from "../lib/utils";
+import {
+  closeTab,
+  compileValidURLPatterns,
+  findURLPattern,
+  modifyElementClasses,
+  newTab,
+  pAlive,
+  randomSuffix,
+  switchToTab,
+} from "../lib/utils";
 import browserTabs from "../stores/browser-tabs";
+import decayedTabs from "../stores/decayed-tabs";
+import settings from "../stores/settings";
+import Bookmark from "./Bookmark.svelte";
 
 // keep track of temporary tabs, when one is being dragged
 let tempTabs = null;
 
 const switchToTabDispatcher = tabId => () => {
-  browser.tabs.update(tabId, { active: true });
+  switchToTab(tabId);
 };
+
+const removeTabDispatcher = tabId => () => {
+  closeTab(tabId);
+};
+
+const openDecayedTabDispatcher = url => newTab(url);
 
 const handleDragTab = () => {
   tempTabs = null;
 };
+
+const calculateDecay = (tab, halfLife, exceptions) => {
+  if (tab.pinned || ~(halfLife > 0)) {
+    return 0;
+  }
+  if (findURLPattern(tab.url, exceptions)) {
+    return 0;
+  }
+
+  const now = new Date();
+  const lastAccessed = tab.lastAccessed.valueOf();
+  const pTabAlive = pAlive(now - lastAccessed, halfLife);
+
+  return 1 - pTabAlive;
+};
+
 const handleDragTabConsider = event => {
   const { trigger, id } = event.detail.info;
   // find index of dragged tab in the browser tabs store
@@ -39,7 +72,6 @@ const handleDragTabConsider = event => {
 };
 // TODO: for some reason this is not being called
 const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl"]);
-
 $: tabs = tempTabs ? tempTabs : [...$browserTabs];
 </script>
 
@@ -62,7 +94,27 @@ $: tabs = tempTabs ? tempTabs : [...$browserTabs];
         title="{tab.title}"
         url="{tab.url}"
         favIcon="{tab.favIconUrl}"
-        on:open="{switchToTabDispatcher(tab._id)}" />
+        decay="{calculateDecay(
+          tab,
+          $settings.tabDecayHalfLife,
+          compileValidURLPatterns($settings.tabDecayExceptions)
+        )}"
+        on:open="{switchToTabDispatcher(tab._id)}"
+        on:close="{removeTabDispatcher(tab._id)}" />
+    {/each}
+  </div>
+  <hr />
+  <h3 class="pl-5 mt-3 text-sm font-extralight">
+    Decayed Tabs <span class="text-gray-300">({$decayedTabs.length})</span>
+  </h3>
+  <div>
+    {#each $decayedTabs as decayedTab}
+      <Bookmark
+        title="{decayedTab.title}"
+        url="{decayedTab.url}"
+        favIcon="{decayedTab.favIconUrl}"
+        closeEnabled="{false}"
+        on:open="{openDecayedTabDispatcher(decayedTab.url)}" />
     {/each}
   </div>
 </div>

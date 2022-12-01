@@ -1,9 +1,8 @@
 <script>
+import createTagStore from "../stores/tags";
+import settings from "../stores/settings";
 import Page from "./Page.svelte";
 import UITabs from "./UITabs.svelte";
-
-import settings from "../stores/settings.js";
-import createTagStore from "../stores/tags";
 
 let currentPageId = 0;
 

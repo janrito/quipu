@@ -13,9 +13,8 @@ import { onMount, createEventDispatcher } from "svelte";
 import { dndzone } from "svelte-dnd-action";
 import delay from "lodash/delay";
 
-import TagEditor from "./TagEditor.svelte";
-
 import { modifyElementClasses } from "../lib/utils";
+import TagEditor from "./TagEditor.svelte";
 
 export let tabs;
 export let selectedTabId;
@@ -106,7 +105,7 @@ $: drawTabs = tabs;
           <a
             class:selected="{tab.id === selectedTabId}"
             href="#page-{tab.name}"
-            class="mt-0 mx-0 -mb-0.5 px-3 text-sm font-extralight text-gray-400 border-b-2 bg-white truncate"
+            class="mt-0 mx-0 -mb-0.5 px-3 text-sm font-extralight text-gray-400 hover:border-gray-400 border-b-2 bg-white truncate"
             on:click|preventDefault="{clickTabDispatcher(tab.id)}">{tab.name}</a>
         {/if}
       {/each}
