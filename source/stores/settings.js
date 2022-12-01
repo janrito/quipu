@@ -1,5 +1,7 @@
 import { writable } from "svelte/store";
+import browser from "webextension-polyfill";
 
+import { UPDATED_SETTINGS_EVENT } from "../lib/constants";
 import optionsStorage from "../lib/options-storage";
 
 const newName = (currentNames, prefix = "New", n = 0) => {
@@ -28,6 +30,7 @@ const storable = () => {
       set(value);
       currentValue = value;
     });
+    browser.runtime.sendMessage({ event: UPDATED_SETTINGS_EVENT });
   };
 
   const updateAndSave = fn => {

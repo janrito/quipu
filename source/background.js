@@ -1,7 +1,7 @@
 import { get } from "svelte/store";
 import browser from "webextension-polyfill";
 
-import { TAB_QUERY } from "./lib/constants";
+import { TAB_QUERY, UPDATED_SETTINGS_EVENT } from "./lib/constants";
 import "./lib/options-storage.js";
 import { closeTab, compileValidURLPatterns, findURLPattern, sampleLifetime } from "./lib/utils.js";
 import decayedTabs from "./stores/decayed-tabs";
@@ -74,3 +74,17 @@ const onActivatedHandler = ({ previousTabId }) => {
 };
 
 browser.tabs.onActivated.addListener(onActivatedHandler);
+
+const onUpdatedHandler = () => {
+  updateTabLifetimes();
+};
+browser.tabs.onUpdated.addListener(onUpdatedHandler);
+
+const messageHandler = async request => {
+  if (request.event && request.event === UPDATED_SETTINGS_EVENT) {
+    // renew lifetimes for every tab
+    updateTabLifetimes([], true);
+  }
+};
+
+browser.runtime.onMessage.addListener(messageHandler);
