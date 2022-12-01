@@ -35,12 +35,18 @@ const handleDragTab = () => {
 };
 
 const calculateDecay = (tab, halfLife, exceptions) => {
+  if (tab.pinned || ~(halfLife > 0)) {
+    return 0;
+  }
+  if (findURLPattern(tab.url, exceptions)) {
+    return 0;
+  }
+
   const now = new Date();
   const lastAccessed = tab.lastAccessed.valueOf();
   const pTabAlive = pAlive(now - lastAccessed, halfLife);
-  const matchingException = findURLPattern(tab.url, exceptions);
 
-  return matchingException || tab.pinned ? 0 : 1 - pTabAlive;
+  return 1 - pTabAlive;
 };
 
 const handleDragTabConsider = event => {

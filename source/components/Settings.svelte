@@ -131,7 +131,12 @@ $: tabsMatchingLiveExceptions = $browserTabs
             bind:value="{$settings.tabDecayHalfLife}" />
 
           <p class="text-xs">
-            Rate of decay of a tab. {formatTimeDelta($settings.tabDecayHalfLife)}
+            Rate of decay of a tab –
+            {#if $settings.tabDecayHalfLife > 0}
+              {formatTimeDelta($settings.tabDecayHalfLife)}
+            {:else}
+              OFF
+            {/if}
           </p>
         </label>
         <div class="w-1/2 p-1 mt-5">

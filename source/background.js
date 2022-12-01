@@ -61,7 +61,7 @@ const updateTabLifetimes = async (forceOn = [], forceOnAll = false) => {
         clearTabLifetime(tab.id);
       }
 
-      if (tabLifetimes[tab.id] === undefined) {
+      if (tabLifetimes[tab.id] === undefined && tabDecayHalfLife > 0) {
         // define new lifetime for all unset ids
         tabLifetimes[tab.id] = setNewTabLifetime({ tab, tabDecayHalfLife, tabDecayExceptions });
       }
