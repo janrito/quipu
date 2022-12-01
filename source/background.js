@@ -16,6 +16,12 @@ const decayTab = tabId => {
   });
 };
 
+const clearTabLifetime = tabId => {
+  const { timerId } = tabLifetimes[tabId];
+  clearTimeout(timerId);
+  delete tabLifetimes[tabId];
+};
+
 const setNewTabLifetime = ({ tab, tabDecayExceptions, tabDecayHalfLife }) => {
   const matchingExceptionPattern = findURLPattern(tab.url, tabDecayExceptions);
 
@@ -32,37 +38,40 @@ const setNewTabLifetime = ({ tab, tabDecayExceptions, tabDecayHalfLife }) => {
   return { timerId, lifetime };
 };
 
-const onActiveTabChanged = async ({ previousTabId, tabId }) => {
+const updateTabLifetimes = async ({ clearOn, forceOn }) => {
   await settings.read();
   const currentSettings = get(settings);
   const tabDecayHalfLife = currentSettings.tabDecayHalfLife;
   const tabDecayExceptions = compileValidURLPatterns(currentSettings.tabDecayExceptions);
 
+  const clearOnSet = new Set(clearOn);
+  const forceOnSet = new Set(forceOn);
+
   browser.tabs.query(TAB_QUERY).then(tabs =>
     tabs.map(tab => {
-      const tabLifetime = tabLifetimes[tab.id];
-      if (tabLifetime === undefined) {
-        // if no lifetime exists set one
-        // except the active one
-        if (tabId !== tab.id) {
-          tabLifetimes[tab.id] = setNewTabLifetime({ tab, tabDecayHalfLife, tabDecayExceptions });
-        }
+      const isSet = tabLifetimes[tab.id] !== undefined;
+
+      if (isSet && clearOnSet.has(tab.id)) {
+        // If on clear list, clear it and return
+        clearTabLifetime(tab.id);
         return;
       }
 
-      if (tabId === tab.id) {
-        //  If lifetime exists for current tab, clear it
+      if (isSet && forceOnSet.has(tab.id)) {
+        // clear all tabs in force list
+        clearTabLifetime(tab.id);
+      }
 
-        clearTimeout(tabLifetime.timerId);
-        delete tabLifetimes[tabId];
-      } else if (previousTabId === tab.id) {
-        // If lifetime exists for recently deactivated tab, clear it and set a new one.
-
-        clearTimeout(tabLifetime.timerId);
+      if (tabLifetimes[tab.id] === undefined) {
+        // define new lifetime for all unset ids
         tabLifetimes[tab.id] = setNewTabLifetime({ tab, tabDecayHalfLife, tabDecayExceptions });
       }
     })
   );
+};
+
+const onActiveTabChanged = async ({ previousTabId, tabId }) => {
+  updateTabLifetimes({ clearOn: [tabId], forceOn: [previousTabId] });
 };
 
 browser.tabs.onActivated.addListener(onActiveTabChanged);
