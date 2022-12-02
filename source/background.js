@@ -4,7 +4,13 @@ import browser from "webextension-polyfill";
 
 import { MAX_DELAY_TO_SCHEDULE, TAB_QUERY, UPDATED_SETTINGS_EVENT } from "./lib/constants";
 import "./lib/options-storage.js";
-import { closeTab, compileValidURLPatterns, findURLPattern, sampleLifetime } from "./lib/utils.js";
+import {
+  calculateDelay,
+  closeTab,
+  compileValidURLPatterns,
+  findURLPattern,
+  sampleLifetime,
+} from "./lib/utils.js";
 import decayedTabs from "./stores/decayed-tabs";
 import settings from "./stores/settings";
 import tabLifetimes from "./stores/tab-lifetimes";
@@ -37,13 +43,10 @@ const setNewTabLifetime = (tab, currentTabLifetimes, { tabDecayExceptions, tabDe
   if (tab.pinned || matchingExceptionPattern) {
     return currentTabLifetimes;
   }
-  const now = new Date().valueOf();
-  const lastAccessed = tab.lastAccessed.valueOf();
   const { lifetime } = currentTabLifetimes[tab.id] || {
     lifetime: sampleLifetime(tabDecayHalfLife),
   };
-  const currentLifeSpan = now - lastAccessed;
-  const delay = lifetime - currentLifeSpan > 0 ? lifetime - currentLifeSpan : 0;
+  const delay = calculateDelay(lifetime, tab.lastAccessed);
 
   if (delay > MAX_DELAY_TO_SCHEDULE) {
     // only set the decay timer on tabs that are likely to decay soon.

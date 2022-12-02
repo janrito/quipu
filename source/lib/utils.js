@@ -167,3 +167,12 @@ export const pAlive = (lifetime, halfLife) => 2 ** (-lifetime / halfLife);
  * to be shorter than 30 days as is longer than 30 days
  */
 export const sampleLifetime = halfLife => -(halfLife * Math.log2(Math.random()));
+
+/**
+ * Calculate delay
+ */
+export const calculateDelay = (lifetime, lastAccessed) => {
+  const now = new Date().valueOf();
+  const currentLifeSpan = now - lastAccessed.valueOf();
+  return lifetime - currentLifeSpan > 0 ? lifetime - currentLifeSpan : 0;
+};
