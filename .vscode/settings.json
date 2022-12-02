@@ -9,18 +9,21 @@
     "fontsource",
     "htmlnano",
     "Iosevka",
-    "newtab",
+    "lightningcss",
     "parens",
     "pcss",
     "quipu",
     "stylelint",
     "tailwindcss",
+    "urlpattern",
+    "vars",
     "webext",
     "webextension",
+    "webextensions",
     "webstore"
   ],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "cSpell.ignoreWords": ["fregante"]
+  "cSpell.ignoreWords": ["fregante", "trivago"]
 }
