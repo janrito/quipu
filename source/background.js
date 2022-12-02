@@ -1,5 +1,5 @@
 import debounce from "lodash/debounce";
-import { get, writable } from "svelte/store";
+import { get } from "svelte/store";
 import browser from "webextension-polyfill";
 
 import { MAX_DELAY_TO_SCHEDULE, TAB_QUERY, UPDATED_SETTINGS_EVENT } from "./lib/constants";
@@ -7,8 +7,7 @@ import "./lib/options-storage.js";
 import { closeTab, compileValidURLPatterns, findURLPattern, sampleLifetime } from "./lib/utils.js";
 import decayedTabs from "./stores/decayed-tabs";
 import settings from "./stores/settings";
-
-const tabLifetimes = writable({});
+import tabLifetimes from "./stores/tab-lifetimes";
 
 const decayTab = debounce(tabId => {
   browser.tabs.get(tabId).then(tab => {
@@ -100,7 +99,7 @@ const updateTabLifetimes = debounce(async (forceOn = [], forceOnAll = false) => 
       currentTabLifetimes
     );
 
-    tabLifetimes.set(currentTabLifetimes);
+    tabLifetimes.update(() => currentTabLifetimes);
   });
 }, 5000);
 
