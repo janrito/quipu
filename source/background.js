@@ -26,12 +26,11 @@ const setNewTabLifetime = ({ tab, tabDecayExceptions, tabDecayHalfLife }) => {
   const matchingExceptionPattern = findURLPattern(tab.url, tabDecayExceptions);
 
   if (tab.pinned || matchingExceptionPattern) {
-    return undefined;
+    return;
   }
   const now = new Date().valueOf();
   const lastAccessed = tab.lastAccessed.valueOf();
-
-  const lifetime = sampleLifetime(tabDecayHalfLife);
+  const { lifetime } = tabLifetimes[tab.id] || { lifetime: sampleLifetime(tabDecayHalfLife) };
   const currentLifeSpan = now - lastAccessed;
   const delay = lifetime - currentLifeSpan > 0 ? lifetime - currentLifeSpan : 0;
 
@@ -40,7 +39,7 @@ const setNewTabLifetime = ({ tab, tabDecayExceptions, tabDecayHalfLife }) => {
     return;
   }
   const timerId = setTimeout(decayTab, delay, tab.id);
-  return { timerId, lifetime };
+  tabLifetimes[tab.id] = { timerId, lifetime };
 };
 
 const updateTabLifetimes = async (forceOn = [], forceOnAll = false) => {
@@ -58,7 +57,7 @@ const updateTabLifetimes = async (forceOn = [], forceOnAll = false) => {
       if (isSet && tab.active) {
         // If active on window, clear it and return
         clearTabLifetime(tab.id);
-        return;
+        return tab;
       }
 
       if (isSet && (forceOnSet.has(tab.id) || forceOnAll)) {
@@ -68,10 +67,10 @@ const updateTabLifetimes = async (forceOn = [], forceOnAll = false) => {
 
       if (tabLifetimes[tab.id] === undefined && tabDecayHalfLife > 0) {
         // define new lifetime for all unset ids
-        tabLifetimes[tab.id] = setNewTabLifetime({ tab, tabDecayHalfLife, tabDecayExceptions });
+        setNewTabLifetime({ tab, tabDecayHalfLife, tabDecayExceptions });
       }
-    })
-  );
+      return tab;
+    });
 };
 
 const onActivatedHandler = ({ previousTabId }) => {
