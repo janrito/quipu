@@ -7,6 +7,7 @@ export const TAB_QUERY = {
 export const UPDATE_EVENT_TYPES = ["onAttached", "onDetached", "onMoved", "onRemoved", "onUpdated"];
 export const KEEP_N_DECAYED_TABS = 100;
 
+export const DECAY_LOG_CACHE_KEY = "decay-log";
 export const UPDATED_SETTINGS_EVENT = "updatedSettings";
 
 // long delays create problems for setTimeout, they will actually fire immediately

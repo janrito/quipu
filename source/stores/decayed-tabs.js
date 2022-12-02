@@ -2,12 +2,11 @@ import throttle from "lodash/throttle";
 import { writable } from "svelte/store";
 import cache from "webext-storage-cache";
 
-import { KEEP_N_DECAYED_TABS, UPDATE_EVENT_TYPES } from "../lib/constants";
+import { DECAY_LOG_CACHE_KEY, KEEP_N_DECAYED_TABS, UPDATE_EVENT_TYPES } from "../lib/constants";
 
 const cacheable = () => {
-  const cacheKey = "decay-log";
   const reader = set => async () => {
-    await cache.get(cacheKey).then(value => {
+    await cache.get(DECAY_LOG_CACHE_KEY).then(value => {
       set(value || []);
     });
   };
@@ -31,14 +30,15 @@ const cacheable = () => {
   });
   const read = reader(set);
 
-  const add = async closedTab => {
-    await cache.get(cacheKey).then(value => {
-      const filteredSavedTabs = [
-        closedTab,
-        ...(value ? value.filter(savedTab => closedTab.url !== savedTab.url) : []),
+  const add = async decayingTab => {
+    await cache.get(DECAY_LOG_CACHE_KEY).then(value => {
+      const filteredDecayedTabs = [
+        decayingTab,
+        ...(value ? value.filter(decayedTab => decayingTab.url !== decayedTab.url) : []),
       ];
-      cache.set(cacheKey, filteredSavedTabs.slice(0, KEEP_N_DECAYED_TABS));
-      read();
+      const newValue = filteredDecayedTabs.slice(0, KEEP_N_DECAYED_TABS);
+      cache.set(DECAY_LOG_CACHE_KEY, newValue);
+      set(newValue);
     });
   };
 
