@@ -1,7 +1,7 @@
 import { get } from "svelte/store";
 import browser from "webextension-polyfill";
 
-import { TAB_QUERY, UPDATED_SETTINGS_EVENT } from "./lib/constants";
+import { MAX_DELAY_TO_SCHEDULE, TAB_QUERY, UPDATED_SETTINGS_EVENT } from "./lib/constants";
 import "./lib/options-storage.js";
 import { closeTab, compileValidURLPatterns, findURLPattern, sampleLifetime } from "./lib/utils.js";
 import decayedTabs from "./stores/decayed-tabs";
@@ -34,6 +34,11 @@ const setNewTabLifetime = ({ tab, tabDecayExceptions, tabDecayHalfLife }) => {
   const lifetime = sampleLifetime(tabDecayHalfLife);
   const currentLifeSpan = now - lastAccessed;
   const delay = lifetime - currentLifeSpan > 0 ? lifetime - currentLifeSpan : 0;
+
+  if (delay > MAX_DELAY_TO_SCHEDULE) {
+    // only set the decay timer on tabs that are likely to decay soon.
+    return;
+  }
   const timerId = setTimeout(decayTab, delay, tab.id);
   return { timerId, lifetime };
 };
