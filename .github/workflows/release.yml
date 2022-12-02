@@ -22,11 +22,14 @@ jobs:
       - uses: fregante/daily-version-action@v2
         name: Create tag if necessary
         id: daily-version
-      - uses: fregante/release-with-changelog@v3
-        if: steps.daily-version.outputs.created
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          exclude: true
+      - if: steps.daily-version.outputs.created
+        name: Create Github release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd distribution
+          zip -r quipu.zip *
+          gh release create "${{ steps.daily-version.outputs.version }}" --generate-notes quipu.zip
 
   Submit:
     needs: Version
@@ -43,7 +46,7 @@ jobs:
       - name: install
         run: npm ci || npm install
       - run: npm run build --if-present
-      - name: Update extension’s meta
+      - name: "Update extension's meta"
         run: npx dot-json@1 $DIRECTORY/manifest.json version ${{ needs.Version.outputs.version }}
       - name: Submit
         run: |
