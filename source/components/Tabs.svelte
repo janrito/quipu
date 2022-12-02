@@ -35,7 +35,7 @@ const handleDragTab = () => {
 };
 
 const calculateDecay = (tab, halfLife, exceptions) => {
-  if (tab.pinned || ~(halfLife > 0)) {
+  if (tab.pinned || !(halfLife > 0)) {
     return 0;
   }
   if (findURLPattern(tab.url, exceptions)) {
