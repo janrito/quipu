@@ -4,7 +4,9 @@ env:
   DIRECTORY: distribution
 
 on:
-  workflow_dispatch: null
+  push:
+    branches:
+      - "main"
 
 jobs:
   Version:
@@ -27,7 +29,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd distribution
+          cd $DIRECTORY
           zip -r quipu.zip *
           gh release create "${{ steps.daily-version.outputs.version }}" --generate-notes quipu.zip
 
