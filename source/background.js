@@ -50,8 +50,10 @@ const updateTabLifetimes = async (forceOn = [], forceOnAll = false) => {
 
   const forceOnSet = new Set(forceOn);
 
-  browser.tabs.query(TAB_QUERY).then(tabs =>
+  browser.tabs.query(TAB_QUERY).then(tabs => {
+    const tabIds = new Set([]);
     tabs.map(tab => {
+      tabIds.add(tab.id);
       const isSet = tabLifetimes[tab.id] !== undefined;
 
       if (isSet && tab.active) {
@@ -71,6 +73,15 @@ const updateTabLifetimes = async (forceOn = [], forceOnAll = false) => {
       }
       return tab;
     });
+
+    Object.keys(tabLifetimes).forEach(tabId => {
+      // clear lifetimes for tabs that don't exist any more
+      // – for example those closed manually
+      if (~tabIds.has(tabId)) {
+        clearTabLifetime(tabId);
+      }
+    });
+  });
 };
 
 const onActivatedHandler = ({ previousTabId }) => {
