@@ -57,54 +57,58 @@ const setNewTabLifetime = (tab, currentTabLifetimes, { tabDecayExceptions, tabDe
   return currentTabLifetimes;
 };
 
-const updateTabLifetimes = debounce(async (forceOn = [], forceOnAll = false) => {
-  await settings.read();
-  const currentSettings = get(settings);
-  const tabDecayHalfLife = currentSettings.tabDecayHalfLife;
-  const tabDecayExceptions = compileValidURLPatterns(currentSettings.tabDecayExceptions);
-  const forceOnSet = new Set(forceOn);
+const updateTabLifetimes = debounce(
+  async (forceOn = [], forceOnAll = false) => {
+    await settings.read();
+    const currentSettings = get(settings);
+    const tabDecayHalfLife = currentSettings.tabDecayHalfLife;
+    const tabDecayExceptions = compileValidURLPatterns(currentSettings.tabDecayExceptions);
+    const forceOnSet = new Set(forceOn);
 
-  let currentTabLifetimes = get(tabLifetimes);
+    let currentTabLifetimes = get(tabLifetimes);
 
-  browser.tabs.query(TAB_QUERY).then(tabs => {
-    const tabIds = new Set([]);
-    tabs.map(tab => {
-      // keep track of all existing tabs
-      tabIds.add(tab.id);
+    browser.tabs.query(TAB_QUERY).then(tabs => {
+      const tabIds = new Set([]);
+      tabs.map(tab => {
+        // keep track of all existing tabs
+        tabIds.add(tab.id);
 
-      const isSet = currentTabLifetimes[tab.id] !== undefined;
+        const isSet = currentTabLifetimes[tab.id] !== undefined;
 
-      if (isSet && tab.active) {
-        // If active on window, clear it and return
-        currentTabLifetimes = clearTabLifetimes([tab.id], currentTabLifetimes);
-        return;
-      }
+        if (isSet && tab.active) {
+          // If active on window, clear it and return
+          currentTabLifetimes = clearTabLifetimes([tab.id], currentTabLifetimes);
+          return;
+        }
 
-      if (isSet && (forceOnSet.has(tab.id) || forceOnAll)) {
-        // clear all tabs in force list
-        currentTabLifetimes = clearTabLifetimes([tab.id], currentTabLifetimes);
-      }
+        if (isSet && (forceOnSet.has(tab.id) || forceOnAll)) {
+          // clear all tabs in force list
+          currentTabLifetimes = clearTabLifetimes([tab.id], currentTabLifetimes);
+        }
 
-      if (tabDecayHalfLife <= 0) {
-        return;
-      }
-      // define new lifetime for all unset ids
-      currentTabLifetimes = setNewTabLifetime(tab, currentTabLifetimes, {
-        tabDecayHalfLife,
-        tabDecayExceptions,
+        if (tabDecayHalfLife <= 0) {
+          return;
+        }
+        // define new lifetime for all unset ids
+        currentTabLifetimes = setNewTabLifetime(tab, currentTabLifetimes, {
+          tabDecayHalfLife,
+          tabDecayExceptions,
+        });
       });
+
+      // clear lifetimes for tabs that don't exist any more
+      // – for example those closed manually
+      currentTabLifetimes = clearTabLifetimes(
+        Object.keys(currentTabLifetimes).filter(tabId => !tabIds.has(Number(tabId))),
+        currentTabLifetimes
+      );
+
+      tabLifetimes.update(() => currentTabLifetimes);
     });
-
-    // clear lifetimes for tabs that don't exist any more
-    // – for example those closed manually
-    currentTabLifetimes = clearTabLifetimes(
-      Object.keys(currentTabLifetimes).filter(tabId => !tabIds.has(Number(tabId))),
-      currentTabLifetimes
-    );
-
-    tabLifetimes.update(() => currentTabLifetimes);
-  });
-}, 5000);
+  },
+  5000,
+  { leading: true, trailing: true }
+);
 
 const onActivatedHandler = ({ previousTabId }) => {
   updateTabLifetimes([previousTabId]);
