@@ -1,11 +1,7 @@
 <script>
-import {
-  dndzone,
-  TRIGGERS,
-  SHADOW_ITEM_MARKER_PROPERTY_NAME,
-  UPDATE_DECAY_DISPLAY_INTERVAL,
-} from "svelte-dnd-action";
+import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
+import { UPDATE_DECAY_DISPLAY_INTERVAL } from "../lib/constants";
 import {
   closeTab,
   modifyElementClasses,
@@ -71,10 +67,14 @@ const handleDragTabConsider = event => {
 // TODO: for some reason this is not being called
 const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl"]);
 let updatedLifetimes = $tabLifetimes;
-$: tabs = tempTabs ? tempTabs : [...$browserTabs];
-$: setInterval(() => {
+setTimeout(() => {
   updatedLifetimes = $tabLifetimes;
-}, UPDATE_DECAY_DISPLAY_INTERVAL);
+  setInterval(() => {
+    updatedLifetimes = $tabLifetimes;
+  }, UPDATE_DECAY_DISPLAY_INTERVAL);
+}, 100);
+$: tabs = tempTabs ? tempTabs : [...$browserTabs];
+$: anmiatedLifetimes = updatedLifetimes;
 </script>
 
 <div class="h-full overflow-y-auto overflow-x-hidden pr-3">
@@ -96,7 +96,7 @@ $: setInterval(() => {
         title="{tab.title}"
         url="{tab.url}"
         favIcon="{tab.favIconUrl}"
-        decay="{calculateDecay(tab, updatedLifetimes[tab._id])}"
+        decay="{calculateDecay(tab, anmiatedLifetimes[tab._id])}"
         on:open="{switchToTabDispatcher(tab._id)}"
         on:close="{removeTabDispatcher(tab._id)}" />
     {/each}
