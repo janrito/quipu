@@ -59,7 +59,7 @@ const updateTabLifetimes = async (forceOn = [], forceOnAll = false) => {
       if (isSet && tab.active) {
         // If active on window, clear it and return
         clearTabLifetime(tab.id);
-        return tab;
+        return;
       }
 
       if (isSet && (forceOnSet.has(tab.id) || forceOnAll)) {
@@ -67,11 +67,11 @@ const updateTabLifetimes = async (forceOn = [], forceOnAll = false) => {
         clearTabLifetime(tab.id);
       }
 
-      if (tabDecayHalfLife > 0) {
-        // define new lifetime for all unset ids
-        setNewTabLifetime({ tab, tabDecayHalfLife, tabDecayExceptions });
+      if (tabDecayHalfLife <= 0) {
+        return;
       }
-      return tab;
+      // define new lifetime for all unset ids
+      setNewTabLifetime({ tab, tabDecayHalfLife, tabDecayExceptions });
     });
 
     Object.keys(tabLifetimes).forEach(tabId => {
