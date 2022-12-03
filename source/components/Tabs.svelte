@@ -1,20 +1,18 @@
 <script>
-import browser from "webextension-polyfill";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
+import { UPDATE_DECAY_DISPLAY_INTERVAL } from "../lib/constants";
 import {
   closeTab,
-  compileValidURLPatterns,
-  findURLPattern,
   modifyElementClasses,
   newTab,
-  pAlive,
   randomSuffix,
+  calculateDelay,
   switchToTab,
 } from "../lib/utils";
 import browserTabs from "../stores/browser-tabs";
 import decayedTabs from "../stores/decayed-tabs";
-import settings from "../stores/settings";
+import tabLifetimes from "../stores/tab-lifetimes";
 import Bookmark from "./Bookmark.svelte";
 
 // keep track of temporary tabs, when one is being dragged
@@ -34,19 +32,15 @@ const handleDragTab = () => {
   tempTabs = null;
 };
 
-const calculateDecay = (tab, halfLife, exceptions) => {
-  if (tab.pinned || ~(halfLife > 0)) {
+const calculateDecay = (tab, tabLifetimeMeta) => {
+  if (tabLifetimeMeta === undefined) {
     return 0;
   }
-  if (findURLPattern(tab.url, exceptions)) {
-    return 0;
-  }
+  const { lifetime } = tabLifetimeMeta;
 
-  const now = new Date();
-  const lastAccessed = tab.lastAccessed.valueOf();
-  const pTabAlive = pAlive(now - lastAccessed, halfLife);
+  const delay = calculateDelay(lifetime, tab.lastAccessed);
 
-  return 1 - pTabAlive;
+  return 1 - delay / lifetime;
 };
 
 const handleDragTabConsider = event => {
@@ -72,7 +66,15 @@ const handleDragTabConsider = event => {
 };
 // TODO: for some reason this is not being called
 const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl"]);
+let updatedLifetimes = $tabLifetimes;
+setTimeout(() => {
+  updatedLifetimes = $tabLifetimes;
+  setInterval(() => {
+    updatedLifetimes = $tabLifetimes;
+  }, UPDATE_DECAY_DISPLAY_INTERVAL);
+}, 100);
 $: tabs = tempTabs ? tempTabs : [...$browserTabs];
+$: anmiatedLifetimes = updatedLifetimes;
 </script>
 
 <div class="h-full overflow-y-auto overflow-x-hidden pr-3">
@@ -94,11 +96,7 @@ $: tabs = tempTabs ? tempTabs : [...$browserTabs];
         title="{tab.title}"
         url="{tab.url}"
         favIcon="{tab.favIconUrl}"
-        decay="{calculateDecay(
-          tab,
-          $settings.tabDecayHalfLife,
-          compileValidURLPatterns($settings.tabDecayExceptions)
-        )}"
+        decay="{calculateDecay(tab, anmiatedLifetimes[tab._id])}"
         on:open="{switchToTabDispatcher(tab._id)}"
         on:close="{removeTabDispatcher(tab._id)}" />
     {/each}

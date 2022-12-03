@@ -4,7 +4,9 @@ env:
   DIRECTORY: distribution
 
 on:
-  workflow_dispatch: null
+  push:
+    branches:
+      - "main"
 
 jobs:
   Version:
@@ -16,17 +18,25 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 20
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "npm"
+          cache-dependency-path: package-lock.json
       - name: install
         run: npm ci || npm install
       - run: npm test
       - uses: fregante/daily-version-action@v2
         name: Create tag if necessary
         id: daily-version
-      - uses: fregante/release-with-changelog@v3
-        if: steps.daily-version.outputs.created
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          exclude: true
+      - if: steps.daily-version.outputs.created
+        name: Create Github release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd $DIRECTORY
+          zip -r quipu.zip *
+          gh release create "${{ steps.daily-version.outputs.version }}" --generate-notes quipu.zip
 
   Submit:
     needs: Version
@@ -40,10 +50,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "npm"
+          cache-dependency-path: package-lock.json
       - name: install
         run: npm ci || npm install
       - run: npm run build --if-present
-      - name: Update extension’s meta
+      - name: "Update extension's meta"
         run: npx dot-json@1 $DIRECTORY/manifest.json version ${{ needs.Version.outputs.version }}
       - name: Submit
         run: |
