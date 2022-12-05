@@ -1,4 +1,5 @@
 export const BROWSER_TAB_PREFIX = "tab";
+export const DECAYED_TAB_PREFIX = "decayed-tab";
 
 export const TAB_QUERY = {
   url: ["http://*/*", "https://*/*", "ws://*/*", "wss://*/*"],
