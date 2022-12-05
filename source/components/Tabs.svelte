@@ -9,6 +9,7 @@ import {
   randomSuffix,
   calculateDelay,
   switchToTab,
+  switchToWindow,
 } from "../lib/utils";
 import browserTabs from "../stores/browser-tabs";
 import decayedTabs from "../stores/decayed-tabs";
@@ -18,7 +19,8 @@ import Bookmark from "./Bookmark.svelte";
 // keep track of temporary tabs, when one is being dragged
 let tempTabs = null;
 
-const switchToTabDispatcher = tabId => () => {
+const switchToTabDispatcher = (windowId, tabId) => () => {
+  switchToWindow(windowId);
   switchToTab(tabId);
 };
 
@@ -97,7 +99,7 @@ $: anmiatedLifetimes = updatedLifetimes;
         url="{tab.url}"
         favIcon="{tab.favIconUrl}"
         decay="{calculateDecay(tab, anmiatedLifetimes[tab._id])}"
-        on:open="{switchToTabDispatcher(tab._id)}"
+        on:open="{switchToTabDispatcher(tab.windowId, tab._id)}"
         on:close="{removeTabDispatcher(tab._id)}" />
     {/each}
   </div>

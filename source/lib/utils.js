@@ -58,6 +58,13 @@ export const closeTab = tabId => {
 };
 
 /**
+ * Switch to a window
+ */
+export const switchToWindow = windowId => {
+  browser.windows.update(windowId, { focused: true });
+};
+
+/**
  * Switch to a tab
  */
 export const switchToTab = tabId => {
