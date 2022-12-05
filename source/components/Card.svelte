@@ -9,7 +9,6 @@
 </style>
 
 <script>
-import browser from "webextension-polyfill";
 import delay from "lodash/delay";
 
 import { createEventDispatcher } from "svelte";
