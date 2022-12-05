@@ -38,6 +38,7 @@ const cacheable = (cacheKey, updateOnEvents) => {
 
   read();
   return {
+    sync: read,
     subscribe,
     update: updateAndCache,
   };
