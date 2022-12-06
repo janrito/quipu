@@ -1,4 +1,5 @@
 export const BROWSER_TAB_PREFIX = "tab";
+export const DECAYED_TAB_PREFIX = "decayed-tab";
 
 export const TAB_QUERY = {
   url: ["http://*/*", "https://*/*", "ws://*/*", "wss://*/*"],
@@ -17,4 +18,4 @@ export const UPDATED_SETTINGS_EVENT = "updatedSettings";
 // this sets a maximum delay length to actually schedule
 export const MAX_DELAY_TO_SCHEDULE = 1000 * 60 * 60 * 24;
 
-export const UPDATE_DECAY_DISPLAY_INTERVAL = 1000 * 60;
+export const UPDATE_DECAY_DISPLAY_INTERVAL = 1000 * 5;

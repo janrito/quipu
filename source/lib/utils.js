@@ -58,6 +58,13 @@ export const closeTab = tabId => {
 };
 
 /**
+ * Switch to a window
+ */
+export const switchToWindow = windowId => {
+  browser.windows.update(windowId, { focused: true });
+};
+
+/**
  * Switch to a tab
  */
 export const switchToTab = tabId => {
@@ -176,3 +183,11 @@ export const calculateDelay = (lifetime, lastAccessed) => {
   const currentLifeSpan = now - lastAccessed.valueOf();
   return lifetime - currentLifeSpan > 0 ? lifetime - currentLifeSpan : 0;
 };
+
+/**
+ * Convert between tab id (numeric) and lifetime id (strings)
+ * tab ids are stored by the browser, we need to use them to interact with a tab
+ * lifetime ids are stored in the cache in an object they have to be strings
+ */
+export const lifetimeIdToTabId = lifetimeId => Number(lifetimeId);
+export const tabIdToLifetimeId = tabId => String(tabId);
