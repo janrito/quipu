@@ -1,4 +1,5 @@
 <script>
+import { onMount } from "svelte";
 import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
 import { UPDATE_DECAY_DISPLAY_INTERVAL } from "../lib/constants";
@@ -22,6 +23,15 @@ let tempDecayedTabs = null;
 
 // keep track of active tab lifetimes
 let updatedLifetimes = $tabLifetimes;
+
+onMount(() => {
+  setTimeout(() => {
+    tabLifetimes.sync();
+    setInterval(() => {
+      tabLifetimes.sync();
+    }, UPDATE_DECAY_DISPLAY_INTERVAL);
+  }, 100);
+});
 
 const switchToTabDispatcher = (windowId, tabId) => () => {
   switchToWindow(windowId);
@@ -105,16 +115,9 @@ const handleDragDecayedTabConsider = event => {
 // TODO: for some reason this is not being called
 const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl"]);
 
-setTimeout(() => {
-  updatedLifetimes = $tabLifetimes;
-  setInterval(() => {
-    updatedLifetimes = $tabLifetimes;
-  }, UPDATE_DECAY_DISPLAY_INTERVAL);
-}, 100);
-
 $: drawingWindowTabs = tempBrowserTabs ? tempBrowserTabs : [...$browserTabs];
 $: drawingDecayedTabs = tempDecayedTabs ? tempDecayedTabs : [...$decayedTabs];
-$: anmiatedLifetimes = updatedLifetimes;
+$: updatedLifetimes = $tabLifetimes;
 </script>
 
 <div class="h-full overflow-y-auto overflow-x-hidden pr-3">
@@ -139,7 +142,7 @@ $: anmiatedLifetimes = updatedLifetimes;
           title="{tab.title}"
           url="{tab.url}"
           favIcon="{tab.favIconUrl}"
-          decay="{calculateDecay(tab, anmiatedLifetimes[tab._id])}"
+          decay="{calculateDecay(tab, updatedLifetimes[tab._id])}"
           on:open="{switchToTabDispatcher(tab.windowId, tab._id)}"
           on:close="{removeTabDispatcher(tab._id)}" />
       {/each}
