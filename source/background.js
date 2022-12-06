@@ -9,7 +9,9 @@ import {
   closeTab,
   compileValidURLPatterns,
   findURLPattern,
+  lifetimeIdToTabId,
   sampleLifetime,
+  tabIdToLifetimeId,
 } from "./lib/utils.js";
 import decayedTabs from "./stores/decayed-tabs";
 import settings from "./stores/settings";
@@ -20,8 +22,9 @@ const decayTab = debounce(tabId => {
     decayedTabs.add(tab);
     closeTab(tabId);
     tabLifetimes.update(currentTabLifetimes => {
-      if (currentTabLifetimes[tabId]) {
-        delete currentTabLifetimes[tabId];
+      const lifetimeId = tabIdToLifetimeId(tabId);
+      if (currentTabLifetimes[lifetimeId]) {
+        delete currentTabLifetimes[lifetimeId];
       }
       return currentTabLifetimes;
     });
@@ -31,10 +34,16 @@ const decayTab = debounce(tabId => {
 const clearTabLifetimes = (tabIds, currentTabLifetimes) => {
   const tabIdsSet = new Set(tabIds);
   tabIdsSet.forEach(tabId => {
-    const { timerId } = currentTabLifetimes[tabId];
+    const lifetimeId = tabIdToLifetimeId(tabId);
+    const { timerId } = currentTabLifetimes[lifetimeId];
     clearTimeout(timerId);
   });
-  return Object.fromEntries(Object.entries(currentTabLifetimes).filter(key => !tabIdsSet.has(key)));
+  return Object.fromEntries(
+    Object.entries(currentTabLifetimes).filter(pair => {
+      const [lifetimeId] = pair;
+      return !tabIdsSet.has(lifetimeIdToTabId(lifetimeId));
+    })
+  );
 };
 
 const setNewTabLifetime = (tab, currentTabLifetimes, { tabDecayExceptions, tabDecayHalfLife }) => {
@@ -43,17 +52,23 @@ const setNewTabLifetime = (tab, currentTabLifetimes, { tabDecayExceptions, tabDe
   if (tab.pinned || matchingExceptionPattern) {
     return currentTabLifetimes;
   }
-  const { lifetime } = currentTabLifetimes[tab.id] || {
+  const lifetimeId = tabIdToLifetimeId(tab.id);
+  const { timerId, lifetime } = currentTabLifetimes[lifetimeId] || {
     lifetime: sampleLifetime(tabDecayHalfLife),
   };
   const delay = calculateDelay(lifetime, tab.lastAccessed);
 
   if (delay > MAX_DELAY_TO_SCHEDULE) {
     // only set the decay timer on tabs that are likely to decay soon.
+    currentTabLifetimes[lifetimeId] = { timerId: undefined, lifetime };
     return currentTabLifetimes;
   }
-  const timerId = setTimeout(decayTab, delay, tab.id);
-  currentTabLifetimes[tab.id] = { timerId, lifetime };
+  if (timerId) {
+    // clearing current timer is already set
+    clearTimeout(timerId);
+  }
+  const newTimerId = setTimeout(decayTab, delay, tab.id);
+  currentTabLifetimes[lifetimeId] = { timerId: newTimerId, lifetime };
   return currentTabLifetimes;
 };
 
@@ -67,21 +82,28 @@ const updateTabLifetimes = debounce(
 
     let currentTabLifetimes = get(tabLifetimes);
 
+    if (forceOnAll) {
+      currentTabLifetimes = clearTabLifetimes(
+        Object.keys(currentTabLifetimes).map(lifetimeId => lifetimeIdToTabId(lifetimeId)),
+        currentTabLifetimes
+      );
+    }
+
     browser.tabs.query(TAB_QUERY).then(tabs => {
       const tabIds = new Set([]);
       tabs.map(tab => {
         // keep track of all existing tabs
         tabIds.add(tab.id);
+        const lifetimeId = tabIdToLifetimeId(tab.id);
 
-        const isSet = currentTabLifetimes[tab.id] !== undefined;
+        const isSet = currentTabLifetimes[lifetimeId] !== undefined;
 
         if (isSet && tab.active) {
           // If active on window, clear it and return
           currentTabLifetimes = clearTabLifetimes([tab.id], currentTabLifetimes);
           return;
         }
-
-        if (isSet && (forceOnSet.has(tab.id) || forceOnAll)) {
+        if (isSet && forceOnSet.has(tab.id)) {
           // clear all tabs in force list
           currentTabLifetimes = clearTabLifetimes([tab.id], currentTabLifetimes);
         }
@@ -98,10 +120,13 @@ const updateTabLifetimes = debounce(
 
       // clear lifetimes for tabs that don't exist any more
       // – for example those closed manually
-      currentTabLifetimes = clearTabLifetimes(
-        Object.keys(currentTabLifetimes).filter(tabId => !tabIds.has(Number(tabId))),
-        currentTabLifetimes
-      );
+      const nonExistentTabIds = Object.keys(currentTabLifetimes)
+        .map(lifetimeId => lifetimeIdToTabId(lifetimeId))
+        .filter(tabId => !tabIds.has(tabId));
+
+      if (nonExistentTabIds.length) {
+        currentTabLifetimes = clearTabLifetimes(nonExistentTabIds, currentTabLifetimes);
+      }
 
       tabLifetimes.update(() => currentTabLifetimes);
     });

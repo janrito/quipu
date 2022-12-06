@@ -11,6 +11,7 @@ import {
   calculateDelay,
   switchToTab,
   switchToWindow,
+  tabIdToLifetimeId,
 } from "../lib/utils";
 import browserTabs from "../stores/browser-tabs";
 import decayedTabs from "../stores/decayed-tabs";
@@ -142,7 +143,7 @@ $: updatedLifetimes = $tabLifetimes;
           title="{tab.title}"
           url="{tab.url}"
           favIcon="{tab.favIconUrl}"
-          decay="{calculateDecay(tab, updatedLifetimes[tab._id])}"
+          decay="{calculateDecay(tab, updatedLifetimes[tabIdToLifetimeId(tab._id)])}"
           on:open="{switchToTabDispatcher(tab.windowId, tab._id)}"
           on:close="{removeTabDispatcher(tab._id)}" />
       {/each}
