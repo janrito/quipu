@@ -1,4 +1,7 @@
 <style>
+:global(#dnd-action-dragged-el) {
+  @apply shadow-xl;
+}
 .parentTag {
   @apply bg-blue-50 text-blue-500 border-blue-400;
 }
