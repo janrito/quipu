@@ -27,8 +27,6 @@ export let favIcon = null;
 export let decay = 0;
 export let closeEnabled = true;
 
-let hover = false;
-
 const dispatch = createEventDispatcher();
 const parsedUrl = new URL(url);
 const openBookmark = () => dispatch("open");
@@ -44,13 +42,11 @@ $: tagsToDraw = tags
 </script>
 
 <div
-  class="p-1 m-1.5 flex flex-col bg-gray-50 cursor-pointer"
+  class="group/bookmark p-1 m-1.5 flex flex-col bg-gray-50 cursor-pointer relative"
   on:keydown="{e => e.key === 'Enter' && openBookmark()}"
-  on:click|preventDefault="{openBookmark}"
-  on:mouseenter="{() => (hover = true)}"
-  on:mouseleave="{() => (hover = false)}">
-  {#if hover && closeEnabled}
-    <div class="flex flex-row h-5 pl-1 ml-5 -mb-5 z-50 justify-end">
+  on:click|preventDefault="{openBookmark}">
+  {#if closeEnabled}
+    <div class="hidden group-hover/bookmark:flex flex-row h-5 pl-1 ml-5 -mb-5 z-50 justify-end">
       <div
         on:keydown="{e => e.key === 'Enter' && closeBookmark()}"
         on:click|preventDefault|stopPropagation|once="{closeBookmark}"
@@ -68,9 +64,8 @@ $: tagsToDraw = tags
           <span
             on:keydown="{e => e.key === 'Enter' && highlightBookmark()}"
             on:click|preventDefault|stopPropagation="{highlightBookmark}"
-            class="block align-top text-sm {hover
-              ? 'text-blue-800'
-              : 'text-gray-200'} cursor-pointer">¶</span>
+            class="block align-top text-sm text-gray-200 group-hover/bookmark:text-blue-800 cursor-pointer"
+            >¶</span>
         </div>
       {/if}
     </div>
