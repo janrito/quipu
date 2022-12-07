@@ -94,11 +94,32 @@ $: tagsToDraw = tags
       {/if}
     </div>
   </div>
-  <div class="shrink-0 h-px -m-1 mt-2 ">
+  <div class="group/decay shrink-0 h-px -m-1 mt-2 ">
     <div class="w-full bg-gray-200">
       <div
         class="{decay <= 0.7 ? 'bg-blue-500' : decay <= 0.9 ? 'bg-orange-500' : 'bg-red-500'} h-px"
         style="width: {decay * 100}%">
+        <!-- tooltip -->
+        <div
+          class="hidden group-hover/decay:flex absolute z-10 -bottom-12 {decay <= 0.7
+            ? 'left-1'
+            : decay <= 0.9
+            ? 'left-10'
+            : '-right-2'} mt-6 flex-col items-center">
+          <div
+            class="w-3 h-3 -mb-2 rotate-45 {decay <= 0.7
+              ? 'bg-blue-200'
+              : decay <= 0.9
+              ? 'bg-orange-200'
+              : 'bg-red-200'}">
+          </div>
+          <span
+            class="relative p-2 text-xs leading-none whitespace-no-wrap shadow-lg {decay <= 0.7
+              ? 'bg-blue-200 text-blue-400'
+              : decay <= 0.9
+              ? 'bg-orange-200 text-orange-400'
+              : 'bg-red-200 text-red-400'} ">Decay: {Math.round(decay * 100)}%</span>
+        </div>
       </div>
     </div>
   </div>
