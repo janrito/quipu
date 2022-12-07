@@ -4,6 +4,7 @@
   "eslint.validate": ["javascript", "svelte"],
   "cSpell.words": [
     "cssnano",
+    "dndzone",
     "esac",
     "fontpath",
     "fontsource",
