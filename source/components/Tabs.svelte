@@ -53,14 +53,14 @@ const handleDragDecayedTab = () => {
   tempDecayedTabs = null;
 };
 
-const calculateDecay = (tab, tabLifetimeMeta) => {
-  if (tabLifetimeMeta === undefined) {
-    return 0;
-  }
+const getTabLifetime = (tab, updatedLifetimes) => {
+  const tabLifetimeMeta = updatedLifetimes[tabIdToLifetimeId(tab._id)] || { lifetime: undefined };
   const { lifetime } = tabLifetimeMeta;
+  return lifetime;
+};
 
+const calculateDecay = (tab, lifetime) => {
   const delay = calculateDelay(lifetime, tab.lastAccessed);
-
   return 1 - delay / lifetime;
 };
 
@@ -138,12 +138,13 @@ $: updatedLifetimes = $tabLifetimes;
       on:consider="{handleDragTabConsider(windowIndex)}"
       on:finalize="{handleDragTab}">
       {#each tabs as tab (tab.id)}
+        {@const lifetime = getTabLifetime(tab, updatedLifetimes)}
         <Bookmark
           key="{tab.id}"
           title="{tab.title}"
           url="{tab.url}"
           favIcon="{tab.favIconUrl}"
-          decay="{calculateDecay(tab, updatedLifetimes[tabIdToLifetimeId(tab._id)])}"
+          decay="{calculateDecay(tab, lifetime)}"
           on:open="{switchToTabDispatcher(tab.windowId, tab._id)}"
           on:close="{removeTabDispatcher(tab._id)}" />
       {/each}

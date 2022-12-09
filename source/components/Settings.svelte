@@ -29,7 +29,7 @@ const goToTab = event => {
   currentTabId = Number(event.detail.id);
 };
 let allSettingsEditMode = false;
-const enableallSettingsEditMode = () => {
+const enableAllSettingsEditMode = () => {
   allSettingsEditMode = true;
 };
 
@@ -102,12 +102,12 @@ $: tabsMatchingLiveExceptions = $browserTabs
   <div class="h-full flex flex-col overflow-y-auto overflow-x-hidden pr-3">
     <div class="flex flex-row flex-wrap">
       {#if currentTab.name === "pinboard"}
-        <label id="pinboard-api-token" for="pinboardAPITtoken" class="w-1/2 p-1 pl-7 mt-5">
+        <label id="pinboard-api-token" for="pinboardAPIToken" class="w-1/2 p-1 pl-7 mt-5">
           <span>Pinboard API Token</span>
           <input
             class="w-full bg-gray-100 border-b-2 border-gray-300"
             type="text"
-            name="pinboardAPITtoken"
+            name="pinboardAPIToken"
             bind:value="{$settings.pinboardAPIToken}" />
 
           <p class="text-xs">
@@ -185,8 +185,8 @@ $: tabsMatchingLiveExceptions = $browserTabs
           {:else}
             <pre
               class="w-full h-min-content p-3 bg-gray-50 text-gray-400 border-b-2 border-gray-300 text-xs "
-              on:click="{enableallSettingsEditMode}"
-              on:keydown="{e => e.key === 'Enter' && enableallSettingsEditMode()}"
+              on:click="{enableAllSettingsEditMode}"
+              on:keydown="{e => e.key === 'Enter' && enableAllSettingsEditMode()}"
               name="allSettings">{JSON.stringify($settings, null, "  ")}</pre>
           {/if}
         </label>

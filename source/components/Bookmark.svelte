@@ -27,13 +27,17 @@ export let favIcon = null;
 export let decay = 0;
 export let closeEnabled = true;
 
-let hover = false;
-
 const dispatch = createEventDispatcher();
 const parsedUrl = new URL(url);
 const openBookmark = () => dispatch("open");
 const closeBookmark = () => dispatch("close");
 const highlightBookmark = () => key && dispatch("highlight", key);
+
+const darkBackground = decay <= 0.7 ? "bg-blue-500" : decay <= 0.9 ? "bg-orange-500" : "bg-red-500";
+const lightBackground =
+  decay <= 0.7 ? "bg-blue-200" : decay <= 0.9 ? "bg-orange-200" : "bg-red-200";
+const darkForeground =
+  decay <= 0.7 ? "text-blue-400" : decay <= 0.9 ? "text-orange-400" : "text-red-400";
 
 $: tagsToDraw = tags
   .map(tag => ({
@@ -44,13 +48,11 @@ $: tagsToDraw = tags
 </script>
 
 <div
-  class="p-1 m-1.5 flex flex-col bg-gray-50 cursor-pointer"
+  class="group/bookmark p-1 m-1.5 flex flex-col bg-gray-50 cursor-pointer relative"
   on:keydown="{e => e.key === 'Enter' && openBookmark()}"
-  on:click|preventDefault="{openBookmark}"
-  on:mouseenter="{() => (hover = true)}"
-  on:mouseleave="{() => (hover = false)}">
-  {#if hover && closeEnabled}
-    <div class="flex flex-row h-5 pl-1 ml-5 -mb-5 z-50 justify-end">
+  on:click|preventDefault="{openBookmark}">
+  {#if closeEnabled}
+    <div class="hidden group-hover/bookmark:flex flex-row h-5 pl-1 ml-5 -mb-5 z-50 justify-end">
       <div
         on:keydown="{e => e.key === 'Enter' && closeBookmark()}"
         on:click|preventDefault|stopPropagation|once="{closeBookmark}"
@@ -68,9 +70,8 @@ $: tagsToDraw = tags
           <span
             on:keydown="{e => e.key === 'Enter' && highlightBookmark()}"
             on:click|preventDefault|stopPropagation="{highlightBookmark}"
-            class="block align-top text-sm {hover
-              ? 'text-blue-800'
-              : 'text-gray-200'} cursor-pointer">¶</span>
+            class="block align-top text-sm text-gray-200 group-hover/bookmark:text-blue-800 cursor-pointer"
+            >¶</span>
         </div>
       {/if}
     </div>
@@ -94,11 +95,23 @@ $: tagsToDraw = tags
       {/if}
     </div>
   </div>
-  <div class="shrink-0 h-px -m-1 mt-2 ">
+  <div class="group/decay shrink-0 h-px -m-1 mt-2 ">
     <div class="w-full bg-gray-200">
-      <div
-        class="{decay <= 0.7 ? 'bg-blue-500' : decay <= 0.9 ? 'bg-orange-500' : 'bg-red-500'} h-px"
-        style="width: {decay * 100}%">
+      <div class="{darkBackground} h-px" style="width: {decay * 100}%">
+        {#if decay}
+          <!-- tooltip -->
+          <div
+            class="hidden group-hover/decay:flex absolute z-10 -bottom-12 {decay <= 0.7
+              ? 'left-1'
+              : decay <= 0.9
+              ? 'left-10'
+              : '-right-2'} mt-6 flex-col items-center">
+            <div class="w-3 h-3 -mb-2 rotate-45 {lightBackground}"></div>
+            <span
+              class="relative p-2 text-xs leading-none whitespace-no-wrap shadow-lg {lightBackground} {darkForeground}"
+              >Decay: {Math.round(decay * 100)}%</span>
+          </div>
+        {/if}
       </div>
     </div>
   </div>
