@@ -143,7 +143,7 @@ $: updatedLifetimes = $tabLifetimes;
           key="{tab.id}"
           title="{tab.title}"
           url="{tab.url}"
-          favIcon="{tab.favIconUrl}"
+          favIconUrl="{tab.favIconUrl}"
           {...lifetime ? { decay: calculateDecay(tab, lifetime) } : {}}
           on:open="{switchToTabDispatcher(tab.windowId, tab._id)}"
           on:close="{removeTabDispatcher(tab._id)}" />
@@ -167,7 +167,7 @@ $: updatedLifetimes = $tabLifetimes;
       <Bookmark
         title="{decayedTab.title}"
         url="{decayedTab.url}"
-        favIcon="{decayedTab.favIconUrl}"
+        favIconUrl="{decayedTab.favIconUrl}"
         closeEnabled="{false}"
         key="{decayedTab.id}"
         on:open="{openDecayedTabDispatcher(decayedTab.url)}" />

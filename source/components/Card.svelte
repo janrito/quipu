@@ -179,7 +179,7 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
         url="{bookmark.href}"
         key="{bookmark.id}"
         tags="{bookmark.tags}"
-        favIcon="{bookmark.favIcon}"
+        favIconUrl="{bookmark.favIcon}"
         parentTags="{[...parentTags, name]}"
         on:highlight="{e => dispatch('highlightBookmark', e.detail)}"
         on:close="{closeBookmarkDispatcher(bookmark.href)}"

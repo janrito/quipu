@@ -23,7 +23,7 @@ export let title;
 export let url;
 export let tags = [];
 export let parentTags = [];
-export let favIcon = null;
+export let favIconUrl;
 export let decay = 0;
 export let closeEnabled = true;
 
@@ -63,8 +63,8 @@ $: tagsToDraw = tags
   {/if}
   <div class="flex flex-row grow">
     <div class="flex-none w-5 pr-1 pt-1 overflow-hidden">
-      {#if favIcon}
-        <img class="w-4 h-4" src="{favIcon}" alt="{title}" />
+      {#if favIconUrl}
+        <img class="w-4 h-4" src="{favIconUrl}" alt="{title}" />
       {:else}
         <div class="w-4 h-4 -mt-1 ml-1">
           <span
