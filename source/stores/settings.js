@@ -19,7 +19,7 @@ const storable = () => {
   const { subscribe, set } = writable(currentValue);
 
   const read = async () => {
-    currentValue = await optionsStorage.getAll().then(value => {
+    await optionsStorage.getAll().then(value => {
       currentValue = value;
       set(value);
     });
