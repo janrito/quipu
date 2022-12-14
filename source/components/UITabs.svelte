@@ -79,10 +79,10 @@ const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl", "ring-1", "
 $: drawTabs = tabs;
 </script>
 
-<div class="flex flex-col h-full overflow-hidden">
-  <nav class="flex-shrink-0 flex flex-row pl-5 overflow-x-auto overflow-y-hidden no-scrollbar">
+<div class="flex flex-col h-full">
+  <nav class="flex-shrink-0 flex flex-row pl-5 overflow-y-visible h-8">
     <div
-      class="h-7 grid grid-flow-col auto-cols-max gap-0 border-b-2 border-gray-300"
+      class="h-7 grid grid-flow-col auto-cols-max gap-0 border-b-2 border-gray-300 overflow-y-visible"
       use:dndzone="{{
         items: drawTabs,
         dropTargetStyle: {},
