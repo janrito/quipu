@@ -52,7 +52,7 @@ $: tagsToDraw = tags
   on:keydown="{e => e.key === 'Enter' && openBookmark()}"
   on:click|preventDefault="{openBookmark}">
   {#if closeEnabled}
-    <div class="hidden group-hover/bookmark:flex flex-row h-5 pl-1 ml-5 -mb-5 z-50 justify-end">
+    <div class="hidden group-hover/bookmark:flex flex-row h-5 pl-1 ml-5 -mb-5 z-10 justify-end">
       <div
         on:keydown="{e => e.key === 'Enter' && closeBookmark()}"
         on:click|preventDefault|stopPropagation|once="{closeBookmark}"
@@ -62,7 +62,7 @@ $: tagsToDraw = tags
     </div>
   {/if}
   <div class="flex flex-row grow">
-    <div class="flex-none w-5 pr-1 pt-1 overflow-hidden">
+    <div class="flex-none w-5 pr-1 pt-1 overflow-hidden group/tooltip">
       {#if favIconUrl}
         <img class="w-4 h-4" src="{favIconUrl}" alt="{title}" />
       {:else}
@@ -72,6 +72,20 @@ $: tagsToDraw = tags
             on:click|preventDefault|stopPropagation="{highlightBookmark}"
             class="block align-top text-sm text-gray-200 group-hover/bookmark:text-blue-800 cursor-pointer"
             >¶</span>
+        </div>
+      {/if}
+      {#if decay}
+        <!-- tooltip -->
+        <div
+          class="hidden group-hover/tooltip:flex absolute z-10 -bottom-12 {decay <= 0.7
+            ? 'left-1'
+            : decay <= 0.9
+            ? 'left-10'
+            : '-right-2'} mt-6 flex-col items-center">
+          <div class="w-3 h-3 -mb-2 rotate-45 {lightBackground}"></div>
+          <span
+            class="relative p-2 text-xs leading-none whitespace-no-wrap shadow-lg {lightBackground} {darkForeground}"
+            >Decay: {Math.round(decay * 100)}%</span>
         </div>
       {/if}
     </div>
@@ -95,24 +109,9 @@ $: tagsToDraw = tags
       {/if}
     </div>
   </div>
-  <div class="group/decay shrink-0 h-px -m-1 mt-2 ">
+  <div class="shrink-0 h-px -m-1 mt-2 ">
     <div class="w-full bg-gray-200">
-      <div class="{darkBackground} h-px" style="width: {decay * 100}%">
-        {#if decay}
-          <!-- tooltip -->
-          <div
-            class="hidden group-hover/decay:flex absolute z-10 -bottom-12 {decay <= 0.7
-              ? 'left-1'
-              : decay <= 0.9
-              ? 'left-10'
-              : '-right-2'} mt-6 flex-col items-center">
-            <div class="w-3 h-3 -mb-2 rotate-45 {lightBackground}"></div>
-            <span
-              class="relative p-2 text-xs leading-none whitespace-no-wrap shadow-lg {lightBackground} {darkForeground}"
-              >Decay: {Math.round(decay * 100)}%</span>
-          </div>
-        {/if}
-      </div>
+      <div class="{darkBackground} h-px" style="width: {decay * 100}%"></div>
     </div>
   </div>
 </div>
