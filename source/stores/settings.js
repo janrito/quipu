@@ -4,13 +4,13 @@ import browser from "webextension-polyfill";
 import { UPDATED_SETTINGS_EVENT } from "../lib/constants";
 import optionsStorage from "../lib/options-storage";
 
-const newName = (currentNames, prefix = "New", n = 0) => {
+const generateNewName = (currentNames, prefix = "New", n = 0) => {
   const _prefix = prefix.replaceAll(/\s+/gi, "-");
   const suggestion = n > 0 ? `${_prefix}-${n}` : _prefix;
   if (!currentNames.includes(suggestion)) {
     return suggestion;
   }
-  return newName(currentNames, _prefix, n + 1);
+  return generateNewName(currentNames, _prefix, n + 1);
 };
 
 const storable = () => {
@@ -44,14 +44,14 @@ const storable = () => {
       updateAndSave(value => {
         value.pages[pageIndex].cards = [
           ...currentCards.slice(0, _cardIndex),
-          newName(currentCards, "New"),
+          generateNewName(currentCards, "New"),
           ...currentCards.slice(_cardIndex),
         ];
         return value;
       });
     } else {
       updateAndSave(value => {
-        value.pages[pageIndex].cards = [newName([], "New")];
+        value.pages[pageIndex].cards = [generateNewName([], "New")];
         return value;
       });
     }
@@ -61,7 +61,7 @@ const storable = () => {
     if (currentValue.pages[pageIndex] && currentValue.pages[pageIndex].cards[cardIndex]) {
       updateAndSave(value => {
         const otherCards = value.pages[pageIndex].cards.filter((_, i) => i !== cardIndex);
-        value.pages[pageIndex].cards[cardIndex] = newName(otherCards, name);
+        value.pages[pageIndex].cards[cardIndex] = generateNewName(otherCards, name);
         return value;
       });
     }
@@ -72,7 +72,7 @@ const storable = () => {
       value.pages = [
         ...value.pages,
         {
-          name: newName(
+          name: generateNewName(
             value.pages.map(p => p.name),
             "New"
           ),
@@ -85,7 +85,7 @@ const storable = () => {
   const renamePage = (pageIndex, name) => {
     if (currentValue.pages[pageIndex]) {
       updateAndSave(value => {
-        value.pages[pageIndex].name = newName(
+        value.pages[pageIndex].name = generateNewName(
           value.pages.filter((_, idx) => idx !== pageIndex).map(p => p.name),
           name
         );
