@@ -77,7 +77,7 @@ $: tagsToDraw = tags
       {#if decay}
         <!-- tooltip -->
         <div
-          class="hidden group-hover/tooltip:flex absolute z-10 -bottom-12 {decay <= 0.7
+          class="hidden group-hover/tooltip:flex absolute z-10 -bottom-9 {decay <= 0.7
             ? 'left-1'
             : decay <= 0.9
             ? 'left-10'
