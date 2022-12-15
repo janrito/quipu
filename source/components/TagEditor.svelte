@@ -62,30 +62,27 @@ const selectSuggestedTag = tag => () => {
 $: drawTags = prefix
   ? tags.filter(tag => tag.name.startsWith(prefix)).slice(0, 5)
   : tags.slice(0, 5);
-$: pos = element ? element.getBoundingClientRect() : null;
-$: contextMenuPosition = pos ? `top:${pos.bottom}px;left:${pos.left}px;width:${pos.width}px` : "";
 </script>
 
-<div class="text-sm flex flex-row">
+<div class="text-sm flex flex-row min-w-fit relative">
   <input
     type="text"
-    class="pr-6 -mb-2 h-full max-w-md bg-gray-100 border-b-2 border-gray-300"
+    class="pr-6 pl-2 px-2 border-b-2 h-full w-36 bg-gray-100"
     bind:this="{element}"
     value="{value}"
     on:blur="{handleEdit}"
     on:keydown="{handleKeydown}"
     on:keyup="{handleKeyUp}"
     use:focus />
-  <button class="-ml-6 text-red-300 hover:text-red-500" on:click|preventDefault="{handleDelete}"
-    ><IconDelete /></button>
+  <button
+    class="-ml-6 mr-2 text-red-300 hover:text-red-500"
+    on:click|preventDefault="{handleDelete}"><IconDelete /></button>
   {#if drawTags.length > 0}
-    <div
-      class="absolute shadow bg-gray-50 border-b-2 border-gray-300"
-      style="{contextMenuPosition}">
+    <div class="absolute z-20 top-7 w-36 left-0 shadow bg-gray-100 border-b-2 border-gray-300">
       <ul>
         {#each drawTags as tag, tagIdx}
           <li
-            class:selected="{selectedSuggestedTagIdx === tagIdx}"
+            class:selected="{selectedSuggestedTagIdx === tagIdx && drawTags.length > 1}"
             class="p-2"
             on:keydown="{e => e.key === 'Enter' && selectSuggestedTag(tag)()}"
             on:click="{selectSuggestedTag(tag)}">
