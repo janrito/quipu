@@ -79,10 +79,10 @@ const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl", "ring-1", "
 $: drawTabs = tabs;
 </script>
 
-<div class="flex flex-col h-full">
-  <nav class="flex-shrink-0 flex flex-row pl-5 overflow-y-visible h-8">
+<div class="flex h-full flex-col">
+  <nav class="flex h-8 flex-shrink-0 flex-row overflow-y-visible pl-5">
     <div
-      class="h-7 grid grid-flow-col auto-cols-max gap-0 border-b-2 border-gray-300 overflow-y-visible"
+      class="grid h-7 auto-cols-max grid-flow-col gap-0 overflow-y-visible border-b-2 border-gray-300"
       use:dndzone="{{
         items: drawTabs,
         dropTargetStyle: {},
@@ -105,7 +105,7 @@ $: drawTabs = tabs;
           <a
             class:selected="{tab.id === selectedTabId}"
             href="#page-{tab.name}"
-            class="mt-0 mx-0 -mb-0.5 px-3 text-sm font-extralight text-gray-400 hover:border-gray-400 border-b-2 bg-white truncate"
+            class="mx-0 mt-0 -mb-0.5 truncate border-b-2 bg-white px-3 text-sm font-extralight text-gray-400 hover:border-gray-400"
             on:click|preventDefault="{clickTabDispatcher(tab.id)}">{tab.name}</a>
         {/if}
       {/each}
@@ -113,7 +113,7 @@ $: drawTabs = tabs;
 
     {#if editable}
       <a
-        class="text-sm font-normal text-gray-200 mx-1.5 -mb-0.5 px-1.5"
+        class="mx-1.5 -mb-0.5 px-1.5 text-sm font-normal text-gray-200"
         href="#new-tab"
         on:click|preventDefault="{createNewTab}">+</a>
     {/if}

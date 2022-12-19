@@ -150,7 +150,7 @@ $: updatedLifetimes = $tabLifetimes;
       {/each}
     </div>
   {/each}
-  <h3 class="pl-5 mt-3 text-sm font-extralight">
+  <h3 class="mt-3 pl-5 text-sm font-extralight">
     Decayed Tabs <span class="text-gray-300">({$decayedTabs.length})</span>
   </h3>
   <div
