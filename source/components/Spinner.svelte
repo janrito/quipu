@@ -1,6 +1,6 @@
 <style>
 .spinner {
-  @apply py-20 text-center text-pink-400 text-lg;
+  @apply py-20 text-center text-lg text-pink-400;
 }
 
 .spinner:after {

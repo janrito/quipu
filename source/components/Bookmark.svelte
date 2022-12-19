@@ -3,10 +3,10 @@
   @apply shadow-xl;
 }
 .parentTag {
-  @apply bg-blue-50 text-blue-500 border-blue-400;
+  @apply border-blue-400 bg-blue-50 text-blue-500;
 }
 .leafTag {
-  @apply bg-yellow-50 text-yellow-500 border-yellow-400;
+  @apply border-yellow-400 bg-yellow-50 text-yellow-500;
 }
 .tag {
   @apply border-b-2;
@@ -48,53 +48,53 @@ $: tagsToDraw = tags
 </script>
 
 <div
-  class="group/bookmark p-1 m-1.5 flex flex-col bg-gray-50 cursor-pointer relative"
+  class="group/bookmark relative m-1.5 flex cursor-pointer flex-col bg-gray-50 p-1"
   on:keydown="{e => e.key === 'Enter' && openBookmark()}"
   on:click|preventDefault="{openBookmark}">
   {#if closeEnabled}
-    <div class="hidden group-hover/bookmark:flex flex-row h-5 pl-1 ml-5 -mb-5 z-10 justify-end">
+    <div class="z-10 ml-5 -mb-5 hidden h-5 flex-row justify-end pl-1 group-hover/bookmark:flex">
       <div
         on:keydown="{e => e.key === 'Enter' && closeBookmark()}"
-        on:click|preventDefault|stopPropagation|once="{closeBookmark}"
-        class="block align-top text-sm text-red-300 hover:text-red-500 cursor-pointer">
+        on:click|preventDefault|stopPropagation="{closeBookmark}"
+        class="block cursor-pointer align-top text-sm text-red-300 hover:text-red-500">
         <IconDelete />
       </div>
     </div>
   {/if}
-  <div class="flex flex-row grow">
-    <div class="flex-none w-5 pr-1 pt-1 overflow-hidden group/tooltip">
+  <div class="flex grow flex-row">
+    <div class="group/tooltip w-5 flex-none overflow-hidden pr-1 pt-1">
       {#if favIconUrl}
-        <img class="w-4 h-4" src="{favIconUrl}" alt="{title}" />
+        <img class="h-4 w-4" src="{favIconUrl}" alt="{title}" />
       {:else}
-        <div class="w-4 h-4 -mt-1 ml-1">
+        <div class="-mt-1 ml-1 h-4 w-4">
           <span
             on:keydown="{e => e.key === 'Enter' && highlightBookmark()}"
             on:click|preventDefault|stopPropagation="{highlightBookmark}"
-            class="block align-top text-sm text-gray-200 group-hover/bookmark:text-blue-800 cursor-pointer"
+            class="block cursor-pointer align-top text-sm text-gray-200 group-hover/bookmark:text-blue-800"
             >¶</span>
         </div>
       {/if}
       {#if decay}
         <!-- tooltip -->
         <div
-          class="hidden group-hover/tooltip:flex absolute z-10 -bottom-9 {decay <= 0.7
+          class="absolute -bottom-9 z-10 hidden group-hover/tooltip:flex {decay <= 0.7
             ? 'left-1'
             : decay <= 0.9
             ? 'left-10'
             : '-right-2'} mt-6 flex-col items-center">
-          <div class="w-3 h-3 -mb-2 rotate-45 {lightBackground}"></div>
+          <div class="-mb-2 h-3 w-3 rotate-45 {lightBackground}"></div>
           <span
-            class="relative p-2 text-xs leading-none whitespace-no-wrap shadow-lg {lightBackground} {darkForeground}"
+            class="whitespace-no-wrap relative p-2 text-xs leading-none shadow-lg {lightBackground} {darkForeground}"
             >Decay: {Math.round(decay * 100)}%</span>
         </div>
       {/if}
     </div>
     <div class="flex-grow overflow-hidden">
-      <p class="truncate text-xs font-normal mt-0.5 mb-1.5">
+      <p class="mt-0.5 mb-1.5 truncate text-xs font-normal">
         {#if title}{title}{:else}{parsedUrl.hostname}{/if}
       </p>
       <p
-        class="truncate text-xs font-extralight bg-pink-100 text-pink-400 border-b-2 border-pink-300 mb-0.5">
+        class="mb-0.5 truncate border-b-2 border-pink-300 bg-pink-100 text-xs font-extralight text-pink-400">
         <span class="font-normal">{parsedUrl.hostname}</span
         >{#if parsedUrl.port}:{parsedUrl.port}{/if}{parsedUrl.pathname}{parsedUrl.search}{parsedUrl.hash}
       </p>
@@ -109,7 +109,7 @@ $: tagsToDraw = tags
       {/if}
     </div>
   </div>
-  <div class="shrink-0 h-px -m-1 mt-2 ">
+  <div class="-m-1 mt-2 h-px shrink-0 ">
     <div class="w-full bg-gray-200">
       <div class="{darkBackground} h-px" style="width: {decay * 100}%"></div>
     </div>

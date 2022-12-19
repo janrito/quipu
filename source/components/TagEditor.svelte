@@ -64,10 +64,10 @@ $: drawTags = prefix
   : tags.slice(0, 5);
 </script>
 
-<div class="text-sm flex flex-row min-w-fit relative">
+<div class="relative flex min-w-fit flex-row text-sm">
   <input
     type="text"
-    class="pr-6 pl-2 px-2 border-b-2 h-full w-36 bg-gray-100"
+    class="h-full w-36 border-b-2 bg-gray-100 px-2 pr-6 pl-2"
     bind:this="{element}"
     value="{value}"
     on:blur="{handleEdit}"
@@ -78,7 +78,7 @@ $: drawTags = prefix
     class="-ml-6 mr-2 text-red-300 hover:text-red-500"
     on:click|preventDefault="{handleDelete}"><IconDelete /></button>
   {#if drawTags.length > 0}
-    <div class="absolute z-20 top-7 w-36 left-0 shadow bg-gray-100 border-b-2 border-gray-300">
+    <div class="absolute top-7 left-0 z-20 w-36 border-b-2 border-gray-300 bg-gray-100 shadow">
       <ul>
         {#each drawTags as tag, tagIdx}
           <li

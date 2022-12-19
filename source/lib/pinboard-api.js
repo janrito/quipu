@@ -44,7 +44,7 @@ const fetchAPI = async (apiToken, route, parameters = {}) => {
 };
 
 const cachedFetchAPI = async (apiToken, route, parameters = {}) =>
-  postsUpdate(apiToken).then(lastUpdate => {
+  postsUpdate(apiToken).then(async lastUpdate => {
     const cacheKey = `${lastUpdate}||${route}?${encodeParameters(parameters)}`;
     return cache.get(cacheKey).then(data => {
       if (data) {

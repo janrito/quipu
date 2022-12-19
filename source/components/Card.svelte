@@ -4,7 +4,7 @@
 }
 
 :global(.active-droppable-card) {
-  @apply shadow-inner bg-gray-50;
+  @apply bg-gray-50 shadow-inner;
 }
 </style>
 
@@ -140,7 +140,7 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
 
 <div class="flex flex-col bg-white">
   {#if editMode}
-    <div class="ml-7 py-3 flex-shrink-0">
+    <div class="ml-7 flex-shrink-0 py-3">
       <TagEditor
         on:edit="{renameCard}"
         on:delete="{deleteCard}"
@@ -151,9 +151,9 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
   {:else}
     <h3 class:untagged class="ml-7 py-3 text-sm text-gray-400">
       <a href="#edit-card-{name}" on:click|preventDefault="{enterEditMode}">{name}</a>
-      <span class="text-gray-300 text-xs"> ({bookmarks.length})</span>
+      <span class="text-xs text-gray-300"> ({bookmarks.length})</span>
       {#if bookmarks.length > 1}
-        <button class="text-gray-300 text-xs" on:click|preventDefault="{openAllBookmarks}">
+        <button class="text-xs text-gray-300" on:click|preventDefault="{openAllBookmarks}">
           open all</button>
       {/if}
       <button class="text-gray-200" on:click|preventDefault="{createNewCard}">+</button>
@@ -161,7 +161,7 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
   {/if}
 
   <div
-    class="flex-grow w-full gap-1 min-h-5 grid"
+    class="grid min-h-5 w-full flex-grow gap-1"
     style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))"
     use:dndzone="{{
       items: bookmarks,

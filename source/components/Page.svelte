@@ -125,16 +125,16 @@ $: errors = $bookmarksStore.errors;
 </script>
 
 {#each errors as error}
-  <div class="pr-3 overflow-hidden">
-    <p class="py-2 pl-7 bg-red-100 text-red-300 border-b-2 border-red-200 text-sm">
+  <div class="overflow-hidden pr-3">
+    <p class="border-b-2 border-red-200 bg-red-100 py-2 pl-7 text-sm text-red-300">
       <span class=" text-red-500">{error.status}</span>
       {error.description}
     </p>
   </div>
 {/each}
-<div class="flex flex-row w-full h-full overflow-hidden">
+<div class="flex h-full w-full flex-row overflow-hidden">
   <div
-    class="h-full flex flex-col overflow-y-auto overflow-x-hidden pr-3 {detail
+    class="flex h-full flex-col overflow-y-auto overflow-x-hidden pr-3 {detail
       ? 'w-3/5'
       : 'w-full'}">
     {#if loading}
@@ -179,7 +179,7 @@ $: errors = $bookmarksStore.errors;
         untagged="{true}"
         on:createNewCard="{createNewCardDispatcher(cards.length)}" />
     {:else}
-      <p class="py-20 text-center text-gray-300 text-lg">
+      <p class="py-20 text-center text-lg text-gray-300">
         Add a
         <a class="text-gray-400" href="#new-card" on:click="{createNewCardDispatcher(0)}">card</a>
         or some bookmarks here!
@@ -187,7 +187,7 @@ $: errors = $bookmarksStore.errors;
     {/if}
   </div>
   {#if detail}
-    <div class="h-full w-2/5 flex flex-col overflow-y-auto overflow-x-hidden pr-3">
+    <div class="flex h-full w-2/5 flex-col overflow-y-auto overflow-x-hidden pr-3">
       <BookmarkEditor
         {...detail}
         parentTags="{parentTags}"
