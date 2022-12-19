@@ -64,7 +64,7 @@
     "@trivago/prettier-plugin-sort-imports": "^4.0.0",
     "@types/lodash": "^4.14.191",
     "autoprefixer": "^10.4.13",
-    "eslint": "^8.29.0",
+    "eslint": "^8.30.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
