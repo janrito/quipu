@@ -55,7 +55,7 @@ $: tagsToDraw = tags
     <div class="hidden group-hover/bookmark:flex flex-row h-5 pl-1 ml-5 -mb-5 z-10 justify-end">
       <div
         on:keydown="{e => e.key === 'Enter' && closeBookmark()}"
-        on:click|preventDefault|stopPropagation|once="{closeBookmark}"
+        on:click|preventDefault|stopPropagation="{closeBookmark}"
         class="block align-top text-sm text-red-300 hover:text-red-500 cursor-pointer">
         <IconDelete />
       </div>
