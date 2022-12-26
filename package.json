@@ -47,7 +47,7 @@
     "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.5",
+    "@babel/core": "^7.20.7",
     "@babel/eslint-parser": "^7.19.1",
     "@fontsource/iosevka": "^4.5.4",
     "@parcel/config-webextension": "^2.8.2",
