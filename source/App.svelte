@@ -33,14 +33,15 @@ const toggleSettings = () => {
       </div>
     </div>
   </header>
-  <main class="mb-auto w-full flex-grow overflow-hidden pl-3">
+  <main
+    class="mb-auto w-full flex-grow overflow-hidden bg-white pl-3 text-gray-800 dark:bg-black dark:text-gray-100">
     <div class="flex h-full w-full flex-row overflow-hidden">
       <div class="h-full flex-grow overflow-hidden py-3">
         {#if $settings}
           {#if settingsActive}<Settings on:close="{toggleSettings}" />{:else}<Bookmarks />{/if}
         {/if}
       </div>
-      <div class="h-full w-56 flex-none bg-gray-100 p-2"><Tabs /></div>
+      <div class="h-full w-56 flex-none bg-gray-100 p-2 dark:bg-gray-800"><Tabs /></div>
     </div>
   </main>
   <footer class="h-2 border-t border-head-600 bg-head-800 py-1 px-3">

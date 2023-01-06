@@ -6,6 +6,8 @@ Quipu is a simple [Pinboard](http://pinboard.in) powered session manager.
 
 [Add to Chrome](https://chrome.google.com/webstore/detail/quipu/ekiaicefngglagjldocoldkinmhegnjo) | [Add to Firefox](https://addons.mozilla.org/addon/quipu/)
 
+**Notice**: Currently the chrome build is broken due to the manifest 2/3 issue. I don't have the time to fix the chrome builds, but there is an issue for it: [#56](https://github.com/janrito/quipu/issues/56)
+
 I have too many tabs open. I struggle to keep them organised. If I have to switch context, I often keep a group of tabs related to a topic open, or I save them in an email, or a slack message or a variety of different bookmarking services, and lose them. I fear my browser crashing and losing work.
 
 Quipu allows me to save some tabs for later, arranged in a simple, two level hierarchy. It doesn't require me to spend too much time curating them, but it does make saving and having them available quickly.
@@ -29,7 +31,6 @@ This extension was inspired by different tools that I have used in the past, but
 
 - [tab decay](https://github.com/benkehoe/tab-decay) - where the idea of using half-lives to decay old tabs came from.
 - [toby](https://www.gettoby.com/) – keep track of old bookmarks
--
 
 ## Contributing
 

@@ -125,7 +125,7 @@ $: updatedLifetimes = $tabLifetimes;
   {#each drawingWindowTabs as tabs, windowIndex}
     <h3 class="pl-5 text-sm font-extralight">
       {#if windowIndex === 0}Current {/if}Window Tabs
-      <span class="text-gray-300">({tabs.length})</span>
+      <span class="text-gray-300 dark:text-gray-600">({tabs.length})</span>
     </h3>
     <div
       use:dndzone="{{
@@ -151,7 +151,7 @@ $: updatedLifetimes = $tabLifetimes;
     </div>
   {/each}
   <h3 class="mt-3 pl-5 text-sm font-extralight">
-    Decayed Tabs <span class="text-gray-300">({$decayedTabs.length})</span>
+    Decayed Tabs <span class="text-gray-300 dark:text-gray-600">({$decayedTabs.length})</span>
   </h3>
   <div
     use:dndzone="{{

@@ -1,10 +1,6 @@
 <style>
-.untagged {
-  @apply text-gray-200;
-}
-
 :global(.active-droppable-card) {
-  @apply bg-gray-50 shadow-inner;
+  @apply opacity-80 shadow-inner;
 }
 </style>
 
@@ -138,7 +134,7 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
 
 <svelte:window on:keydown="{handleAltKeyPressed}" on:keyup="{handleAltKeyPressed}" />
 
-<div class="flex flex-col bg-white">
+<div class="flex flex-col bg-white shadow-gray-900 dark:bg-black dark:shadow-gray-50">
   {#if editMode}
     <div class="ml-7 flex-shrink-0 py-3">
       <TagEditor
@@ -149,14 +145,20 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
         tags="{$tagStore}" />
     </div>
   {:else}
-    <h3 class:untagged class="ml-7 py-3 text-sm text-gray-400">
+    <h3
+      class="ml-7 py-3 text-sm {untagged
+        ? 'text-gray-200 dark:text-gray-700'
+        : 'text-gray-400 dark:text-gray-500'}">
       <a href="#edit-card-{name}" on:click|preventDefault="{enterEditMode}">{name}</a>
-      <span class="text-xs text-gray-300"> ({bookmarks.length})</span>
+      <span class="text-xs text-gray-300 dark:text-gray-600"> ({bookmarks.length})</span>
       {#if bookmarks.length > 1}
-        <button class="text-xs text-gray-300" on:click|preventDefault="{openAllBookmarks}">
+        <button
+          class="text-xs text-gray-300 dark:text-gray-600"
+          on:click|preventDefault="{openAllBookmarks}">
           open all</button>
       {/if}
-      <button class="text-gray-200" on:click|preventDefault="{createNewCard}">+</button>
+      <button class="text-gray-200 dark:text-gray-700" on:click|preventDefault="{createNewCard}"
+        >+</button>
     </h3>
   {/if}
 
@@ -181,6 +183,7 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
         tags="{bookmark.tags}"
         favIconUrl="{bookmark.favIcon}"
         parentTags="{[...parentTags, name]}"
+        cardsIn
         on:highlight="{e => dispatch('highlightBookmark', e.detail)}"
         on:close="{closeBookmarkDispatcher(bookmark.href)}"
         on:open="{openBookmarkDispatcher(bookmark.href)}" />

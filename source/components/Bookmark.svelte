@@ -2,15 +2,6 @@
 :global(#dnd-action-dragged-el) {
   @apply shadow-xl;
 }
-.parentTag {
-  @apply border-blue-400 bg-blue-50 text-blue-500;
-}
-.leafTag {
-  @apply border-yellow-400 bg-yellow-50 text-yellow-500;
-}
-.tag {
-  @apply border-b-2;
-}
 </style>
 
 <script>
@@ -33,11 +24,24 @@ const openBookmark = () => dispatch("open");
 const closeBookmark = () => dispatch("close");
 const highlightBookmark = () => key && dispatch("highlight", key);
 
-const darkBackground = decay <= 0.7 ? "bg-blue-500" : decay <= 0.9 ? "bg-orange-500" : "bg-red-500";
-const lightBackground =
-  decay <= 0.7 ? "bg-blue-200" : decay <= 0.9 ? "bg-orange-200" : "bg-red-200";
-const darkForeground =
-  decay <= 0.7 ? "text-blue-400" : decay <= 0.9 ? "text-orange-400" : "text-red-400";
+const decayProgressBackground =
+  decay <= 0.7
+    ? "bg-blue-500 dark:bg-blue-500"
+    : decay <= 0.9
+    ? "bg-orange-500 dark:bg-orange-400"
+    : "bg-red-500 dark:bg-red-400";
+const tooltipBackground =
+  decay <= 0.7
+    ? "bg-blue-200 dark:bg-blue-700"
+    : decay <= 0.9
+    ? "bg-orange-200 dark:bg-orange-700"
+    : "bg-red-200 dark:bg-red-700";
+const tooltipForeground =
+  decay <= 0.7
+    ? "text-blue-400 dark:text-blue-500"
+    : decay <= 0.9
+    ? "text-orange-400 dark:text-orange-500"
+    : "text-red-400 dark:text-red-500";
 
 $: tagsToDraw = tags
   .map(tag => ({
@@ -48,7 +52,7 @@ $: tagsToDraw = tags
 </script>
 
 <div
-  class="group/bookmark relative m-1.5 flex cursor-pointer flex-col bg-gray-50 p-1"
+  class="group/bookmark relative m-1.5 flex cursor-pointer flex-col bg-gray-50 p-1 shadow-gray-900 dark:bg-gray-900 "
   on:keydown="{e => e.key === 'Enter' && openBookmark()}"
   on:click|preventDefault="{openBookmark}">
   {#if closeEnabled}
@@ -56,8 +60,8 @@ $: tagsToDraw = tags
       <div
         on:keydown="{e => e.key === 'Enter' && closeBookmark()}"
         on:click|preventDefault|stopPropagation="{closeBookmark}"
-        class="block cursor-pointer align-top text-sm text-red-300 hover:text-red-500">
-        <IconDelete />
+        class="group/close-button block cursor-pointer align-top text-sm text-red-300 hover:text-red-500">
+        <IconDelete class="drop-shadow-sm group-hover/close-button:drop-shadow-lg" />
       </div>
     </div>
   {/if}
@@ -70,7 +74,7 @@ $: tagsToDraw = tags
           <span
             on:keydown="{e => e.key === 'Enter' && highlightBookmark()}"
             on:click|preventDefault|stopPropagation="{highlightBookmark}"
-            class="block cursor-pointer align-top text-sm text-gray-200 group-hover/bookmark:text-blue-800"
+            class="block cursor-pointer align-top text-sm text-gray-200 group-hover/bookmark:text-blue-800 dark:text-gray-700 dark:group-hover/bookmark:text-blue-100"
             >¶</span>
         </div>
       {/if}
@@ -82,26 +86,28 @@ $: tagsToDraw = tags
             : decay <= 0.9
             ? 'left-10'
             : '-right-2'} mt-6 flex-col items-center">
-          <div class="-mb-2 h-3 w-3 rotate-45 {lightBackground}"></div>
+          <div class="-mb-2 h-3 w-3 rotate-45 {tooltipBackground}"></div>
           <span
-            class="whitespace-no-wrap relative p-2 text-xs leading-none shadow-lg {lightBackground} {darkForeground}"
+            class="whitespace-no-wrap relative p-2 text-xs leading-none shadow-lg {tooltipBackground} {tooltipForeground}"
             >Decay: {Math.round(decay * 100)}%</span>
         </div>
       {/if}
     </div>
     <div class="flex-grow overflow-hidden">
-      <p class="mt-0.5 mb-1.5 truncate text-xs font-normal">
+      <p class="mt-0.5 truncate text-xs font-normal">
         {#if title}{title}{:else}{parsedUrl.hostname}{/if}
       </p>
-      <p
-        class="mb-0.5 truncate border-b-2 border-pink-300 bg-pink-100 text-xs font-extralight text-pink-400">
+      <p class="mb-0.5 truncate  text-2xs font-extralight text-gray-300  dark:text-gray-600">
         <span class="font-normal">{parsedUrl.hostname}</span
         >{#if parsedUrl.port}:{parsedUrl.port}{/if}{parsedUrl.pathname}{parsedUrl.search}{parsedUrl.hash}
       </p>
       {#if tagsToDraw && tags.length > 0}
         <p class="truncate text-xs font-extralight">
           {#each tagsToDraw as tag}
-            <span class="tag" class:parentTag="{tag.isParent}" class:leafTag="{!tag.isParent}"
+            <span
+              class="inline-block border-b px-1 {tag.isParent
+                ? 'border-blue-400 bg-blue-50 text-blue-500 dark:border-blue-500 dark:bg-blue-900 dark:text-blue-500'
+                : 'border-yellow-400 bg-yellow-50 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-500'}"
               >{tag.name}</span>
             <span> </span>
           {/each}
@@ -110,8 +116,8 @@ $: tagsToDraw = tags
     </div>
   </div>
   <div class="-m-1 mt-2 h-px shrink-0 ">
-    <div class="w-full bg-gray-200">
-      <div class="{darkBackground} h-px" style="width: {decay * 100}%"></div>
+    <div class="w-full bg-gray-200 dark:bg-gray-700">
+      <div class="{decayProgressBackground} h-px" style="width: {decay * 100}%"></div>
     </div>
   </div>
 </div>
