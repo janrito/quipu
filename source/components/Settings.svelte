@@ -105,7 +105,7 @@ $: tabsMatchingLiveExceptions = $browserTabs
         <label id="pinboard-api-token" for="pinboardAPIToken" class="mt-5 w-1/2 p-1 pl-7">
           <span>Pinboard API Token</span>
           <input
-            class="w-full border-b-2 border-gray-300 bg-gray-100"
+            class="w-full border-b-2 border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800"
             type="text"
             name="pinboardAPIToken"
             bind:value="{$settings.pinboardAPIToken}" />
@@ -121,7 +121,7 @@ $: tabsMatchingLiveExceptions = $browserTabs
           <span>Pinboard Root Tag</span>
           <input
             type="text"
-            class="w-full border-b-2 border-gray-300 bg-gray-100"
+            class="w-full border-b-2 border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800"
             name="pinboardRootTag"
             bind:value="{$settings.pinboardRootTag}" />
         </label>
@@ -129,7 +129,7 @@ $: tabsMatchingLiveExceptions = $browserTabs
         <label id="tab-decay-half-life" class="mt-5 w-1/2 p-1 pl-7">
           <span>Half Life </span>
           <input
-            class="w-full border-b-2 border-gray-300 bg-gray-100"
+            class="w-full border-b-2 border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-800"
             type="text"
             name="tabDecayHalfLife"
             on:focusout="{updateTabDecayHalfLife}"
@@ -149,7 +149,7 @@ $: tabsMatchingLiveExceptions = $browserTabs
             <span>Exceptions</span>
             {#if tabDecayExceptionsEditMode}
               <pre
-                class="h-min-content w-full border-b-2 border-gray-300 bg-gray-100 p-3 text-xs text-gray-400"
+                class="h-min-content w-full border-b-2 border-gray-300 bg-gray-100 p-3 text-xs text-gray-800 dark:border-gray-300 dark:bg-gray-100 dark:text-gray-100"
                 contenteditable="true"
                 role="textbox"
                 on:focusout="{updateTabDecayExemptions}"
@@ -157,7 +157,7 @@ $: tabsMatchingLiveExceptions = $browserTabs
                 name="tabDecayExceptions">{$settings.tabDecayExceptions.join("\n")}</pre>
             {:else}
               <pre
-                class="h-min-content w-full border-b-2 border-gray-300 bg-gray-50 p-3 text-xs text-gray-400"
+                class="h-min-content w-full border-b-2 border-gray-300 bg-gray-50 p-3 text-xs text-gray-400 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-500"
                 on:click="{enableTabDecayExceptionsEditMode}"
                 on:keydown="{e => e.key === 'Enter' && enableTabDecayExceptionsEditMode()}"
                 name="tabDecayExceptions">{$settings.tabDecayExceptions.join("\n")}</pre>
@@ -168,7 +168,7 @@ $: tabsMatchingLiveExceptions = $browserTabs
           </label>
           <p class="mt-4 mb-1 text-sm ">Open tabs matching exceptions</p>
           <pre
-            class="h-min-content w-full whitespace-pre-wrap border-b-2 border-gray-300 bg-gray-50 p-3 text-xs text-gray-400">{tabsMatchingLiveExceptions.join(
+            class="h-min-content w-full whitespace-pre-wrap border-b-2 border-gray-300 bg-gray-50 p-3 text-xs text-gray-400 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-500">{tabsMatchingLiveExceptions.join(
               "\n"
             )}</pre>
         </div>
@@ -177,24 +177,24 @@ $: tabsMatchingLiveExceptions = $browserTabs
           <span>All Settings</span>
           {#if allSettingsEditMode}
             <pre
-              class="h-min-content w-full border-b-2 border-gray-300 bg-gray-100 p-3 text-xs text-gray-400"
+              class="h-min-content w-full border-b-2 border-gray-300 bg-gray-100 p-3 text-xs text-gray-800 dark:border-gray-300 dark:bg-gray-100 dark:text-gray-100"
               contenteditable="true"
               role="textbox"
               on:focusout="{updateAllSettings}"
-              name="allSettings">{JSON.stringify($settings, null, "  ")}</pre>
+              name="allSettings">{JSON.stringify($settings, null, " ")}</pre>
           {:else}
             <pre
-              class="h-min-content w-full border-b-2 border-gray-300 bg-gray-50 p-3 text-xs text-gray-400 "
+              class="h-min-content w-full border-b-2 border-gray-300 bg-gray-50 p-3 text-xs text-gray-400 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-500"
               on:click="{enableAllSettingsEditMode}"
               on:keydown="{e => e.key === 'Enter' && enableAllSettingsEditMode()}"
-              name="allSettings">{JSON.stringify($settings, null, "  ")}</pre>
+              name="allSettings">{JSON.stringify($settings, null, " ")}</pre>
           {/if}
         </label>
       {:else if currentTab.name === "cache"}
         <div class="w-full flex-grow">
           <p class="ml-7 mt-5">
             <button
-              class="border-b-2 border-red-500 bg-red-200 px-1.5 text-red-500 hover:border-red-200 hover:bg-red-500 hover:text-red-200"
+              class="border-b-2 border-red-500 bg-red-200 px-1.5 text-red-500 hover:border-red-200 hover:bg-red-500 hover:text-red-200 dark:border-red-400 dark:bg-red-700 dark:text-red-400 dark:hover:border-red-700 dark:hover:bg-red-400 dark:hover:text-red-700"
               on:click|preventDefault="{clearCacheHandler}">
               clear cache <span class="inline-block align-text-bottom"><IconDelete /></span>
             </button>
@@ -204,7 +204,7 @@ $: tabsMatchingLiveExceptions = $browserTabs
       <div class="w-3/4"></div>
       <div class="w-1/4 p-1">
         <button
-          class="w-full border-b-2 border-gray-500 bg-gray-200 pr-1.5 pl-5 text-left text-gray-500 hover:border-gray-200 hover:bg-gray-500 hover:text-gray-200"
+          class="w-full border-b-2 border-gray-500 bg-gray-200 pr-1.5 pl-5 text-left text-gray-500 hover:border-gray-200 hover:bg-gray-500 hover:text-gray-200 dark:border-gray-400 dark:bg-gray-700 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-400 dark:hover:text-gray-700"
           on:click|preventDefault="{closeSettings}">
           done
         </button>

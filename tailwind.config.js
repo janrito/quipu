@@ -18,9 +18,8 @@ module.exports = {
       ...defaultTheme.minHeight,
     },
     fontSize: {
-      "2xs": ['10px', '16px'],
+      "2xs": ["10px", "16px"],
       ...defaultTheme.fontSize,
-
     },
     extend: {
       colors: {

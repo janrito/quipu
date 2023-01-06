@@ -179,9 +179,12 @@ $: errors = $bookmarksStore.errors;
         untagged="{true}"
         on:createNewCard="{createNewCardDispatcher(cards.length)}" />
     {:else}
-      <p class="py-20 text-center text-lg text-gray-300">
+      <p class="py-20 text-center text-lg text-gray-300 dark:text-gray-600">
         Add a
-        <a class="text-gray-400" href="#new-card" on:click="{createNewCardDispatcher(0)}">card</a>
+        <a
+          class="text-gray-400 dark:text-gray-500"
+          href="#new-card"
+          on:click="{createNewCardDispatcher(0)}">card</a>
         or some bookmarks here!
       </p>
     {/if}

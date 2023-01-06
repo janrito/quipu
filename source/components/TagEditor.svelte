@@ -1,9 +1,3 @@
-<style>
-.selected {
-  @apply bg-gray-200;
-}
-</style>
-
 <script>
 import { createEventDispatcher } from "svelte";
 
@@ -67,7 +61,7 @@ $: drawTags = prefix
 <div class="relative flex min-w-fit flex-row text-sm">
   <input
     type="text"
-    class="h-full w-36 border-b-2 bg-gray-100 px-2 pr-6 pl-2"
+    class="h-full w-36 border-b-2 border-gray-200 bg-gray-100 px-2 pr-6 pl-2 dark:border-gray-700 dark:bg-gray-800"
     bind:this="{element}"
     value="{value}"
     on:blur="{handleEdit}"
@@ -75,15 +69,17 @@ $: drawTags = prefix
     on:keyup="{handleKeyUp}"
     use:focus />
   <button
-    class="-ml-6 mr-2 text-red-300 hover:text-red-500"
+    class="-ml-6 mr-2 text-red-300 hover:text-red-500 dark:text-red-600 dark:hover:text-red-400"
     on:click|preventDefault="{handleDelete}"><IconDelete /></button>
   {#if drawTags.length > 0}
-    <div class="absolute top-7 left-0 z-20 w-36 border-b-2 border-gray-300 bg-gray-100 shadow">
+    <div
+      class="absolute top-7 left-0 z-20 w-36 border-b-2 border-gray-300 bg-gray-100 shadow dark:border-gray-600 dark:bg-gray-800">
       <ul>
         {#each drawTags as tag, tagIdx}
           <li
-            class:selected="{selectedSuggestedTagIdx === tagIdx && drawTags.length > 1}"
-            class="p-2"
+            class="p-2 {selectedSuggestedTagIdx === tagIdx && drawTags.length > 1
+              ? 'bg-gray-200 dark:bg-gray-700'
+              : ''}"
             on:keydown="{e => e.key === 'Enter' && selectSuggestedTag(tag)()}"
             on:click="{selectSuggestedTag(tag)}">
             {tag.name}
