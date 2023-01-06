@@ -17,6 +17,11 @@ module.exports = {
       "3/4": "75%",
       ...defaultTheme.minHeight,
     },
+    fontSize: {
+      "2xs": ['10px', '16px'],
+      ...defaultTheme.fontSize,
+
+    },
     extend: {
       colors: {
         head: process.env.NODE_ENV === "production" ? colors.gray : colors.fuchsia,

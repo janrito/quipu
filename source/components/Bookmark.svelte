@@ -90,11 +90,10 @@ $: tagsToDraw = tags
       {/if}
     </div>
     <div class="flex-grow overflow-hidden">
-      <p class="mt-0.5 mb-1.5 truncate text-xs font-normal">
+      <p class="mt-0.5 truncate text-xs font-normal">
         {#if title}{title}{:else}{parsedUrl.hostname}{/if}
       </p>
-      <p
-        class="mb-0.5 truncate border-b-2 border-pink-300 bg-pink-100 text-xs font-extralight text-pink-400">
+      <p class="mb-0.5 truncate bg-gray-50 text-2xs font-extralight text-gray-300">
         <span class="font-normal">{parsedUrl.hostname}</span
         >{#if parsedUrl.port}:{parsedUrl.port}{/if}{parsedUrl.pathname}{parsedUrl.search}{parsedUrl.hash}
       </p>
