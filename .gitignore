@@ -1,6 +1,11 @@
 node_modules
 yarn.lock
+
 distribution
 coverage
+
 .parcel-cache
 .DS_Store
+
+# editor
+.vscode
