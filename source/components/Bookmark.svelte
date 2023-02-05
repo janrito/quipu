@@ -10,20 +10,20 @@ import { createEventDispatcher } from "svelte";
 import IconDelete from "./IconDelete.svelte";
 
 export let key;
-export let title;
+export let title = null;
 export let url;
 export let tags = [];
 export let parentTags = [];
-export let favIconUrl;
+export let favIconUrl = null;
 export let decay = 0;
 export let closeEnabled = true;
 
 const dispatch = createEventDispatcher();
-const parsedUrl = new URL(url);
 const openBookmark = () => dispatch("open");
 const closeBookmark = () => dispatch("close");
 const highlightBookmark = () => key && dispatch("highlight", key);
-
+const parsedUrl = new URL(url);
+const displayTitle = title || parsedUrl.hostname;
 const decayProgressBackground =
   decay <= 0.7
     ? "bg-blue-500 dark:bg-blue-500"
@@ -60,6 +60,8 @@ $: tagsToDraw = tags
       <div
         on:keydown="{e => e.key === 'Enter' && closeBookmark()}"
         on:click|preventDefault|stopPropagation="{closeBookmark}"
+        role="button"
+        aria-label="close"
         class="group/close-button block cursor-pointer align-top text-sm text-red-300 hover:text-red-500">
         <IconDelete class="drop-shadow-sm group-hover/close-button:drop-shadow-lg" />
       </div>
@@ -68,12 +70,21 @@ $: tagsToDraw = tags
   <div class="flex grow flex-row">
     <div class="group/tooltip w-5 flex-none overflow-hidden pr-1 pt-1">
       {#if favIconUrl}
-        <img class="h-4 w-4" src="{favIconUrl}" alt="{title}" />
+        <img
+          on:keydown="{e => e.key === 'Enter' && highlightBookmark()}"
+          on:click|preventDefault|stopPropagation="{highlightBookmark}"
+          role="button"
+          aria-label="highlight"
+          class="block h-4 w-4 cursor-pointer align-top"
+          src="{favIconUrl}"
+          alt="{displayTitle}" />
       {:else}
         <div class="-mt-1 ml-1 h-4 w-4">
           <span
             on:keydown="{e => e.key === 'Enter' && highlightBookmark()}"
             on:click|preventDefault|stopPropagation="{highlightBookmark}"
+            role="button"
+            aria-label="highlight"
             class="block cursor-pointer align-top text-sm text-gray-200 group-hover/bookmark:text-blue-800 dark:text-gray-700 dark:group-hover/bookmark:text-blue-100"
             >¶</span>
         </div>
@@ -81,6 +92,7 @@ $: tagsToDraw = tags
       {#if decay}
         <!-- tooltip -->
         <div
+          role="tooltip"
           class="absolute -bottom-9 z-10 hidden group-hover/tooltip:flex {decay <= 0.7
             ? 'left-1'
             : decay <= 0.9
@@ -94,9 +106,7 @@ $: tagsToDraw = tags
       {/if}
     </div>
     <div class="flex-grow overflow-hidden">
-      <p class="mt-0.5 truncate text-xs font-normal">
-        {#if title}{title}{:else}{parsedUrl.hostname}{/if}
-      </p>
+      <h3 class="mt-0.5 truncate text-xs font-normal">{displayTitle}</h3>
       <p class="mb-0.5 truncate  text-2xs font-extralight text-gray-300  dark:text-gray-600">
         <span class="font-normal">{parsedUrl.hostname}</span
         >{#if parsedUrl.port}:{parsedUrl.port}{/if}{parsedUrl.pathname}{parsedUrl.search}{parsedUrl.hash}
@@ -117,7 +127,8 @@ $: tagsToDraw = tags
   </div>
   <div class="-m-1 mt-2 h-px shrink-0 ">
     <div class="w-full bg-gray-200 dark:bg-gray-700">
-      <div class="{decayProgressBackground} h-px" style="width: {decay * 100}%"></div>
+      <div role="progressbar" class="{decayProgressBackground} h-px" style="width: {decay * 100}%">
+      </div>
     </div>
   </div>
 </div>

@@ -100,6 +100,8 @@ $: drawTabs = tabs;
         {:else}
           <a
             href="#page-{tab.name}"
+            role="tab"
+            name="tab-page-{tab.name}"
             class="mx-0 mt-0 -mb-0.5 truncate border-b-2 bg-white px-3 text-sm font-extralight hover:border-gray-400 dark:bg-black hover:dark:border-gray-500 {tab.id ===
             selectedTabId
               ? 'border-gray-600 text-gray-800 dark:border-gray-300 dark:text-gray-200'
