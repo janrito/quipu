@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
+import { fireEvent, render, within } from "@testing-library/svelte";
 
-import { render, fireEvent, within } from "@testing-library/svelte";
 import Bookmark from "./Bookmark.svelte";
 
 describe("Bookmark", () => {
