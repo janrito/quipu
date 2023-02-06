@@ -145,6 +145,7 @@ $: updatedLifetimes = $tabLifetimes;
           url="{tab.url}"
           favIconUrl="{tab.favIconUrl}"
           {...lifetime ? { decay: calculateDecay(tab, lifetime) } : {}}
+          on:highlight="{switchToTabDispatcher(tab.windowId, tab._id)}"
           on:open="{switchToTabDispatcher(tab.windowId, tab._id)}"
           on:close="{removeTabDispatcher(tab._id)}" />
       {/each}
@@ -170,6 +171,7 @@ $: updatedLifetimes = $tabLifetimes;
         favIconUrl="{decayedTab.favIconUrl}"
         closeEnabled="{false}"
         key="{decayedTab.id}"
+        on:highlight="{openDecayedTabDispatcher(decayedTab.url)}"
         on:open="{openDecayedTabDispatcher(decayedTab.url)}" />
     {/each}
   </div>

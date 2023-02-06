@@ -2,7 +2,11 @@
   "arrowParens": "avoid",
   "bracketSpacing": true,
   "bracketSameLine": true,
-  "plugins": ["prettier-plugin-svelte", "prettier-plugin-tailwindcss"],
+  "plugins": [
+    "prettier-plugin-svelte",
+    "prettier-plugin-tailwindcss",
+    "@trivago/prettier-plugin-sort-imports"
+  ],
   "pluginSearchDirs": false,
   "printWidth": 100,
   "proseWrap": "preserve",

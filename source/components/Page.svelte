@@ -126,8 +126,9 @@ $: errors = $bookmarksStore.errors;
 
 {#each errors as error}
   <div class="overflow-hidden pr-3">
-    <p class="border-b-2 border-red-200 bg-red-100 py-2 pl-7 text-sm text-red-300">
-      <span class=" text-red-500">{error.status}</span>
+    <p
+      class="border-b-2 border-red-200 bg-red-100 py-2 pl-7 text-sm text-red-300 dark:border-red-700 dark:bg-red-800 dark:text-red-600">
+      <span class=" text-red-500 dark:text-red-400">{error.status}</span>
       {error.description}
     </p>
   </div>
