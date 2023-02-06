@@ -1,7 +1,7 @@
 {
   "extends": "@parcel/config-webextension",
   "transformers": {
-    "*.{js,ts}": [
+    "*.{js,ts,mjs}": [
       "@parcel/transformer-js"
     ],
     "*.svelte": [
