@@ -1,17 +1,21 @@
-<script>
+<script lang="ts">
 import { createEventDispatcher } from "svelte";
+import { preventDefault } from "svelte/legacy";
 
 import { focus } from "../lib/actions";
 import IconDelete from "./IconDelete.svelte";
 
+interface Tag {
+  name: string;
+}
+
 const dispatch = createEventDispatcher();
 
-export let value;
-export let tags;
+let { value, tags }: { value: string; tags: Tag[] } = $props();
 
-let prefix = value;
-let element;
-let selectedSuggestedTagIdx = 0;
+let prefix = $state(value);
+let element = $state();
+let selectedSuggestedTagIdx = $state(0);
 
 const handleEdit = event => {
   dispatch("edit", event.target.value);
@@ -48,40 +52,42 @@ const handleKeydown = event => {
   }
 };
 
-const selectSuggestedTag = tag => () => {
+const selectSuggestedTag = (tag: Tag) => () => {
   dispatch("edit", tag.name);
   dispatch("exit");
 };
 
-$: drawTags = prefix
-  ? tags.filter(tag => tag.name.startsWith(prefix)).slice(0, 5)
-  : tags.slice(0, 5);
+let drawTags = $derived(
+  prefix ? tags.filter(tag => tag.name.startsWith(prefix)).slice(0, 5) : tags.slice(0, 5)
+);
 </script>
 
 <div class="relative flex min-w-fit flex-row text-sm">
   <input
     type="text"
-    class="h-full w-36 border-b-2 border-gray-200 bg-gray-100 px-2 pr-6 pl-2 dark:border-gray-700 dark:bg-gray-800"
-    bind:this="{element}"
-    value="{value}"
-    on:blur="{handleEdit}"
-    on:keydown="{handleKeydown}"
-    on:keyup="{handleKeyUp}"
+    class="h-full w-36 border-b-2 border-gray-200 bg-gray-100 px-2 pl-2 pr-6 dark:border-gray-700 dark:bg-gray-800"
+    bind:this={element}
+    {value}
+    onblur={handleEdit}
+    onkeydown={handleKeydown}
+    onkeyup={handleKeyUp}
     use:focus />
   <button
     class="-ml-6 mr-2 text-red-300 hover:text-red-500 dark:text-red-600 dark:hover:text-red-400"
-    on:click|preventDefault="{handleDelete}"><IconDelete /></button>
+    onclick={preventDefault(handleDelete)}><IconDelete /></button>
   {#if drawTags.length > 0}
     <div
-      class="absolute top-7 left-0 z-20 w-36 border-b-2 border-gray-300 bg-gray-100 shadow dark:border-gray-600 dark:bg-gray-800">
+      class="absolute left-0 top-7 z-20 w-36 border-b-2 border-gray-300 bg-gray-100 shadow dark:border-gray-600 dark:bg-gray-800">
       <ul>
         {#each drawTags as tag, tagIdx}
           <li
+            role="button"
+            tabindex="0"
             class="p-2 {selectedSuggestedTagIdx === tagIdx && drawTags.length > 1
               ? 'bg-gray-200 dark:bg-gray-700'
               : ''}"
-            on:keydown="{e => e.key === 'Enter' && selectSuggestedTag(tag)()}"
-            on:click="{selectSuggestedTag(tag)}">
+            onkeydown={e => e.key === "Enter" && selectSuggestedTag(tag)()}
+            onclick={selectSuggestedTag(tag)}>
             {tag.name}
           </li>
         {/each}

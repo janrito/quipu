@@ -4,23 +4,33 @@
 }
 </style>
 
-<script>
+<script lang="ts">
 import delay from "lodash/delay";
-
 import { createEventDispatcher } from "svelte";
-import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
+import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME, TRIGGERS } from "svelte-dnd-action";
+import { preventDefault } from "svelte/legacy";
 
 import { browserTabToBookmark, modifyElementClasses, newTab } from "../lib/utils";
-import settings from "../stores/settings";
+import appSettings from "../stores/app-settings";
 import createTagStore from "../stores/tags";
 import Bookmark from "./Bookmark.svelte";
 import TagEditor from "./TagEditor.svelte";
 
-export let name;
-export let bookmarks = [];
-export let parentTags = [];
-export let untagged = false;
-export let editMode = false;
+interface Props {
+  name: any;
+  bookmarks?: any;
+  parentTags?: any;
+  untagged?: boolean;
+  editMode?: boolean;
+}
+
+let {
+  name,
+  bookmarks = $bindable([]),
+  parentTags = [],
+  untagged = false,
+  editMode = $bindable(false),
+}: Props = $props();
 
 let altKeyActive = false;
 
@@ -129,35 +139,35 @@ const styleDraggedBookmark = el => modifyElementClasses(el, ["shadow-xl"]);
 const handleAltKeyPressed = event => {
   altKeyActive = event.altKey;
 };
-$: tagStore = createTagStore($settings.pinboardAPIToken);
+let tagStore = $derived(createTagStore($appSettings.pinboardAPIToken));
 </script>
 
-<svelte:window on:keydown="{handleAltKeyPressed}" on:keyup="{handleAltKeyPressed}" />
+<svelte:window onkeydown={handleAltKeyPressed} onkeyup={handleAltKeyPressed} />
 
 <div class="flex flex-col bg-white shadow-gray-900 dark:bg-black dark:shadow-gray-50">
   {#if editMode}
     <div class="ml-7 flex-shrink-0 py-3">
       <TagEditor
-        on:edit="{renameCard}"
-        on:delete="{deleteCard}"
-        on:exit="{exitEditMode}"
-        value="{name}"
-        tags="{$tagStore}" />
+        on:edit={renameCard}
+        on:delete={deleteCard}
+        on:exit={exitEditMode}
+        value={name}
+        tags={$tagStore} />
     </div>
   {:else}
     <h3
       class="ml-7 py-3 text-sm {untagged
         ? 'text-gray-200 dark:text-gray-700'
         : 'text-gray-400 dark:text-gray-500'}">
-      <a href="#edit-card-{name}" on:click|preventDefault="{enterEditMode}">{name}</a>
+      <a href="#edit-card-{name}" onclick={preventDefault(enterEditMode)}>{name}</a>
       <span class="text-xs text-gray-300 dark:text-gray-600"> ({bookmarks.length})</span>
       {#if bookmarks.length > 1}
         <button
           class="text-xs text-gray-300 dark:text-gray-600"
-          on:click|preventDefault="{openAllBookmarks}">
+          onclick={preventDefault(openAllBookmarks)}>
           open all</button>
       {/if}
-      <button class="text-gray-200 dark:text-gray-700" on:click|preventDefault="{createNewCard}"
+      <button class="text-gray-200 dark:text-gray-700" onclick={preventDefault(createNewCard)}
         >+</button>
     </h3>
   {/if}
@@ -165,28 +175,28 @@ $: tagStore = createTagStore($settings.pinboardAPIToken);
   <div
     class="grid min-h-5 w-full flex-grow gap-1"
     style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))"
-    use:dndzone="{{
+    use:dndzone={{
       items: bookmarks,
       dropTargetStyle: {},
-      dropTargetClasses: ['active-droppable-card'],
+      dropTargetClasses: ["active-droppable-card"],
       dropFromOthersDisabled: untagged,
       transformDraggedElement: styleDraggedBookmark,
-      type: 'bookmark',
-    }}"
-    on:consider="{handleDragBookmarkConsider}"
-    on:finalize="{handleDragBookmark}">
+      type: "bookmark",
+    }}
+    onconsider={handleDragBookmarkConsider}
+    onfinalize={handleDragBookmark}>
     {#each bookmarks as bookmark (bookmark.id)}
       <Bookmark
-        title="{bookmark.description}"
-        url="{bookmark.href}"
-        key="{bookmark.id}"
-        tags="{bookmark.tags}"
-        favIconUrl="{bookmark.favIcon}"
-        parentTags="{[...parentTags, name]}"
+        title={bookmark.description}
+        url={bookmark.href}
+        key={bookmark.id}
+        tags={bookmark.tags}
+        favIconUrl={bookmark.favIcon}
+        parentTags={[...parentTags, name]}
         cardsIn
-        on:highlight="{e => dispatch('highlightBookmark', e.detail)}"
-        on:close="{closeBookmarkDispatcher(bookmark.href)}"
-        on:open="{openBookmarkDispatcher(bookmark.href)}" />
+        on:highlight={e => dispatch("highlightBookmark", e.detail)}
+        on:close={closeBookmarkDispatcher(bookmark.href)}
+        on:open={openBookmarkDispatcher(bookmark.href)} />
     {/each}
   </div>
 </div>

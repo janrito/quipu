@@ -1,14 +1,15 @@
 <script>
 import { onMount } from "svelte";
-import { dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
+import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME, TRIGGERS } from "svelte-dnd-action";
+import { run } from "svelte/legacy";
 
 import { UPDATE_DECAY_DISPLAY_INTERVAL } from "../lib/constants";
 import {
+  calculateDelay,
   closeTab,
   modifyElementClasses,
   newTab,
   randomSuffix,
-  calculateDelay,
   switchToTab,
   switchToWindow,
   tabIdToLifetimeId,
@@ -19,11 +20,11 @@ import tabLifetimes from "../stores/tab-lifetimes";
 import Bookmark from "./Bookmark.svelte";
 
 // keep track of temporary tabs, when one is being dragged
-let tempBrowserTabs = null;
-let tempDecayedTabs = null;
+let tempBrowserTabs = $state(null);
+let tempDecayedTabs = $state(null);
 
 // keep track of active tab lifetimes
-let updatedLifetimes = $tabLifetimes;
+let updatedLifetimes = $state($tabLifetimes);
 
 onMount(() => {
   setTimeout(() => {
@@ -116,37 +117,40 @@ const handleDragDecayedTabConsider = event => {
 // TODO: for some reason this is not being called
 const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl"]);
 
-$: drawingWindowTabs = tempBrowserTabs ? tempBrowserTabs : [...$browserTabs];
-$: drawingDecayedTabs = tempDecayedTabs ? tempDecayedTabs : [...$decayedTabs];
-$: updatedLifetimes = $tabLifetimes;
+let drawingWindowTabs = $derived(tempBrowserTabs ? tempBrowserTabs : [...$browserTabs]);
+let drawingDecayedTabs = $derived(tempDecayedTabs ? tempDecayedTabs : [...$decayedTabs]);
+run(() => {
+  updatedLifetimes = $tabLifetimes;
+});
 </script>
 
 <div class="h-full overflow-y-auto overflow-x-hidden pr-3">
   {#each drawingWindowTabs as tabs, windowIndex}
     <h3 class="pl-5 text-sm font-extralight">
-      {#if windowIndex === 0}Current {/if}Window Tabs
+      {#if windowIndex === 0}Current
+      {/if}Window Tabs
       <span class="text-gray-300 dark:text-gray-600">({tabs.length})</span>
     </h3>
     <div
-      use:dndzone="{{
+      use:dndzone={{
         items: tabs,
         dropTargetStyle: {},
         dropFromOthersDisabled: true,
         transformDraggedElement: styleDraggedTab,
-        type: 'bookmark',
-      }}"
-      on:consider="{handleDragTabConsider(windowIndex)}"
-      on:finalize="{handleDragTab}">
+        type: "bookmark",
+      }}
+      onconsider={handleDragTabConsider(windowIndex)}
+      onfinalize={handleDragTab}>
       {#each tabs as tab (tab.id)}
         {@const lifetime = getTabLifetime(tab, updatedLifetimes)}
         <Bookmark
-          key="{tab.id}"
-          title="{tab.title}"
-          url="{tab.url}"
-          favIconUrl="{tab.favIconUrl}"
+          key={tab.id}
+          title={tab.title}
+          url={tab.url}
+          favIconUrl={tab.favIconUrl}
           {...lifetime ? { decay: calculateDecay(tab, lifetime) } : {}}
-          on:open="{switchToTabDispatcher(tab.windowId, tab._id)}"
-          on:close="{removeTabDispatcher(tab._id)}" />
+          on:open={switchToTabDispatcher(tab.windowId, tab._id)}
+          on:close={removeTabDispatcher(tab._id)} />
       {/each}
     </div>
   {/each}
@@ -154,23 +158,23 @@ $: updatedLifetimes = $tabLifetimes;
     Decayed Tabs <span class="text-gray-300 dark:text-gray-600">({$decayedTabs.length})</span>
   </h3>
   <div
-    use:dndzone="{{
+    use:dndzone={{
       items: drawingDecayedTabs,
       dropTargetStyle: {},
       dropFromOthersDisabled: true,
       transformDraggedElement: styleDraggedTab,
-      type: 'bookmark',
-    }}"
-    on:consider="{handleDragDecayedTabConsider}"
-    on:finalize="{handleDragDecayedTab}">
+      type: "bookmark",
+    }}
+    onconsider={handleDragDecayedTabConsider}
+    onfinalize={handleDragDecayedTab}>
     {#each drawingDecayedTabs as decayedTab}
       <Bookmark
-        title="{decayedTab.title}"
-        url="{decayedTab.url}"
-        favIconUrl="{decayedTab.favIconUrl}"
-        closeEnabled="{false}"
-        key="{decayedTab.id}"
-        on:open="{openDecayedTabDispatcher(decayedTab.url)}" />
+        title={decayedTab.title}
+        url={decayedTab.url}
+        favIconUrl={decayedTab.favIconUrl}
+        closeEnabled={false}
+        key={decayedTab.id}
+        on:open={openDecayedTabDispatcher(decayedTab.url)} />
     {/each}
   </div>
 </div>

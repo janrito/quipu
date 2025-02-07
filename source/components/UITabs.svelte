@@ -4,19 +4,32 @@
 }
 </style>
 
-<script>
-import { onMount, createEventDispatcher } from "svelte";
-import { dndzone } from "svelte-dnd-action";
+<script lang="ts">
 import delay from "lodash/delay";
+import { createEventDispatcher, onMount } from "svelte";
+import { dndzone } from "svelte-dnd-action";
+import { preventDefault } from "svelte/legacy";
 
 import { modifyElementClasses } from "../lib/utils";
 import TagEditor from "./TagEditor.svelte";
 
-export let tabs;
-export let selectedTabId;
-export let editable = false;
-export let editMode = null;
-export let tags;
+interface Props {
+  tabs: any;
+  selectedTabId: any;
+  editable?: boolean;
+  editMode?: any;
+  tags: any;
+  children?: import("svelte").Snippet;
+}
+
+let {
+  tabs = $bindable(),
+  selectedTabId = $bindable(),
+  editable = false,
+  editMode = $bindable(null),
+  tags,
+  children,
+}: Props = $props();
 
 const dispatch = createEventDispatcher();
 
@@ -72,39 +85,39 @@ const handleReorderTabs = event => {
 
 const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl", "ring-1", "ring-gray-200"]);
 
-$: drawTabs = tabs;
+let drawTabs = $derived(tabs);
 </script>
 
 <div class="flex h-full flex-col">
   <nav class="flex h-8 flex-shrink-0 flex-row overflow-y-visible pl-5">
     <div
       class="grid h-7 auto-cols-max grid-flow-col gap-0 overflow-y-visible border-gray-300 dark:border-gray-600"
-      use:dndzone="{{
+      use:dndzone={{
         items: drawTabs,
         dropTargetStyle: {},
-        dropTargetClasses: ['active-droppable-tab-target'],
+        dropTargetClasses: ["active-droppable-tab-target"],
         dropFromOthersDisabled: true,
         transformDraggedElement: styleDraggedTab,
         dragDisabled: !editable,
-      }}"
-      on:consider="{handleReorderTabsConsider}"
-      on:finalize="{handleReorderTabs}">
+      }}
+      onconsider={handleReorderTabsConsider}
+      onfinalize={handleReorderTabs}>
       {#each drawTabs as tab (tab.id)}
         {#if editable && editMode === tab.id}
           <TagEditor
-            on:edit="{renameTabDispatcher(tab.id)}"
-            on:delete="{deleteTabDispatcher(tab.id)}"
-            on:exit="{exitEditMode}"
-            value="{tab.name}"
-            tags="{tags}" />
+            on:edit={renameTabDispatcher(tab.id)}
+            on:delete={deleteTabDispatcher(tab.id)}
+            on:exit={exitEditMode}
+            value={tab.name}
+            {tags} />
         {:else}
           <a
             href="#page-{tab.name}"
-            class="mx-0 mt-0 -mb-0.5 truncate border-b-2 bg-white px-3 text-sm font-extralight hover:border-gray-400 dark:bg-black hover:dark:border-gray-500 {tab.id ===
+            class="mx-0 -mb-0.5 mt-0 truncate border-b-2 bg-white px-3 text-sm font-extralight hover:border-gray-400 dark:bg-black hover:dark:border-gray-500 {tab.id ===
             selectedTabId
               ? 'border-gray-600 text-gray-800 dark:border-gray-300 dark:text-gray-200'
               : 'border-gray-300 text-gray-400 dark:border-gray-600 dark:text-gray-500'}"
-            on:click|preventDefault="{clickTabDispatcher(tab.id)}">{tab.name}</a>
+            onclick={preventDefault(clickTabDispatcher(tab.id))}>{tab.name}</a>
         {/if}
       {/each}
     </div>
@@ -113,10 +126,10 @@ $: drawTabs = tabs;
       <a
         class="mx-1.5 -mb-0.5 px-1.5 text-sm font-normal text-gray-200 dark:text-gray-700"
         href="#new-tab"
-        on:click|preventDefault="{createNewTab}">+</a>
+        onclick={preventDefault(createNewTab)}>+</a>
     {/if}
   </nav>
   <div class="flex-grow overflow-hidden">
-    <slot />
+    {@render children?.()}
   </div>
 </div>

@@ -1,12 +1,12 @@
 import cacheable from "../lib/cacheable";
 import {
-  DECAYED_TAB_PREFIX,
   DECAY_LOG_CACHE_KEY,
+  DECAYED_TAB_PREFIX,
   KEEP_N_DECAYED_TABS,
   UPDATE_EVENT_TYPES,
 } from "../lib/constants";
 
-const decayedTAbs = () => {
+const decayedTabs = () => {
   const { subscribe, update, sync } = cacheable(DECAY_LOG_CACHE_KEY, UPDATE_EVENT_TYPES);
 
   const add = decayingTab => {
@@ -30,4 +30,4 @@ const decayedTAbs = () => {
     add,
   };
 };
-export default decayedTAbs();
+export default decayedTabs();

@@ -1,6 +1,7 @@
 import throttle from "lodash/throttle";
 import { writable } from "svelte/store";
-import cache from "webext-storage-cache";
+import cache from "webext-storage-cache/legacy.js";
+import browser from "webextension-polyfill";
 
 const cacheable = (cacheKey, updateOnEvents) => {
   const reader = set => async () => {

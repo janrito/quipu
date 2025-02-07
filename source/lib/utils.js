@@ -108,7 +108,7 @@ export const compileURLPattern = line => {
   try {
     // Attempt to create a pattern
     return new URLPattern(trimmed);
-  } catch (error) {
+  } catch {
     // Return undefined on failure
     return undefined;
   }

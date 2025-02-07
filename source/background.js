@@ -3,7 +3,9 @@ import { get } from "svelte/store";
 import browser from "webextension-polyfill";
 
 import { MAX_DELAY_TO_SCHEDULE, TAB_QUERY, UPDATED_SETTINGS_EVENT } from "./lib/constants";
+
 import "./lib/options-storage.js";
+
 import {
   calculateDelay,
   closeTab,
@@ -14,7 +16,7 @@ import {
   tabIdToLifetimeId,
 } from "./lib/utils.js";
 import decayedTabs from "./stores/decayed-tabs";
-import settings from "./stores/settings";
+import appSettings from "./stores/app-settings";
 import tabLifetimes from "./stores/tab-lifetimes";
 
 const decayTab = debounce(tabId => {
@@ -74,10 +76,10 @@ const setNewTabLifetime = (tab, currentTabLifetimes, { tabDecayExceptions, tabDe
 
 const updateTabLifetimes = debounce(
   async (forceOn = [], forceOnAll = false) => {
-    await settings.read();
-    const currentSettings = get(settings);
-    const tabDecayHalfLife = currentSettings.tabDecayHalfLife;
-    const tabDecayExceptions = compileValidURLPatterns(currentSettings.tabDecayExceptions);
+    await appSettings.read();
+    const currentAppSettings = get(appSettings);
+    const tabDecayHalfLife = currentAppSettings.tabDecayHalfLife;
+    const tabDecayExceptions = compileValidURLPatterns(currentAppSettings.tabDecayExceptions);
     const forceOnSet = new Set(forceOn);
 
     let currentTabLifetimes = get(tabLifetimes);

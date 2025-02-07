@@ -1,4 +1,4 @@
-import cache from "webext-storage-cache";
+import cache from "webext-storage-cache/legacy.js";
 
 import { encodeParameters, formatDate } from "./utils";
 
