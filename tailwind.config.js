@@ -23,7 +23,7 @@ module.exports = {
     },
     extend: {
       colors: {
-        head: process.env.NODE_ENV === "production" ? colors.gray : colors.fuchsia,
+        head: import.meta.env.PROD ? colors.gray : colors.fuchsia,
       },
     },
   },

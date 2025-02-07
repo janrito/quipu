@@ -62,7 +62,7 @@ or just build it:
 npm run build
 ```
 
-You can load a temporary extension on both Firefox and Chrome by pointing them to the `manifest.json` file on the `/distribution` directory after you have built it.
+You can load a temporary extension on both Firefox and Chrome by pointing them to the `manifest.json` file on the `/dist` directory after you have built it.
 
 Make sure that your code conforms to the lint settings
 

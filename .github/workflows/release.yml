@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  DIRECTORY: distribution
+  DIRECTORY: dist
 
 on:
   push:
