@@ -3,3 +3,4 @@ yarn.lock
 dist
 .parcel-cache
 .DS_Store
+.vscode
