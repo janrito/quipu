@@ -2,9 +2,15 @@ import { writable } from "svelte/store";
 import browser from "webextension-polyfill";
 
 import { UPDATED_SETTINGS_EVENT } from "../lib/constants";
-import optionsStorage from "../lib/options-storage";
+import {
+  AppSettingsSchema,
+  decodeOptions,
+  encodeOptions,
+  optionsStorage,
+  PagesSchema,
+} from "../lib/options-storage";
 
-const generateNewName = (currentNames, prefix = "New", n = 0) => {
+const generateNewName = (currentNames: string[], prefix: string = "New", n: number = 0) => {
   const _prefix = prefix.replaceAll(/\s+/gi, "-");
   const suggestion = n > 0 ? `${_prefix}-${n}` : _prefix;
   if (!currentNames.includes(suggestion)) {
@@ -14,34 +20,38 @@ const generateNewName = (currentNames, prefix = "New", n = 0) => {
 };
 
 const storable = () => {
-  let currentValue;
+  let currentValue: AppSettingsSchema;
 
-  const { subscribe, set } = writable(currentValue);
+  const { subscribe, set } = writable();
 
   const read = async () => {
     await optionsStorage.getAll().then(value => {
-      currentValue = value;
-      set(value);
+      currentValue = decodeOptions(value);
+      console.log("settings read", currentValue, value);
+      set(currentValue);
     });
   };
 
-  const setAndSave = value => {
-    optionsStorage.setAll(value).then(() => {
+  const setAndSave = (value: AppSettingsSchema) => {
+    const encodedValue = encodeOptions(value);
+
+    optionsStorage.setAll(encodedValue).then(() => {
       set(value);
+      console.log("Settings saved", value, encodedValue);
       currentValue = value;
     });
     browser.runtime.sendMessage({ event: UPDATED_SETTINGS_EVENT });
   };
 
-  const updateAndSave = fn => {
+  const updateAndSave = (fn: (value: AppSettingsSchema) => AppSettingsSchema) => {
     setAndSave(fn(currentValue));
   };
 
-  const newCard = (pageIndex, cardIndex = 0) => {
+  const newCard = (pageIndex: number, cardIndex: number = 0) => {
     const currentCards = currentValue.pages[pageIndex].cards;
     if (currentCards) {
       const _cardIndex = cardIndex <= currentCards.length ? cardIndex : 0;
-      updateAndSave(value => {
+      updateAndSave((value: AppSettingsSchema) => {
         value.pages[pageIndex].cards = [
           ...currentCards.slice(0, _cardIndex),
           generateNewName(currentCards, "New"),
@@ -50,16 +60,16 @@ const storable = () => {
         return value;
       });
     } else {
-      updateAndSave(value => {
+      updateAndSave((value: AppSettingsSchema) => {
         value.pages[pageIndex].cards = [generateNewName([], "New")];
         return value;
       });
     }
   };
 
-  const renameCard = (pageIndex, cardIndex, name) => {
+  const renameCard = (pageIndex: number, cardIndex: number, name: string) => {
     if (currentValue.pages[pageIndex] && currentValue.pages[pageIndex].cards[cardIndex]) {
-      updateAndSave(value => {
+      updateAndSave((value: AppSettingsSchema) => {
         const otherCards = value.pages[pageIndex].cards.filter((_, i) => i !== cardIndex);
         value.pages[pageIndex].cards[cardIndex] = generateNewName(otherCards, name);
         return value;
@@ -68,7 +78,7 @@ const storable = () => {
   };
 
   const newPage = () => {
-    updateAndSave(value => {
+    updateAndSave((value: AppSettingsSchema) => {
       value.pages = [
         ...value.pages,
         {
@@ -76,15 +86,15 @@ const storable = () => {
             value.pages.map(p => p.name),
             "New"
           ),
-        },
+        } as PagesSchema,
       ];
       return value;
     });
   };
 
-  const renamePage = (pageIndex, name) => {
+  const renamePage = (pageIndex: number, name: string) => {
     if (currentValue.pages[pageIndex]) {
-      updateAndSave(value => {
+      updateAndSave((value: AppSettingsSchema) => {
         value.pages[pageIndex].name = generateNewName(
           value.pages.filter((_, idx) => idx !== pageIndex).map(p => p.name),
           name
