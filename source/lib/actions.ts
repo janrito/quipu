@@ -1,4 +1,4 @@
-export const focus = element => {
+export const focus = (element: HTMLElement) => {
   element.focus();
   if (element instanceof HTMLInputElement && element.type === "text") {
     // select element
