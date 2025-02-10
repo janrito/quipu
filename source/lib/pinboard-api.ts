@@ -1,7 +1,7 @@
 import cache from "webext-storage-cache/legacy.js";
 
-import { BookmarkSchema, PinBoardAPIBookmarkSchema, TagMap } from "./types";
-import { encodeParameters, formatDate, Parameters } from "./utils";
+import { BookmarkSchema, Parameters, PinBoardAPIBookmarkSchema, TagMap } from "./types";
+import { encodeParameters, formatDate } from "./utils";
 
 const BOOKMARK_PREFIX = `quipu-bookmark`;
 

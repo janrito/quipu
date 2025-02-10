@@ -2,15 +2,15 @@ import memoize from "lodash/memoize";
 import { URLPattern } from "urlpattern-polyfill";
 import browser from "webextension-polyfill";
 
+import { Parameters } from "./types";
+
 /**
  * Attempts to parse JSON from a string, otherwise returns false
  */
-export const tryParseJSON = jsonString => {
+export const tryParseJSON = (jsonString: string) => {
   try {
     const o = JSON.parse(jsonString);
-    if (o && typeof o === "object") {
-      return o;
-    }
+    if (o && typeof o === "object") return o;
   } catch {
     return false;
   }
@@ -25,7 +25,8 @@ export const formatDate = (date = new Date()) => date.toISOString().replace(/\.\
  * the pinboard API.
  * If multiple values in a key, they will be joined by a `+`
  */
-export const encodeParameters = parameters =>
+
+export const encodeParameters = (parameters: Parameters): string =>
   Object.entries(parameters)
     .map(([key, value]) => {
       if (Array.isArray(value)) {
@@ -42,7 +43,7 @@ export const randomSuffix = () => Math.round(Math.random() * 100000);
  * Transforms a browser tab as returned from the `browser.tabs`
  * interface object to a bookmark object as expected by the pinboard API
  */
-export const browserTabToBookmark = browserTab => ({
+export const browserTabToBookmark = (browserTab: browser.Tabs.Tab) => ({
   description: browserTab.title,
   href: browserTab.url,
   favIcon: browserTab.favIconUrl,
@@ -53,21 +54,21 @@ export const browserTabToBookmark = browserTab => ({
 /**
  * Close a tab
  */
-export const closeTab = tabId => {
+export const closeTab = (tabId: number) => {
   browser.tabs.remove(tabId);
 };
 
 /**
  * Switch to a window
  */
-export const switchToWindow = windowId => {
+export const switchToWindow = (windowId: number) => {
   browser.windows.update(windowId, { focused: true });
 };
 
 /**
  * Switch to a tab
  */
-export const switchToTab = tabId => {
+export const switchToTab = (tabId: number) => {
   browser.tabs.update(tabId, { active: true });
 };
 
@@ -80,7 +81,7 @@ const currentTab = memoize(async () => await browser.tabs.getCurrent());
 /**
  * Open a url in a new tab next to the current one
  */
-export const newTab = async url => {
+export const newTab = async (url: string) => {
   browser.tabs.create({ url, active: false, index: (await currentTab()).index + 1 });
 };
 
@@ -89,7 +90,11 @@ export const newTab = async url => {
  * the classes in `remove`.
  * It always returns the modified element
  */
-export const modifyElementClasses = (element, add = [], remove = []) => {
+export const modifyElementClasses = (
+  element: HTMLElement,
+  add: string[] = [],
+  remove: string[] = []
+) => {
   element.className = [
     ...new Set([...element.className.split(" ").filter(cls => !remove.includes(cls)), ...add]),
   ].join(" ");
@@ -99,7 +104,7 @@ export const modifyElementClasses = (element, add = [], remove = []) => {
 /**
  * Convert a strings into valid URLPattern
  */
-export const compileURLPattern = line => {
+export const compileURLPattern = (line: string) => {
   const trimmed = line.trim();
   if (trimmed.startsWith("//")) {
     // Ignore lines that start with double slashes
@@ -118,18 +123,19 @@ export const compileURLPattern = line => {
  * Compile all valid URLPatterns from a list.
  * Discard any invalid ones and ones that start with `//
  */
-export const compileValidURLPatterns = lines =>
+export const compileValidURLPatterns = (lines: string[]) =>
   lines.map(compileURLPattern).filter(pattern => pattern);
 
 /**
  * Test if URL matches pattern
  */
-export const findURLPattern = (url, patterns) => patterns.find(pattern => pattern.test(url));
+export const findURLPattern = (url: string, patterns: URLPattern[]) =>
+  patterns.find(pattern => pattern.test(url));
 
 /**
  * Pretty format a half life
  */
-export const formatTimeDelta = timeDeltaInMilliseconds => {
+export const formatTimeDelta = (timeDeltaInMilliseconds: number) => {
   const timeDeltaInWeeks = Math.floor(timeDeltaInMilliseconds / (1000 * 60 * 60 * 24 * 7));
   const timeDeltaInDays = Math.floor(
     timeDeltaInMilliseconds / (1000 * 60 * 60 * 24) - timeDeltaInWeeks * 7
@@ -166,19 +172,19 @@ export const formatTimeDelta = timeDeltaInMilliseconds => {
  * e.g. the probability of being alive with lifetime of 20, and a half-life of 20
  * should be 50%
  */
-export const pAlive = (lifetime, halfLife) => 2 ** (-lifetime / halfLife);
+export const pAlive = (lifetime: number, halfLife: number) => 2 ** (-lifetime / halfLife);
 
 /**
  * Samples a lifetime for half life
  * e.g. for a half life of 30 days it produces a random lifetime that equally likely
  * to be shorter than 30 days as is longer than 30 days
  */
-export const sampleLifetime = halfLife => -(halfLife * Math.log2(Math.random()));
+export const sampleLifetime = (halfLife: number) => -(halfLife * Math.log2(Math.random()));
 
 /**
  * Calculate delay
  */
-export const calculateDelay = (lifetime, lastAccessed) => {
+export const calculateDelay = (lifetime: number, lastAccessed: Date) => {
   const now = new Date().valueOf();
   const currentLifeSpan = now - lastAccessed.valueOf();
   return lifetime - currentLifeSpan > 0 ? lifetime - currentLifeSpan : 0;
@@ -189,5 +195,5 @@ export const calculateDelay = (lifetime, lastAccessed) => {
  * tab ids are stored by the browser, we need to use them to interact with a tab
  * lifetime ids are stored in the cache in an object they have to be strings
  */
-export const lifetimeIdToTabId = lifetimeId => Number(lifetimeId);
-export const tabIdToLifetimeId = tabId => String(tabId);
+export const lifetimeIdToTabId = (lifetimeId: string) => Number(lifetimeId);
+export const tabIdToLifetimeId = (tabId: number) => String(tabId);

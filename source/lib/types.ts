@@ -1,5 +1,10 @@
 import browser from "webextension-polyfill";
 
+export type ParameterValue = string | number | boolean | Array<string | number | boolean>;
+export type Parameters = {
+  [key: string]: ParameterValue;
+};
+
 export type BrowserTab = browser.Tabs.Tab & { _id: number; id: string };
 
 export interface PagesSchema {
