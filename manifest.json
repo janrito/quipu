@@ -21,7 +21,7 @@
   },
   "background": {
     "{{firefox}}.persistent": false,
-    "{{firefox}}.scripts": ["source/background.js"],
-    "{{chrome}}.service_worker": "source/background.js"
+    "{{firefox}}.scripts": ["source/background.ts"],
+    "{{chrome}}.service_worker": "source/background.ts"
   }
 }

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import { preventDefault } from "svelte/legacy";
 
 import "@fontsource/iosevka/100.css";
