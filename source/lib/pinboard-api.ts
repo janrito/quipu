@@ -1,6 +1,9 @@
 import cache from "webext-storage-cache/legacy.js";
 
+import { BookmarkSchema, PinBoardAPIBookmarkSchema, TagMap } from "./types";
 import { encodeParameters, formatDate, Parameters } from "./utils";
+
+const BOOKMARK_PREFIX = `quipu-bookmark`;
 
 // TODO: subclass this error in order to enable error handling when appropriate
 // e.g. a bookmark that already exists, which can be modified instead
@@ -78,22 +81,29 @@ const cachedFetchAPI = async (apiToken: string, route: string, parameters: Param
     });
   });
 
+const preprocessTags = (tags: { [key: string]: number }): TagMap[] =>
+  Object.entries(tags)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+
 export const tagsGet = auth(
-  async (apiToken: string): Promise<{ [key: string]: number }> =>
-    cachedFetchAPI(apiToken, "tags/get")
+  async (apiToken: string): Promise<TagMap[]> =>
+    cachedFetchAPI(apiToken, "tags/get").then(preprocessTags)
 );
 
-export interface RawBookmarkSchema {
-  href: URL;
-  description: string;
-  extended: string;
-  tags: string;
-  time: string;
-}
+export const preprocessBookmark = (data: PinBoardAPIBookmarkSchema[]): BookmarkSchema[] =>
+  data.map((bookmarkData: PinBoardAPIBookmarkSchema, idx: number) => ({
+    ...bookmarkData,
+    id: `${BOOKMARK_PREFIX}-${idx}`,
+    tags: bookmarkData.tags.split(" "),
+    time: Date.parse(bookmarkData.time),
+  }));
 
 export const postsAll = auth(
-  async (apiToken: string, tags: string[] = []): Promise<RawBookmarkSchema[]> => {
-    return cachedFetchAPI(apiToken, "posts/all", { tag: tags.filter(t => t) });
+  async (apiToken: string, tags: string[] = []): Promise<BookmarkSchema[]> => {
+    return cachedFetchAPI(apiToken, "posts/all", { tag: tags.filter(t => t) }).then(
+      preprocessBookmark
+    );
   }
 );
 

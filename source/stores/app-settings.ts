@@ -2,13 +2,8 @@ import { writable } from "svelte/store";
 import browser from "webextension-polyfill";
 
 import { UPDATED_SETTINGS_EVENT } from "../lib/constants";
-import {
-  AppSettingsSchema,
-  decodeOptions,
-  encodeOptions,
-  optionsStorage,
-  PagesSchema,
-} from "../lib/options-storage";
+import { decodeOptions, encodeOptions, optionsStorage } from "../lib/options-storage";
+import { AppSettingsSchema, PagesSchema } from "../lib/types";
 
 const generateNewName = (currentNames: string[], prefix: string = "New", n: number = 0) => {
   const _prefix = prefix.replaceAll(/\s+/gi, "-");

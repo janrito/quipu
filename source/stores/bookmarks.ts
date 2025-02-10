@@ -2,30 +2,8 @@ import debounce from "lodash/debounce";
 import memoize from "lodash/memoize";
 import { writable } from "svelte/store";
 
-import { postsAdd, postsAll, postsDelete, RawBookmarkSchema } from "../lib/pinboard-api";
-
-const BOOKMARK_PREFIX = `quipu-bookmark`;
-
-interface BookmarkSchema {
-  href: URL;
-  description: string;
-  extended: string;
-  tags: string[];
-  time: number;
-  id: string;
-}
-interface BookmarksStore {
-  data: BookmarkSchema[];
-  loading: boolean;
-  errors: Error[];
-}
-const preprocessBookmark = (data: RawBookmarkSchema[]): BookmarkSchema[] =>
-  data.map((bookmarkData: RawBookmarkSchema, idx: number) => ({
-    ...bookmarkData,
-    id: `${BOOKMARK_PREFIX}-${idx}`,
-    tags: bookmarkData.tags.split(" "),
-    time: Date.parse(bookmarkData.time),
-  }));
+import { postsAdd, postsAll, postsDelete } from "../lib/pinboard-api";
+import { BookmarkSchema, BookmarksStore } from "../lib/types";
 
 const createBookmarksStore = (apiToken: string, tags: string[]) => {
   const initialValue: BookmarksStore = {
@@ -51,7 +29,7 @@ const createBookmarksStore = (apiToken: string, tags: string[]) => {
           clearTimeout(showLoadingTimer);
 
           update(currentValue => ({
-            data: preprocessBookmark(data),
+            data: data,
             loading: false,
             errors: currentValue.errors,
           }));

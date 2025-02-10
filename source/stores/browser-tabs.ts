@@ -3,8 +3,7 @@ import { readable } from "svelte/store";
 import browser from "webextension-polyfill";
 
 import { BROWSER_TAB_PREFIX, TAB_QUERY, UPDATE_EVENT_TYPES } from "../lib/constants";
-
-type BrowserTab = browser.Tabs.Tab & { _id: number; id: string };
+import { BrowserTab } from "../lib/types";
 
 export default readable([], (set: (value: BrowserTab[]) => void) => {
   const updateTabs = throttle(
