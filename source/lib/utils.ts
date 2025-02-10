@@ -2,7 +2,7 @@ import memoize from "lodash/memoize";
 import { URLPattern } from "urlpattern-polyfill";
 import browser from "webextension-polyfill";
 
-import { Parameters } from "./types";
+import { BrowserMessage, Parameters } from "./types";
 
 /**
  * Attempts to parse JSON from a string, otherwise returns false
@@ -123,15 +123,14 @@ export const compileURLPattern = (line: string) => {
  * Compile all valid URLPatterns from a list.
  * Discard any invalid ones and ones that start with `//
  */
-export const compileValidURLPatterns = (lines: string[]) =>
-  lines.map(compileURLPattern).filter(pattern => pattern);
+export const compileValidURLPatterns = (lines: string[]): URLPattern[] =>
+  lines.map(compileURLPattern).filter(pattern => pattern) as URLPattern[];
 
 /**
  * Test if URL matches pattern
  */
-export const findURLPattern = (url: string, patterns: URLPattern[]) =>
-  patterns.find(pattern => pattern.test(url));
-
+export const findURLPattern = (url: string, patterns: URLPattern[]): URLPattern =>
+  (url ? patterns.find(pattern => pattern.test(url)) : undefined) as URLPattern;
 /**
  * Pretty format a half life
  */
@@ -184,9 +183,9 @@ export const sampleLifetime = (halfLife: number) => -(halfLife * Math.log2(Math.
 /**
  * Calculate delay
  */
-export const calculateDelay = (lifetime: number, lastAccessed: Date) => {
+export const calculateDelay = (lifetime: number, lastAccessed?: number | undefined) => {
   const now = new Date().valueOf();
-  const currentLifeSpan = now - lastAccessed.valueOf();
+  const currentLifeSpan = lastAccessed ? (now - lastAccessed).valueOf() : 0;
   return lifetime - currentLifeSpan > 0 ? lifetime - currentLifeSpan : 0;
 };
 
@@ -197,3 +196,10 @@ export const calculateDelay = (lifetime: number, lastAccessed: Date) => {
  */
 export const lifetimeIdToTabId = (lifetimeId: string) => Number(lifetimeId);
 export const tabIdToLifetimeId = (tabId: number) => String(tabId);
+
+/** Check if an object of type unknown, is in fact a BrowserMessage
+ *
+ */
+export const isBrowserMessage = (message: unknown): message is BrowserMessage => {
+  return (message && typeof message === "object" && "eventType" in message) as boolean;
+};

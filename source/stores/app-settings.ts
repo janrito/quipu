@@ -3,7 +3,7 @@ import browser from "webextension-polyfill";
 
 import { UPDATED_SETTINGS_EVENT } from "../lib/constants";
 import { decodeOptions, encodeOptions, optionsStorage } from "../lib/options-storage";
-import { AppSettingsSchema, PagesSchema } from "../lib/types";
+import { AppSettingsSchema, BrowserMessage, PagesSchema } from "../lib/types";
 
 const generateNewName = (currentNames: string[], prefix: string = "New", n: number = 0) => {
   const _prefix = prefix.replaceAll(/\s+/gi, "-");
@@ -17,12 +17,11 @@ const generateNewName = (currentNames: string[], prefix: string = "New", n: numb
 const storable = () => {
   let currentValue: AppSettingsSchema;
 
-  const { subscribe, set } = writable();
+  const { subscribe, set } = writable<AppSettingsSchema>();
 
   const read = async () => {
     await optionsStorage.getAll().then(value => {
       currentValue = decodeOptions(value);
-      console.log("settings read", currentValue, value);
       set(currentValue);
     });
   };
@@ -32,10 +31,9 @@ const storable = () => {
 
     optionsStorage.setAll(encodedValue).then(() => {
       set(value);
-      console.log("Settings saved", value, encodedValue);
       currentValue = value;
     });
-    browser.runtime.sendMessage({ event: UPDATED_SETTINGS_EVENT });
+    browser.runtime.sendMessage({ eventType: UPDATED_SETTINGS_EVENT } as BrowserMessage);
   };
 
   const updateAndSave = (fn: (value: AppSettingsSchema) => AppSettingsSchema) => {

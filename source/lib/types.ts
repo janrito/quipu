@@ -1,6 +1,6 @@
 import browser from "webextension-polyfill";
 
-export type ParameterValue = string | number | boolean | Array<string | number | boolean>;
+export type ParameterValue = Array<boolean | number | string> | boolean | number | string;
 export type Parameters = {
   [key: string]: ParameterValue;
 };
@@ -53,4 +53,19 @@ export interface PinBoardAPIBookmarkSchema {
 export interface TagMap {
   name: string;
   count: number;
+}
+
+export interface TabLifetimeSchema {
+  timerId?: ReturnType<typeof setTimeout>;
+  lifetime: number;
+}
+
+export interface tabLifetimesSchema {
+  [lifetimeId: string]: TabLifetimeSchema;
+}
+
+export type BrowserEventType = "updatedSettings";
+
+export interface BrowserMessage {
+  eventType: BrowserEventType;
 }

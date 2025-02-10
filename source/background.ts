@@ -1,22 +1,25 @@
 import debounce from "lodash/debounce";
 import { get } from "svelte/store";
+import { URLPattern } from "urlpattern-polyfill";
 import browser from "webextension-polyfill";
 
 import { MAX_DELAY_TO_SCHEDULE, TAB_QUERY, UPDATED_SETTINGS_EVENT } from "./lib/constants";
 
-import "./lib/options-storage.js";
+import "./lib/options-storage";
 
+import { AppSettingsSchema, BrowserMessage, tabLifetimesSchema } from "./lib/types";
 import {
   calculateDelay,
   closeTab,
   compileValidURLPatterns,
   findURLPattern,
+  isBrowserMessage,
   lifetimeIdToTabId,
   sampleLifetime,
   tabIdToLifetimeId,
-} from "./lib/utils.js";
-import decayedTabs from "./stores/decayed-tabs";
+} from "./lib/utils";
 import appSettings from "./stores/app-settings";
+import decayedTabs from "./stores/decayed-tabs";
 import tabLifetimes from "./stores/tab-lifetimes";
 
 const decayTab = debounce(tabId => {
@@ -33,7 +36,7 @@ const decayTab = debounce(tabId => {
   });
 }, 100);
 
-const clearTabLifetimes = (tabIds, currentTabLifetimes) => {
+const clearTabLifetimes = (tabIds: number[], currentTabLifetimes: tabLifetimesSchema) => {
   const tabIdsSet = new Set(tabIds);
   tabIdsSet.forEach(tabId => {
     const lifetimeId = tabIdToLifetimeId(tabId);
@@ -45,15 +48,19 @@ const clearTabLifetimes = (tabIds, currentTabLifetimes) => {
       const [lifetimeId] = pair;
       return !tabIdsSet.has(lifetimeIdToTabId(lifetimeId));
     })
-  );
+  ) as tabLifetimesSchema;
 };
 
-const setNewTabLifetime = (tab, currentTabLifetimes, { tabDecayExceptions, tabDecayHalfLife }) => {
-  const matchingExceptionPattern = findURLPattern(tab.url, tabDecayExceptions);
-
-  if (tab.pinned || matchingExceptionPattern) {
+const setNewTabLifetime = (
+  tab: browser.Tabs.Tab,
+  currentTabLifetimes: tabLifetimesSchema,
+  tabDecayHalfLife: number,
+  tabDecayExceptions: URLPattern[] = []
+) => {
+  if (!tab.id || tab.pinned || findURLPattern(tab.url || "", tabDecayExceptions)) {
     return currentTabLifetimes;
   }
+
   const lifetimeId = tabIdToLifetimeId(tab.id);
   const { timerId, lifetime } = currentTabLifetimes[lifetimeId] || {
     lifetime: sampleLifetime(tabDecayHalfLife),
@@ -75,9 +82,9 @@ const setNewTabLifetime = (tab, currentTabLifetimes, { tabDecayExceptions, tabDe
 };
 
 const updateTabLifetimes = debounce(
-  async (forceOn = [], forceOnAll = false) => {
+  async (forceOn: number[] = [], forceOnAll: boolean = false) => {
     await appSettings.read();
-    const currentAppSettings = get(appSettings);
+    const currentAppSettings = get<AppSettingsSchema>(appSettings);
     const tabDecayHalfLife = currentAppSettings.tabDecayHalfLife;
     const tabDecayExceptions = compileValidURLPatterns(currentAppSettings.tabDecayExceptions);
     const forceOnSet = new Set(forceOn);
@@ -92,8 +99,11 @@ const updateTabLifetimes = debounce(
     }
 
     browser.tabs.query(TAB_QUERY).then(tabs => {
-      const tabIds = new Set([]);
+      const tabIds = new Set<number>([]);
       tabs.map(tab => {
+        // ignore tabs without ID
+        if (!tab.id) return;
+
         // keep track of all existing tabs
         tabIds.add(tab.id);
         const lifetimeId = tabIdToLifetimeId(tab.id);
@@ -114,10 +124,12 @@ const updateTabLifetimes = debounce(
           return;
         }
         // define new lifetime for all unset ids
-        currentTabLifetimes = setNewTabLifetime(tab, currentTabLifetimes, {
+        currentTabLifetimes = setNewTabLifetime(
+          tab,
+          currentTabLifetimes,
           tabDecayHalfLife,
-          tabDecayExceptions,
-        });
+          tabDecayExceptions
+        );
       });
 
       // clear lifetimes for tabs that don't exist any more
@@ -137,8 +149,10 @@ const updateTabLifetimes = debounce(
   { leading: true, trailing: true }
 );
 
-const onActivatedHandler = ({ previousTabId }) => {
-  updateTabLifetimes([previousTabId]);
+const onActivatedHandler = (info: browser.Tabs.OnActivatedActiveInfoType) => {
+  if (info.previousTabId) {
+    updateTabLifetimes([info.previousTabId]);
+  }
 };
 
 browser.tabs.onActivated.addListener(onActivatedHandler);
@@ -148,10 +162,12 @@ const onUpdatedHandler = () => {
 };
 browser.tabs.onUpdated.addListener(onUpdatedHandler);
 
-const messageHandler = async request => {
-  if (request.event && request.event === UPDATED_SETTINGS_EVENT) {
-    // renew lifetimes for every tab
-    updateTabLifetimes([], true);
+const messageHandler = async (message: BrowserMessage | unknown) => {
+  if (isBrowserMessage(message)) {
+    switch (message.eventType) {
+      case UPDATED_SETTINGS_EVENT:
+        updateTabLifetimes([], true);
+    }
   }
 };
 
