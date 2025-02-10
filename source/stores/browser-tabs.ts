@@ -4,10 +4,12 @@ import browser from "webextension-polyfill";
 
 import { BROWSER_TAB_PREFIX, TAB_QUERY, UPDATE_EVENT_TYPES } from "../lib/constants";
 
-export default readable([], set => {
+type BrowserTab = browser.Tabs.Tab & { _id: number; id: string };
+
+export default readable([], (set: (value: BrowserTab[]) => void) => {
   const updateTabs = throttle(
     async () => {
-      const tabs = await browser.tabs.query(TAB_QUERY).then(async tabs => {
+      const tabs: BrowserTab[] = await browser.tabs.query(TAB_QUERY).then(async tabs => {
         const currentWindow = await browser.windows.getCurrent();
         return (
           [
@@ -38,19 +40,26 @@ export default readable([], set => {
             .map(d => d[1])
         );
       });
+
       set(tabs);
     },
     1000,
     { trailing: true }
   );
   const attachEvents = () => {
-    UPDATE_EVENT_TYPES.map(eventType => {
-      browser.tabs[eventType].addListener(updateTabs);
+    UPDATE_EVENT_TYPES.forEach(eventType => {
+      const event = browser.tabs[eventType as keyof typeof browser.tabs];
+      if (event && typeof event === "object" && "addListener" in event) {
+        event.addListener(updateTabs);
+      }
     });
   };
   const detachEvents = () => {
-    UPDATE_EVENT_TYPES.map(eventType => {
-      browser.tabs[eventType].removeListener(updateTabs);
+    UPDATE_EVENT_TYPES.forEach(eventType => {
+      const event = browser.tabs[eventType as keyof typeof browser.tabs];
+      if (event && typeof event === "object" && "removeListener" in event) {
+        event.removeListener(updateTabs);
+      }
     });
   };
   attachEvents();

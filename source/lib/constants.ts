@@ -1,3 +1,5 @@
+import browser from "webextension-polyfill";
+
 export const BROWSER_TAB_PREFIX = "tab";
 export const DECAYED_TAB_PREFIX = "decayed-tab";
 
@@ -5,7 +7,13 @@ export const TAB_QUERY = {
   url: ["http://*/*", "https://*/*", "ws://*/*", "wss://*/*"],
 };
 
-export const UPDATE_EVENT_TYPES = ["onAttached", "onDetached", "onMoved", "onRemoved", "onUpdated"];
+export const UPDATE_EVENT_TYPES: Array<keyof typeof browser.tabs> = [
+  "onAttached",
+  "onDetached",
+  "onMoved",
+  "onRemoved",
+  "onUpdated",
+];
 export const KEEP_N_DECAYED_TABS = 100;
 
 export const DECAY_LOG_CACHE_KEY = "decay-log";
