@@ -1,9 +1,9 @@
 import { writable } from "svelte/store";
 import browser from "webextension-polyfill";
 
-import { UPDATED_SETTINGS_EVENT } from "../lib/constants";
-import { decodeOptions, encodeOptions, optionsStorage } from "../lib/options-storage";
-import { AppSettingsSchema, BrowserMessage, PagesSchema } from "../lib/types";
+import { UPDATED_SETTINGS_EVENT } from "../lib/constants.js";
+import { decodeOptions, encodeOptions, optionsStorage } from "../lib/options-storage.js";
+import { AppSettingsSchema, BrowserMessage, PageSchema } from "../lib/types.js";
 
 const generateNewName = (currentNames: string[], prefix: string = "New", n: number = 0) => {
   const _prefix = prefix.replaceAll(/\s+/gi, "-");
@@ -79,7 +79,7 @@ const storable = () => {
             value.pages.map(p => p.name),
             "New"
           ),
-        } as PagesSchema,
+        } as PageSchema,
       ];
       return value;
     });
@@ -97,6 +97,18 @@ const storable = () => {
     }
   };
 
+  const reorderPages = (names: string[]) => {
+    if (
+      names.length === currentValue.pages.length &&
+      new Set(names) === new Set(currentValue.pages.map(p => p.name))
+    ) {
+      updateAndSave((value: AppSettingsSchema) => {
+        value.pages = names.map(name => value.pages.find(p => p.name === name) as PageSchema);
+        return value;
+      });
+    }
+  };
+
   read();
 
   return {
@@ -108,6 +120,7 @@ const storable = () => {
     renameCard,
     newPage,
     renamePage,
+    reorderPages,
   };
 };
 
