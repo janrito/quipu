@@ -1,5 +1,4 @@
 import js from "@eslint/js";
-
 import prettier from "eslint-plugin-prettier/recommended";
 import svelte from "eslint-plugin-svelte";
 import globals from "globals";
@@ -49,17 +48,17 @@ export default [
       "svelte/no-reactive-literals": "error",
     },
   },
-  // {
-  //   rules: {
-  //     semi: ["warn", "always"],
-  //     quotes: ["warn", "single", { avoidEscape: true, allowTemplateLiterals: true }],
-  //     "no-nested-ternary": "error",
-  //     "linebreak-style": ["error", "unix"],
-  //     "no-cond-assign": ["error", "always"],
-  //     "@typescript-eslint/sort-type-constituents": "error",
-  //     "no-console": ["error", { allow: ["warn", "error"] }],
-  //   },
-  // },
+  {
+    rules: {
+      semi: ["warn", "always"],
+      quotes: ["warn", "double", { avoidEscape: true, allowTemplateLiterals: true }],
+      "no-nested-ternary": "error",
+      "linebreak-style": ["error", "unix"],
+      "no-cond-assign": ["error", "always"],
+      "@typescript-eslint/sort-type-constituents": "error",
+      "no-console": ["error", { allow: ["warn", "error"] }],
+    },
+  },
 
   {
     ignores: [
