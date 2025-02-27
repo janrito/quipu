@@ -13,6 +13,8 @@ export default {
   requirePragma: false,
   semi: true,
   singleQuote: false,
+  tailwindStylesheet: "./source/main.css",
+  tailwindConfig: "tailwind.config.js",
   trailingComma: "es5",
   useTabs: false,
   tabWidth: 2,

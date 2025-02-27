@@ -1,6 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@theme {
+  --font-mono: "Iosevka";
+}
 
 @layer base {
   input:focus {
@@ -16,4 +19,9 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+}
+
+@utility text-2xs {
+  font-size: 0.65rem;
+  line-height: var(--tw-leading, 1rem);
 }
