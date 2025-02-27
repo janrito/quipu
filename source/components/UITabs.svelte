@@ -1,91 +1,81 @@
 <style>
+@reference "../main.css";
 :global(.active-droppable-tab-target) {
   @apply opacity-80;
 }
 </style>
 
 <script lang="ts">
-import delay from "lodash/delay";
-import { createEventDispatcher, onMount } from "svelte";
+import type { Snippet } from "svelte";
+import type { DndEvent, Item } from "svelte-dnd-action";
 import { dndzone } from "svelte-dnd-action";
-import { preventDefault } from "svelte/legacy";
 
-import { modifyElementClasses } from "../lib/utils";
-import TagEditor from "./TagEditor.svelte";
+import type { TagMap } from "../lib/types.js";
+import { modifyElementClasses } from "../lib/utils.js";
+import UITab from "./UITab.svelte";
 
 interface Props {
-  tabs: any;
-  selectedTabId: any;
+  tabs: string[];
+  selectedTab: string;
   editable?: boolean;
-  editMode?: any;
-  tags: any;
-  children?: import("svelte").Snippet;
+  suggestedTags?: TagMap[];
+  createNewTab?: () => void;
+  renameTab?: (oldTabName: string, newTabName: string) => void;
+  deleteTab?: (tabName: string) => void;
+  reorderTabs?(newOrder: string[]): void;
+  children: Snippet;
 }
 
 let {
   tabs = $bindable(),
-  selectedTabId = $bindable(),
+  selectedTab = $bindable(tabs[0]),
   editable = false,
-  editMode = $bindable(null),
-  tags,
+  suggestedTags = [],
+  createNewTab = () => {},
+  renameTab = () => {},
+  deleteTab = () => {},
+  reorderTabs = () => {},
   children,
 }: Props = $props();
 
-const dispatch = createEventDispatcher();
+// create in-flight tabs, set initial state to ordered tabs
+let inFlightTabs: Item[] = $state([]);
+let drawTabs = $derived(
+  inFlightTabs.length ? inFlightTabs : tabs.map((tab, index) => ({ id: index, name: tab }))
+);
 
-onMount(() => {
-  // select the first tab if none is selected
-  selectedTabId = selectedTabId || tabs[0].id;
-});
-
-const enterEditMode = id => {
-  editMode = id;
-};
-const exitEditMode = () => {
-  delay(() => {
-    editMode = null;
-  }, 100);
-};
-
-const clickTabDispatcher = id => () => {
-  if (id === selectedTabId) {
-    enterEditMode(id);
-  } else {
-    dispatch("selectTab", { id });
-  }
-};
-
-const createNewTab = () => {
-  dispatch("createNewTab");
-};
-
-const renameTabDispatcher = id => event => {
-  dispatch("renameTab", { id, name: event.detail });
-};
-
-const deleteTabDispatcher = id => () => {
+const deleteTabDispatcher = (tabName: string) => () => {
   if (tabs.length > 1) {
-    const currentTabIdx = tabs.findIndex(tab => tab.id === id);
-    dispatch("selectTab", {
-      id: tabs[currentTabIdx >= 1 ? currentTabIdx - 1 : currentTabIdx].id,
-    });
-    dispatch("deleteTab", { id });
+    const selectedTabIdx = tabs.findIndex(tab => tab === tabName);
+    selectedTab = tabs[selectedTabIdx >= 1 ? selectedTabIdx - 1 : selectedTabIdx];
+    deleteTab(tabName);
   }
 };
 
-const handleReorderTabsConsider = event => {
-  tabs = event.detail.items;
+const handleReorderTabsConsider = (event: CustomEvent<DndEvent>) => {
+  inFlightTabs = event.detail.items;
 };
 
-const handleReorderTabs = event => {
-  const order = event.detail.items.map(tab => tab.id);
-  dispatch("reorderTabs", order);
-  dispatch("selectTab", { id: order.indexOf(selectedTabId) });
+const handleReorderTabs = (event: CustomEvent<DndEvent>) => {
+  const order = event.detail.items.map(tab => tab.name);
+  reorderTabs(order);
+  selectedTab = order[0];
+  inFlightTabs = [];
 };
 
-const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl", "ring-1", "ring-gray-200"]);
+const handleClickCreateNewTab = (event: Event) => {
+  event.preventDefault();
+  createNewTab();
+};
 
-let drawTabs = $derived(tabs);
+const styleDraggedTab = (element: HTMLElement | undefined) => {
+  if (!element) return;
+  modifyElementClasses(element, ["shadow-xl", "ring-1", "ring-gray-200"]);
+};
+
+$effect(() => {
+  selectedTab = tabs.find(t => t === selectedTab) ? selectedTab : tabs[0];
+});
 </script>
 
 <div class="flex h-full flex-col">
@@ -102,23 +92,19 @@ let drawTabs = $derived(tabs);
       }}
       onconsider={handleReorderTabsConsider}
       onfinalize={handleReorderTabs}>
-      {#each drawTabs as tab (tab.id)}
-        {#if editable && editMode === tab.id}
-          <TagEditor
-            on:edit={renameTabDispatcher(tab.id)}
-            on:delete={deleteTabDispatcher(tab.id)}
-            on:exit={exitEditMode}
-            value={tab.name}
-            {tags} />
-        {:else}
-          <a
-            href="#page-{tab.name}"
-            class="mx-0 -mb-0.5 mt-0 truncate border-b-2 bg-white px-3 text-sm font-extralight hover:border-gray-400 dark:bg-black hover:dark:border-gray-500 {tab.id ===
-            selectedTabId
-              ? 'border-gray-600 text-gray-800 dark:border-gray-300 dark:text-gray-200'
-              : 'border-gray-300 text-gray-400 dark:border-gray-600 dark:text-gray-500'}"
-            onclick={preventDefault(clickTabDispatcher(tab.id))}>{tab.name}</a>
-        {/if}
+      {#each drawTabs as tab}
+        <UITab
+          label={tab.name}
+          {editable}
+          {suggestedTags}
+          bind:selected={
+            () => tab.name === selectedTab, selected => selected && (selectedTab = tab.name)
+          }
+          deleteTab={deleteTabDispatcher(tab.name)}
+          renameTab={newName => {
+            renameTab(tab.name, newName);
+            selectedTab = selectedTab === tab.name ? newName : selectedTab;
+          }} />
       {/each}
     </div>
 
@@ -126,7 +112,7 @@ let drawTabs = $derived(tabs);
       <a
         class="mx-1.5 -mb-0.5 px-1.5 text-sm font-normal text-gray-200 dark:text-gray-700"
         href="#new-tab"
-        onclick={preventDefault(createNewTab)}>+</a>
+        onclick={handleClickCreateNewTab}>+</a>
     {/if}
   </nav>
   <div class="flex-grow overflow-hidden">
