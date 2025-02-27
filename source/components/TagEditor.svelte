@@ -1,94 +1,102 @@
 <script lang="ts">
-import { createEventDispatcher } from "svelte";
-import { preventDefault } from "svelte/legacy";
-
-import { focus } from "../lib/actions";
+import { focus } from "../lib/actions.js";
+import type { TagMap } from "../lib/types.js";
 import IconDelete from "./IconDelete.svelte";
 
-interface Tag {
-  name: string;
+interface Props {
+  value: string;
+  suggestedTags: TagMap[];
+  deleteTag: () => void;
+  close: () => void;
 }
 
-const dispatch = createEventDispatcher();
-
-let { value, tags }: { value: string; tags: Tag[] } = $props();
+let { value = $bindable(), suggestedTags, close, deleteTag }: Props = $props();
 
 let prefix = $state(value);
-let element = $state();
-let selectedSuggestedTagIdx = $state(0);
+let selectedSuggestedTagIdx = $state(-1);
 
-const handleEdit = event => {
-  dispatch("edit", event.target.value);
-  dispatch("exit");
+let drawSuggestedTags = $derived.by(() => {
+  if (prefix) {
+    return suggestedTags.filter(tag => tag.name.startsWith(prefix)).slice(0, 5);
+  }
+  return suggestedTags.slice(0, 5);
+});
+
+const handleEdit = (event: Event) => {
+  if (!event.target || !(event.target instanceof HTMLInputElement)) {
+    return;
+  }
+  value = event.target.value;
+  close();
 };
 
-const handleDelete = () => {
-  dispatch("delete");
-  dispatch("exit");
+const handleDelete = (event: Event) => {
+  event.preventDefault();
+  deleteTag();
+  close();
 };
 
-const handleKeyUp = event => {
+const handleKeyUp = (event: KeyboardEvent) => {
+  if (!event.target || !(event.target instanceof HTMLInputElement)) {
+    return;
+  }
   const newPrefix = event.target.value;
   if (newPrefix !== prefix) {
     selectedSuggestedTagIdx = 0;
     prefix = newPrefix;
   }
 };
-const handleKeydown = event => {
+const handleKeydown = (event: KeyboardEvent) => {
+  if (!event.target || !(event.target instanceof HTMLInputElement)) {
+    return;
+  }
   if (event.key === "Escape") {
     event.preventDefault();
     event.target.value = value;
-    dispatch("exit");
-  } else if (event.key === "Enter") {
-    dispatch("edit", drawTags[selectedSuggestedTagIdx]?.name || event.target.value);
-    dispatch("exit");
-  } else if (event.key === "ArrowUp") {
-    selectedSuggestedTagIdx = selectedSuggestedTagIdx > 0 ? selectedSuggestedTagIdx - 1 : 0;
-  } else if (event.key === "ArrowDown") {
-    selectedSuggestedTagIdx =
-      selectedSuggestedTagIdx < drawTags.length - 1
-        ? selectedSuggestedTagIdx + 1
-        : drawTags.length - 1;
+    close();
+  } else if (event.key === "Enter" && selectedSuggestedTagIdx >= 0) {
+    value = drawSuggestedTags[selectedSuggestedTagIdx]?.name || event.target.value;
+    close();
+  } else if (event.key === "ArrowUp" && selectedSuggestedTagIdx >= 0) {
+    selectedSuggestedTagIdx -= 1;
+  } else if (event.key === "ArrowDown" && selectedSuggestedTagIdx < drawSuggestedTags.length - 1) {
+    selectedSuggestedTagIdx += 1;
   }
 };
 
-const selectSuggestedTag = (tag: Tag) => () => {
-  dispatch("edit", tag.name);
-  dispatch("exit");
+const selectSuggestedTag = (tag: TagMap) => () => {
+  value = tag.name;
+  close();
 };
-
-let drawTags = $derived(
-  prefix ? tags.filter(tag => tag.name.startsWith(prefix)).slice(0, 5) : tags.slice(0, 5)
-);
+const selectedSuggestedTagStyle = "bg-gray-200 dark:bg-gray-700";
 </script>
 
 <div class="relative flex min-w-fit flex-row text-sm">
   <input
     type="text"
-    class="h-full w-36 border-b-2 border-gray-200 bg-gray-100 px-2 pl-2 pr-6 dark:border-gray-700 dark:bg-gray-800"
-    bind:this={element}
+    class="h-full w-36 border-0 border-b-2 border-gray-200 bg-gray-100 px-0.5 pr-6 pl-1 dark:border-gray-700 dark:bg-gray-800"
     {value}
     onblur={handleEdit}
     onkeydown={handleKeydown}
     onkeyup={handleKeyUp}
     use:focus />
   <button
-    class="-ml-6 mr-2 text-red-300 hover:text-red-500 dark:text-red-600 dark:hover:text-red-400"
-    onclick={preventDefault(handleDelete)}><IconDelete /></button>
-  {#if drawTags.length > 0}
+    class="mr-2 -ml-6 text-red-300 hover:text-red-500 dark:text-red-600 dark:hover:text-red-400"
+    onclick={handleDelete}><IconDelete /></button>
+  {#if drawSuggestedTags.length > 0}
     <div
-      class="absolute left-0 top-7 z-20 w-36 border-b-2 border-gray-300 bg-gray-100 shadow dark:border-gray-600 dark:bg-gray-800">
+      class="absolute top-5 left-0 z-20 w-36 border-b-2 border-gray-300 bg-gray-100 shadow dark:border-gray-600 dark:bg-gray-800">
       <ul>
-        {#each drawTags as tag, tagIdx}
-          <li
-            role="button"
-            tabindex="0"
-            class="p-2 {selectedSuggestedTagIdx === tagIdx && drawTags.length > 1
-              ? 'bg-gray-200 dark:bg-gray-700'
-              : ''}"
-            onkeydown={e => e.key === "Enter" && selectSuggestedTag(tag)()}
-            onclick={selectSuggestedTag(tag)}>
-            {tag.name}
+        {#each drawSuggestedTags as tag, tagIdx}
+          <li class="p-0">
+            <span
+              role="button"
+              tabindex="0"
+              class="block px-1 pt-0.5 pb-0 {selectedSuggestedTagIdx === tagIdx &&
+                selectedSuggestedTagStyle}"
+              onkeydown={e => e.key === "Enter" && selectSuggestedTag(tag)()}
+              onclick={selectSuggestedTag(tag)}>
+              {tag.name}</span>
           </li>
         {/each}
       </ul>
