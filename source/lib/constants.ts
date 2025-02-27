@@ -1,6 +1,6 @@
 import browser from "webextension-polyfill";
 
-import { BrowserEventType } from "./types";
+import type { BrowserEventType } from "./types.js";
 
 export const BROWSER_TAB_PREFIX = "tab";
 export const DECAYED_TAB_PREFIX = "decayed-tab";

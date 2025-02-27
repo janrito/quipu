@@ -1,11 +1,11 @@
 import OptionsSync from "webext-options-sync";
 
-import { AppSettingsSchema, EncodedAppSettingsSchema, PagesSchema } from "./types";
+import type { AppSettingsSchema, EncodedAppSettingsSchema, PageSchema } from "./types.js";
 
 export const decodeOptions = (obj: EncodedAppSettingsSchema): AppSettingsSchema => ({
   pinboardAPIToken: obj.pinboardAPIToken,
   pinboardRootTag: obj.pinboardRootTag,
-  pages: JSON.parse(obj.pages) as PagesSchema[],
+  pages: JSON.parse(obj.pages) as PageSchema[],
   tabDecayHalfLife: Number(obj.tabDecayHalfLife),
   tabDecayExceptions: JSON.parse(obj.tabDecayExceptions) as string[],
 });

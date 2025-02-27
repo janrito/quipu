@@ -1,4 +1,5 @@
 <style>
+@reference "../main.css";
 .spinner {
   @apply py-20 text-center text-lg text-pink-400;
 }

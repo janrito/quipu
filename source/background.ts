@@ -1,13 +1,10 @@
-import debounce from "lodash/debounce";
+import { debounce } from "lodash";
 import { get } from "svelte/store";
 import { URLPattern } from "urlpattern-polyfill";
 import browser from "webextension-polyfill";
 
-import { MAX_DELAY_TO_SCHEDULE, TAB_QUERY, UPDATED_SETTINGS_EVENT } from "./lib/constants";
-
-import "./lib/options-storage";
-
-import { AppSettingsSchema, BrowserMessage, tabLifetimesSchema } from "./lib/types";
+import { MAX_DELAY_TO_SCHEDULE, TAB_QUERY, UPDATED_SETTINGS_EVENT } from "./lib/constants.js";
+import { AppSettingsSchema, BrowserMessage, tabLifetimesSchema } from "./lib/types.js";
 import {
   calculateDelay,
   closeTab,
@@ -17,10 +14,10 @@ import {
   lifetimeIdToTabId,
   sampleLifetime,
   tabIdToLifetimeId,
-} from "./lib/utils";
-import appSettings from "./stores/app-settings";
-import decayedTabs from "./stores/decayed-tabs";
-import tabLifetimes from "./stores/tab-lifetimes";
+} from "./lib/utils.js";
+import appSettings from "./stores/app-settings.js";
+import decayedTabs from "./stores/decayed-tabs.js";
+import tabLifetimes from "./stores/tab-lifetimes.js";
 
 const decayTab = debounce(tabId => {
   browser.tabs.get(tabId).then(tab => {

@@ -1,4 +1,4 @@
-import throttle from "lodash/throttle";
+import { throttle } from "lodash";
 import { writable } from "svelte/store";
 import cache from "webext-storage-cache/legacy.js";
 import browser from "webextension-polyfill";
