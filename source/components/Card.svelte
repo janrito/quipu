@@ -1,27 +1,40 @@
 <style>
+@reference "../main.css";
 :global(.active-droppable-card) {
   @apply opacity-80 shadow-inner;
 }
 </style>
 
 <script lang="ts">
-import delay from "lodash/delay";
-import { createEventDispatcher } from "svelte";
+import { delay } from "lodash";
+import type { DndEvent } from "svelte-dnd-action";
 import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME, TRIGGERS } from "svelte-dnd-action";
-import { preventDefault } from "svelte/legacy";
 
-import { browserTabToBookmark, modifyElementClasses, newTab } from "../lib/utils";
-import appSettings from "../stores/app-settings";
-import createTagStore from "../stores/tags";
+import type {
+  DraggableBookmarkSchema,
+  GenericBookmarkSchema,
+  TabBookmarkSchema,
+} from "../lib/types.js";
+import { isBookmarkSchemaInCard, isTab, modifyElementClasses, newTab } from "../lib/utils.js";
+import appSettings from "../stores/app-settings.js";
+import createTagStore from "../stores/tags.js";
 import Bookmark from "./Bookmark.svelte";
 import TagEditor from "./TagEditor.svelte";
 
 interface Props {
-  name: any;
-  bookmarks?: any;
-  parentTags?: any;
+  name: string;
+  bookmarks?: DraggableBookmarkSchema[];
+  parentTags?: string[];
   untagged?: boolean;
   editMode?: boolean;
+  deleteBookmark: (href: URL) => void;
+  addNewBookmark: (bookmark: TabBookmarkSchema) => void;
+  updateBookmark: (bookmark: GenericBookmarkSchema) => void;
+  highlightBookmark: (bookmarkId: string) => void;
+  syncBookmarks: () => void;
+  renameCard?: (newName: string) => void;
+  deleteCard?: () => void;
+  createNewCard: () => void;
 }
 
 let {
@@ -30,21 +43,31 @@ let {
   parentTags = [],
   untagged = false,
   editMode = $bindable(false),
+  deleteBookmark,
+  addNewBookmark,
+  updateBookmark,
+  highlightBookmark,
+  syncBookmarks,
+  renameCard = () => {},
+  deleteCard = () => {},
+  createNewCard,
 }: Props = $props();
+
+let tagStore = $derived(createTagStore($appSettings.pinboardAPIToken));
 
 let altKeyActive = false;
 
-const dispatch = createEventDispatcher();
-
-const openBookmarkDispatcher = url => newTab(url);
-
-const closeBookmarkDispatcher = url => () => {
-  dispatch("deleteBookmark", { href: url });
+const closeBookmarkDispatcher = (url: URL) => () => {
+  deleteBookmark(url);
 };
 
-const openAllBookmarks = () => bookmarks.map(bookmark => openBookmarkDispatcher(bookmark.href)());
+const openAllBookmarks = (event: Event) => {
+  event.preventDefault();
+  bookmarks.map(bookmark => newTab(bookmark.href));
+};
 
-const enterEditMode = () => {
+const enterEditMode = (event: Event) => {
+  event.preventDefault();
   if (!untagged) {
     editMode = true;
   }
@@ -56,63 +79,64 @@ const exitEditMode = () => {
     }, 100);
   }
 };
-const renameCard = event => {
-  if (!untagged) {
-    dispatch("renameCard", event.detail);
-  }
+
+const handleCreateNewCard = (event: Event) => {
+  event.preventDefault();
+  createNewCard();
 };
 
-const createNewCard = () => {
-  dispatch("createNewCard");
+const sortBookmarksToDraw = (
+  bookmarksToDraw: DraggableBookmarkSchema[]
+): DraggableBookmarkSchema[] => {
+  return bookmarksToDraw.sort((a, b) => {
+    if ("time" in a && "time" in b) {
+      return b.time - a.time;
+    } else if ("time" in a) {
+      return -1;
+    } else if ("time" in b) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
 };
 
-const deleteCard = () => {
-  if (!untagged) {
-    dispatch("deleteCard");
-  }
-};
-
-const handleDragBookmarkConsider = event => {
-  const { id } = event.detail.info;
-
+const handleDragBookmarkConsider = (event: CustomEvent<DndEvent<DraggableBookmarkSchema>>) => {
   // find the dragged item
   const draggedBookmark = event.detail.items.find(b => b[SHADOW_ITEM_MARKER_PROPERTY_NAME]);
 
-  if (draggedBookmark && draggedBookmark._cardTag !== name) {
-    const newBookmark = draggedBookmark.url
-      ? browserTabToBookmark(draggedBookmark)
-      : draggedBookmark;
+  if (
+    !draggedBookmark ||
+    (!isTab(draggedBookmark) &&
+      isBookmarkSchemaInCard(draggedBookmark) &&
+      draggedBookmark._cardTag === name)
+  ) {
+    // dragged from this card, don't allow dropping in the same card
+    bookmarks = event.detail.items;
+  } else {
     bookmarks = [
       {
-        ...newBookmark,
-        id: id,
+        ...draggedBookmark,
         tags: [...parentTags, name],
         [SHADOW_ITEM_MARKER_PROPERTY_NAME]: true,
       },
       ...event.detail.items.filter(b => !b[SHADOW_ITEM_MARKER_PROPERTY_NAME]),
-    ].sort((a, b) => b.time - a.time);
-  } else {
-    bookmarks = event.detail.items.sort((a, b) => b.time - a.time);
+    ];
   }
+  bookmarks = sortBookmarksToDraw(bookmarks);
 };
 
-const handleDragBookmark = event => {
+const handleDragBookmark = (event: CustomEvent<DndEvent<DraggableBookmarkSchema>>) => {
   const { id, trigger } = event.detail.info;
   const droppedBookmark = event.detail.items.find(b => b.id === id);
 
   if (droppedBookmark && trigger === TRIGGERS.DROPPED_INTO_ZONE) {
     // actual new bookmark, add it
-    if (droppedBookmark.url) {
-      dispatch("addNewBookmark", {
-        bookmark: {
-          ...browserTabToBookmark(droppedBookmark),
-          tags: [...parentTags, name],
-        },
-        sourceTab: droppedBookmark,
-      });
-    } else if (droppedBookmark._cardTag !== name) {
+    if (isTab(droppedBookmark)) {
+      addNewBookmark({ ...droppedBookmark, tags: [...parentTags, name] });
+    } else if (isBookmarkSchemaInCard(droppedBookmark) && droppedBookmark._cardTag !== name) {
       // existing bookmark, update details
-      dispatch("updateBookmarkDetails", {
+      updateBookmark({
         ...droppedBookmark,
         tags: [
           ...new Set([
@@ -129,46 +153,45 @@ const handleDragBookmark = event => {
       });
     } else {
       // dragged from this card, dropped in the same card, sync from store
-      dispatch("syncBookmarks");
+      syncBookmarks();
     }
   }
 };
 
-const styleDraggedBookmark = el => modifyElementClasses(el, ["shadow-xl"]);
+const handleDeleteTag = () => !untagged && deleteCard();
 
-const handleAltKeyPressed = event => {
+const styleDraggedBookmark = (element: HTMLElement | undefined) => {
+  if (!element) return;
+  modifyElementClasses(element, ["shadow-xl"]);
+};
+
+const handleAltKeyPressed = (event: KeyboardEvent) => {
   altKeyActive = event.altKey;
 };
-let tagStore = $derived(createTagStore($appSettings.pinboardAPIToken));
+const untaggedHeaderStyle = "text-gray-200 dark:text-gray-700";
+const taggedHeaderStyle = "text-gray-400 dark:text-gray-500";
 </script>
 
 <svelte:window onkeydown={handleAltKeyPressed} onkeyup={handleAltKeyPressed} />
 
 <div class="flex flex-col bg-white shadow-gray-900 dark:bg-black dark:shadow-gray-50">
-  {#if editMode}
+  {#if editMode && !untagged}
     <div class="ml-7 flex-shrink-0 py-3">
       <TagEditor
-        on:edit={renameCard}
-        on:delete={deleteCard}
-        on:exit={exitEditMode}
-        value={name}
-        tags={$tagStore} />
+        deleteTag={handleDeleteTag}
+        close={exitEditMode}
+        bind:value={() => name, (newName: string) => renameCard(newName)}
+        suggestedTags={$tagStore} />
     </div>
   {:else}
-    <h3
-      class="ml-7 py-3 text-sm {untagged
-        ? 'text-gray-200 dark:text-gray-700'
-        : 'text-gray-400 dark:text-gray-500'}">
-      <a href="#edit-card-{name}" onclick={preventDefault(enterEditMode)}>{name}</a>
+    <h3 class="ml-7 py-3 text-sm {untagged ? untaggedHeaderStyle : taggedHeaderStyle}">
+      <a href="#edit-card-{name}" onclick={enterEditMode}>{name}</a>
       <span class="text-xs text-gray-300 dark:text-gray-600"> ({bookmarks.length})</span>
       {#if bookmarks.length > 1}
-        <button
-          class="text-xs text-gray-300 dark:text-gray-600"
-          onclick={preventDefault(openAllBookmarks)}>
+        <button class="text-xs text-gray-300 dark:text-gray-600" onclick={openAllBookmarks}>
           open all</button>
       {/if}
-      <button class="text-gray-200 dark:text-gray-700" onclick={preventDefault(createNewCard)}
-        >+</button>
+      <button class="text-gray-200 dark:text-gray-700" onclick={handleCreateNewCard}>+</button>
     </h3>
   {/if}
 
@@ -187,16 +210,16 @@ let tagStore = $derived(createTagStore($appSettings.pinboardAPIToken));
     onfinalize={handleDragBookmark}>
     {#each bookmarks as bookmark (bookmark.id)}
       <Bookmark
-        title={bookmark.description}
-        url={bookmark.href}
+        description={bookmark.description}
+        href={bookmark.href}
         key={bookmark.id}
         tags={bookmark.tags}
-        favIconUrl={bookmark.favIcon}
+        favIconUrl={bookmark.favIconUrl}
         parentTags={[...parentTags, name]}
-        cardsIn
-        on:highlight={e => dispatch("highlightBookmark", e.detail)}
-        on:close={closeBookmarkDispatcher(bookmark.href)}
-        on:open={openBookmarkDispatcher(bookmark.href)} />
+        highlightBookmark={() =>
+          highlightBookmark(isBookmarkSchemaInCard(bookmark) ? bookmark._bookmarkId : bookmark.id)}
+        closeBookmark={closeBookmarkDispatcher(bookmark.href)}
+        openBookmark={() => newTab(bookmark.href)} />
     {/each}
   </div>
 </div>
