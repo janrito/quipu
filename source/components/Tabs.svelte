@@ -1,9 +1,15 @@
-<script>
+<script lang="ts">
 import { onMount } from "svelte";
+import type { DndEvent } from "svelte-dnd-action";
 import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME, TRIGGERS } from "svelte-dnd-action";
 import { run } from "svelte/legacy";
 
-import { UPDATE_DECAY_DISPLAY_INTERVAL } from "../lib/constants";
+import { UPDATE_DECAY_DISPLAY_INTERVAL } from "../lib/constants.js";
+import type {
+  DraggableBookmarkSchema,
+  TabBookmarkSchema,
+  tabLifetimesSchema,
+} from "../lib/types.js";
 import {
   calculateDelay,
   closeTab,
@@ -13,18 +19,23 @@ import {
   switchToTab,
   switchToWindow,
   tabIdToLifetimeId,
-} from "../lib/utils";
-import browserTabs from "../stores/browser-tabs";
-import decayedTabs from "../stores/decayed-tabs";
-import tabLifetimes from "../stores/tab-lifetimes";
+} from "../lib/utils.js";
+import browserTabs from "../stores/browser-tabs.js";
+import decayedTabs from "../stores/decayed-tabs.js";
+import tabLifetimes from "../stores/tab-lifetimes.js";
 import Bookmark from "./Bookmark.svelte";
 
 // keep track of temporary tabs, when one is being dragged
-let tempBrowserTabs = $state(null);
-let tempDecayedTabs = $state(null);
+let tempBrowserTabs: (DraggableBookmarkSchema & TabBookmarkSchema)[][] = $state([]);
+let tempDecayedTabs: DraggableBookmarkSchema[] = $state([]);
 
 // keep track of active tab lifetimes
 let updatedLifetimes = $state($tabLifetimes);
+
+let drawingWindowTabs = $derived(tempBrowserTabs.length ? tempBrowserTabs : [...$browserTabs]);
+let drawingDecayedTabs = $derived(
+  tempDecayedTabs.length ? tempDecayedTabs : ([...$decayedTabs] as DraggableBookmarkSchema[])
+);
 
 onMount(() => {
   setTimeout(() => {
@@ -32,67 +43,57 @@ onMount(() => {
     setInterval(() => {
       tabLifetimes.sync();
     }, UPDATE_DECAY_DISPLAY_INTERVAL);
-  }, 100);
+  }, 500);
 });
 
-const switchToTabDispatcher = (windowId, tabId) => () => {
-  switchToWindow(windowId);
-  switchToTab(tabId);
-};
-
-const removeTabDispatcher = tabId => () => {
-  closeTab(tabId);
-};
-
-const openDecayedTabDispatcher = url => newTab(url);
-
 const handleDragTab = () => {
-  tempBrowserTabs = null;
+  tempBrowserTabs = [];
 };
 
 const handleDragDecayedTab = () => {
-  tempDecayedTabs = null;
+  tempDecayedTabs = [];
 };
 
-const getTabLifetime = (tab, updatedLifetimes) => {
+const getTabLifetime = (tab: TabBookmarkSchema, updatedLifetimes: tabLifetimesSchema) => {
   const tabLifetimeMeta = updatedLifetimes[tabIdToLifetimeId(tab._id)] || { lifetime: undefined };
   const { lifetime } = tabLifetimeMeta;
   return lifetime;
 };
 
-const calculateDecay = (tab, lifetime) => {
+const calculateDecay = (tab: TabBookmarkSchema, lifetime: number) => {
   const delay = calculateDelay(lifetime, tab.lastAccessed);
   return 1 - delay / lifetime;
 };
 
-const handleDragTabConsider = windowIndex => event => {
-  const { trigger, id } = event.detail.info;
-  const localTabs = $browserTabs[windowIndex];
-  // find index of dragged tab in the browser tabs store
-  const draggedTabInStoreIdx = localTabs.findIndex(b => b.id === id);
+const handleDragTabConsider =
+  (windowIndex: number) => (event: CustomEvent<DndEvent<DraggableBookmarkSchema>>) => {
+    const { trigger, id } = event.detail.info;
+    const localTabs = $browserTabs[windowIndex];
+    // find index of dragged tab in the browser tabs store
+    const draggedTabInStoreIdx = localTabs.findIndex(b => b.id === id);
 
-  if (draggedTabInStoreIdx >= 0 && trigger === TRIGGERS.DRAG_STARTED) {
-    event.detail.items = event.detail.items.filter(b => !b[SHADOW_ITEM_MARKER_PROPERTY_NAME]);
-    event.detail.items.splice(draggedTabInStoreIdx, 0, {
-      // duplicate tab with fake id temporarily
-      ...localTabs[draggedTabInStoreIdx],
-      id: `${id}-${randomSuffix()}`,
-    });
-    tempBrowserTabs = [
-      ...$browserTabs.slice(0, windowIndex),
-      event.detail.items,
-      ...$browserTabs.slice(windowIndex + 1),
-    ];
-  } else if (
-    trigger === TRIGGERS.DROPPED_INTO_ANOTHER ||
-    trigger === TRIGGERS.DROPPED_OUTSIDE_OF_ANY ||
-    trigger === TRIGGERS.DRAG_STOPPED
-  ) {
-    tempBrowserTabs = null;
-  }
-};
+    if (draggedTabInStoreIdx >= 0 && trigger === TRIGGERS.DRAG_STARTED) {
+      event.detail.items = event.detail.items.filter(b => !b[SHADOW_ITEM_MARKER_PROPERTY_NAME]);
+      event.detail.items.splice(draggedTabInStoreIdx, 0, {
+        // duplicate tab with fake id temporarily
+        ...localTabs[draggedTabInStoreIdx],
+        id: `${id}-${randomSuffix()}`,
+      });
+      tempBrowserTabs = [
+        ...$browserTabs.slice(0, windowIndex),
+        event.detail.items as TabBookmarkSchema[],
+        ...$browserTabs.slice(windowIndex + 1),
+      ];
+    } else if (
+      trigger === TRIGGERS.DROPPED_INTO_ANOTHER ||
+      trigger === TRIGGERS.DROPPED_OUTSIDE_OF_ANY ||
+      trigger === TRIGGERS.DRAG_STOPPED
+    ) {
+      tempBrowserTabs = [];
+    }
+  };
 
-const handleDragDecayedTabConsider = event => {
+const handleDragDecayedTabConsider = (event: CustomEvent<DndEvent<DraggableBookmarkSchema>>) => {
   const { trigger, id } = event.detail.info;
 
   // find index of dragged tab in the browser tabs store
@@ -111,20 +112,21 @@ const handleDragDecayedTabConsider = event => {
     trigger === TRIGGERS.DROPPED_OUTSIDE_OF_ANY ||
     trigger === TRIGGERS.DRAG_STOPPED
   ) {
-    tempDecayedTabs = null;
+    tempDecayedTabs = [];
   }
 };
 // TODO: for some reason this is not being called
-const styleDraggedTab = el => modifyElementClasses(el, ["shadow-xl"]);
+const styleDraggedTab = (element: HTMLElement | undefined) => {
+  if (!element) return;
+  modifyElementClasses(element, ["shadow-xl"]);
+};
 
-let drawingWindowTabs = $derived(tempBrowserTabs ? tempBrowserTabs : [...$browserTabs]);
-let drawingDecayedTabs = $derived(tempDecayedTabs ? tempDecayedTabs : [...$decayedTabs]);
 run(() => {
   updatedLifetimes = $tabLifetimes;
 });
 </script>
 
-<div class="h-full overflow-y-auto overflow-x-hidden pr-3">
+<div class="h-full overflow-x-hidden overflow-y-auto pr-3">
   {#each drawingWindowTabs as tabs, windowIndex}
     <h3 class="pl-5 text-sm font-extralight">
       {#if windowIndex === 0}Current
@@ -145,12 +147,15 @@ run(() => {
         {@const lifetime = getTabLifetime(tab, updatedLifetimes)}
         <Bookmark
           key={tab.id}
-          title={tab.title}
-          url={tab.url}
+          description={tab.description}
+          href={tab.href}
           favIconUrl={tab.favIconUrl}
           {...lifetime ? { decay: calculateDecay(tab, lifetime) } : {}}
-          on:open={switchToTabDispatcher(tab.windowId, tab._id)}
-          on:close={removeTabDispatcher(tab._id)} />
+          openBookmark={() => {
+            switchToWindow(tab.windowId);
+            switchToTab(tab._id);
+          }}
+          closeBookmark={() => closeTab(tab._id)} />
       {/each}
     </div>
   {/each}
@@ -169,12 +174,12 @@ run(() => {
     onfinalize={handleDragDecayedTab}>
     {#each drawingDecayedTabs as decayedTab}
       <Bookmark
-        title={decayedTab.title}
-        url={decayedTab.url}
+        description={decayedTab.description}
+        href={decayedTab.href}
         favIconUrl={decayedTab.favIconUrl}
         closeEnabled={false}
         key={decayedTab.id}
-        on:open={openDecayedTabDispatcher(decayedTab.url)} />
+        openBookmark={() => newTab(decayedTab.href)} />
     {/each}
   </div>
 </div>
