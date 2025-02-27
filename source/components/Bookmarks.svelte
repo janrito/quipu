@@ -1,55 +1,43 @@
-<script>
-import appSettings from "../stores/app-settings";
-import createTagStore from "../stores/tags";
+<script lang="ts">
+import appSettings from "../stores/app-settings.js";
+import createTagStore from "../stores/tags.js";
 import Page from "./Page.svelte";
 import UITabs from "./UITabs.svelte";
 
-let currentPageId = $state(0);
-
-const goToPage = event => {
-  currentPageId = Number(event.detail.id);
-};
+let currentPageName = $state($appSettings.pages[0].name);
+let tagStore = createTagStore($appSettings.pinboardAPIToken);
 
 const createNewTab = () => {
   appSettings.newPage();
 };
 
-const renameTab = event => {
-  const { id, name } = event.detail;
-  if (id !== undefined && name !== undefined) {
-    appSettings.renamePage(id, name);
-  }
+const renameTab = (oldName: string, newName: string) => {
+  const index = $appSettings.pages.map(page => page.name).indexOf(oldName);
+  if (index === -1) return;
+  appSettings.renamePage(index, newName);
 };
 
-const deleteTab = event => {
-  const { id } = event.detail;
+const deleteTab = (name: string) => {
   if ($appSettings.pages.length > 1) {
-    $appSettings.pages = $appSettings.pages.filter((_, i) => i !== id);
+    $appSettings.pages = $appSettings.pages.filter(page => name !== page.name);
   }
 };
 
-const reorderTab = event => {
-  const order = [...new Set(event.detail)];
-  if (order.length === $appSettings.pages.length) {
-    $appSettings.pages = order.map(index => $appSettings.pages[index]);
-  }
+const reorderTab = (newOrder: string[]) => {
+  appSettings.reorderPages(newOrder);
 };
-
-let pages = $derived($appSettings.pages.map((page, index) => ({ id: index, name: page.name })));
-let tagStore = $derived(createTagStore($appSettings.pinboardAPIToken));
 </script>
 
 <UITabs
-  tabs={pages}
-  selectedTabId={currentPageId}
+  tabs={$appSettings.pages.map(page => page.name)}
+  bind:selectedTab={currentPageName}
   editable={true}
-  tags={$tagStore}
-  on:selectTab={goToPage}
-  on:createNewTab={createNewTab}
-  on:renameTab={renameTab}
-  on:deleteTab={deleteTab}
-  on:reorderTabs={reorderTab}>
-  {#if pages && pages.length > 0}
-    <Page pageIndex={currentPageId} />
+  suggestedTags={$tagStore}
+  {createNewTab}
+  {renameTab}
+  {deleteTab}
+  reorderTabs={reorderTab}>
+  {#if $appSettings.pages && $appSettings.pages.length > 0}
+    <Page pageIndex={$appSettings.pages.findIndex(p => p.name === currentPageName)} />
   {/if}
 </UITabs>
