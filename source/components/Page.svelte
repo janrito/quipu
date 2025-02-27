@@ -1,30 +1,53 @@
 <script lang="ts">
-import { dndzone } from "svelte-dnd-action";
-import browser from "webextension-polyfill";
+import type { DndEvent } from "svelte-dnd-action";
+import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
-import { modifyElementClasses } from "../lib/utils";
-import appSettings from "../stores/app-settings";
-import createBookmarksStore from "../stores/bookmarks";
+import type {
+  BookmarkSchema,
+  BookmarkSchemaInCard,
+  GenericBookmarkSchema,
+  PageSchema,
+  TabBookmarkSchema,
+} from "../lib/types.js";
+import { closeTab, modifyElementClasses } from "../lib/utils.js";
+import appSettings from "../stores/app-settings.js";
+import createBookmarksStore from "../stores/bookmarks.js";
 import BookmarkEditor from "./BookmarkEditor.svelte";
 import Card from "./Card.svelte";
 import Spinner from "./Spinner.svelte";
 
-let { pageIndex } = $props();
+interface Props {
+  pageIndex: number;
+}
 
-let tempCards = $state(null);
-let highlightedBookmarkId = $state(null);
-let parentTags = $derived(
-  [$appSettings.pinboardRootTag, $appSettings.pages[pageIndex].name].filter(tag => tag)
-);
+interface DraggableCardSchema {
+  name: string;
+  id: number;
+  [SHADOW_ITEM_MARKER_PROPERTY_NAME]?: boolean;
+}
+
+let { pageIndex = $bindable() }: Props = $props();
+let page: PageSchema = $derived($appSettings.pages[pageIndex]);
+
+let tempCards: DraggableCardSchema[] = $state([]);
+let highlightedBookmarkId: string | undefined = $state(undefined);
+let parentTags = $derived([$appSettings.pinboardRootTag, page.name].filter(tag => tag));
 let bookmarksStore = $derived(createBookmarksStore($appSettings.pinboardAPIToken, parentTags));
-let cards = $derived(
-  tempCards
-    ? tempCards
-    : $appSettings.pages[pageIndex].cards
-      ? $appSettings.pages[pageIndex].cards.map((name, id) => ({ id, name }))
-      : []
-);
+
+let cards = $derived.by(() => {
+  if (tempCards.length) {
+    return tempCards;
+  }
+  if ($appSettings.pages[pageIndex].cards) {
+    return $appSettings.pages[pageIndex].cards.map(
+      (name, id) => ({ id, name }) as DraggableCardSchema
+    );
+  }
+  return [];
+});
+
 let bookmarks = $derived($bookmarksStore.data);
+
 let highlightedBookmark = $derived(
   bookmarks.find(bookmark => bookmark.id === highlightedBookmarkId)
 );
@@ -37,10 +60,10 @@ $effect(() => {
   highlightedBookmarkId =
     (highlightedBookmarkId &&
       bookmarks.find(bookmark => bookmark.id === highlightedBookmarkId)?.id) ||
-    null;
+    undefined;
 });
 
-const filterBookmarksByTag = (bookmarks, tag) => {
+const filterBookmarksByTag = (bookmarks: BookmarkSchema[], tag: string): BookmarkSchemaInCard[] => {
   if (!(bookmarks && bookmarks.length > 0 && tag)) {
     return [];
   }
@@ -50,11 +73,12 @@ const filterBookmarksByTag = (bookmarks, tag) => {
     .map(bookmark => ({
       ...bookmark,
       id: `${tag}|${bookmark.id}`,
+      _bookmarkId: bookmark.id,
       _cardTag: tag,
     }));
 };
 
-const filterBookmarksWithoutTags = (bookmarks, tags) => {
+const filterBookmarksWithoutTags = (bookmarks: BookmarkSchema[], tags: string[]) => {
   if (!(bookmarks && bookmarks.length > 0)) {
     return [];
   }
@@ -63,33 +87,30 @@ const filterBookmarksWithoutTags = (bookmarks, tags) => {
     return bookmarks;
   }
 
-  return bookmarks
-    .filter(bookmark => !tags.some(tag => bookmark.tags.includes(tag)))
-    .map(bookmark => ({ ...bookmark, id: `...|${bookmark.id}` }));
+  return bookmarks.filter(bookmark => !tags.some(tag => bookmark.tags.includes(tag)));
 };
 
-const createNewCardDispatcher = cardIndex => () => {
+const createNewCardDispatcher = (cardIndex: number) => () => {
   appSettings.newCard(pageIndex, cardIndex);
 };
 
-const renameCardDispatcher = cardIndex => event => {
-  const newName = event.detail;
+const renameCardDispatcher = (cardIndex: number) => (newName: string) => {
   if (newName) {
     appSettings.renameCard(pageIndex, cardIndex, newName);
   }
 };
 
-const deleteCardDispatcher = cardIndex => () => {
+const deleteCardDispatcher = (cardIndex: number) => () => {
   $appSettings.pages[pageIndex].cards = $appSettings.pages[pageIndex].cards.filter(
     (_, index) => index !== cardIndex
   );
 };
 
-const handleReorderCardsConsider = event => {
+const handleReorderCardsConsider = (event: CustomEvent<DndEvent<DraggableCardSchema>>) => {
   tempCards = event.detail.items;
 };
 
-const handleReorderCards = event => {
+const handleReorderCards = (event: CustomEvent<DndEvent<DraggableCardSchema>>) => {
   const order = [...new Set(event.detail.items.map(card => card.id))];
 
   if (order.length === $appSettings.pages[pageIndex].cards.length) {
@@ -97,23 +118,22 @@ const handleReorderCards = event => {
       index => $appSettings.pages[pageIndex].cards[index]
     );
   }
-  tempCards = null;
+  tempCards = [];
 };
 
-const updateBookmarkDetails = event => {
-  bookmarksStore.updateBookmark({ ...event.detail });
+const updateBookmark = (bookmark: GenericBookmarkSchema) => {
+  bookmarksStore.updateBookmark(bookmark);
 };
 
-const deleteBookmark = event => {
-  bookmarksStore.deleteBookmark({ ...event.detail });
+const deleteBookmark = (href: URL) => {
+  bookmarksStore.deleteBookmark(href);
 };
-const addNewBookmark = event => {
-  const { bookmark, sourceTab } = event.detail;
+const addNewBookmark = (bookmark: TabBookmarkSchema) => {
   bookmarksStore
     .addBookmark(bookmark)
     .then(() => {
       // close tab after adding bookmark
-      browser.tabs.remove(sourceTab._id);
+      closeTab(bookmark._id);
     })
     // ignore error, it is already logged
     .catch(() => {});
@@ -123,27 +143,32 @@ const syncBookmarks = () => {
   bookmarksStore.sync();
 };
 
-const highLightBookmark = event => {
-  const [, _id] = event.detail.split("|", 2);
-  highlightedBookmarkId = _id;
+const highlightBookmark = (id: string) => {
+  highlightedBookmarkId = id;
 };
 
-const styleDraggedCard = el => modifyElementClasses(el, ["shadow-xl"]);
+const styleDraggedCard = (element: HTMLElement | undefined) => {
+  if (!element) return;
+  modifyElementClasses(element, ["shadow-xl"]);
+};
+
+const narrowPanelStyle = "w-3/5";
+const widePanelStyle = "w-full";
 </script>
 
 {#each errors as error}
   <div class="overflow-hidden pr-3">
     <p class="border-b-2 border-red-200 bg-red-100 py-2 pl-7 text-sm text-red-300">
       <span class=" text-red-500">{error.status}</span>
-      {error.description}
+      {error.message}
     </p>
   </div>
 {/each}
 <div class="flex h-full w-full flex-row overflow-hidden">
   <div
-    class="flex h-full flex-col overflow-y-auto overflow-x-hidden pr-3 {highlightedBookmark
-      ? 'w-3/5'
-      : 'w-full'}">
+    class="flex h-full flex-col overflow-x-hidden overflow-y-auto pr-3 {highlightedBookmark
+      ? narrowPanelStyle
+      : widePanelStyle}">
     {#if loading}
       <Spinner />
     {:else if (bookmarks && bookmarks.length > 0) || (cards && cards.length)}
@@ -163,14 +188,14 @@ const styleDraggedCard = el => modifyElementClasses(el, ["shadow-xl"]);
               {...card}
               bookmarks={filterBookmarksByTag(bookmarks, card.name)}
               {parentTags}
-              on:highlightBookmark={highLightBookmark}
-              on:deleteBookmark={deleteBookmark}
-              on:renameCard={renameCardDispatcher(card.id)}
-              on:createNewCard={createNewCardDispatcher(card.id)}
-              on:deleteCard={deleteCardDispatcher(card.id)}
-              on:addNewBookmark={addNewBookmark}
-              on:syncBookmarks={syncBookmarks}
-              on:updateBookmarkDetails={updateBookmarkDetails} />
+              {highlightBookmark}
+              {deleteBookmark}
+              renameCard={renameCardDispatcher(card.id)}
+              createNewCard={createNewCardDispatcher(card.id)}
+              deleteCard={deleteCardDispatcher(card.id)}
+              {addNewBookmark}
+              {syncBookmarks}
+              {updateBookmark} />
           {/each}
         </div>
       {/if}
@@ -180,11 +205,14 @@ const styleDraggedCard = el => modifyElementClasses(el, ["shadow-xl"]);
           bookmarks,
           cards.map(card => card.name)
         )}
-        on:highlightBookmark={highLightBookmark}
-        on:deleteBookmark={deleteBookmark}
+        {highlightBookmark}
+        {deleteBookmark}
         {parentTags}
         untagged={true}
-        on:createNewCard={createNewCardDispatcher(cards.length)} />
+        createNewCard={createNewCardDispatcher(cards.length)}
+        {addNewBookmark}
+        {syncBookmarks}
+        {updateBookmark} />
     {:else}
       <p class="py-20 text-center text-lg text-gray-300 dark:text-gray-600">
         Add a
@@ -197,14 +225,14 @@ const styleDraggedCard = el => modifyElementClasses(el, ["shadow-xl"]);
     {/if}
   </div>
   {#if highlightedBookmark}
-    <div class="flex h-full w-2/5 flex-col overflow-y-auto overflow-x-hidden pr-3">
+    <div class="flex h-full w-2/5 flex-col overflow-x-hidden overflow-y-auto pr-3">
       <BookmarkEditor
         {...highlightedBookmark}
         {parentTags}
         cardsInPage={$appSettings.pages[pageIndex].cards}
-        on:update={updateBookmarkDetails}
-        on:delete={deleteBookmark}
-        on:done={() => (highlightedBookmarkId = null)} />
+        {updateBookmark}
+        {deleteBookmark}
+        close={() => (highlightedBookmarkId = undefined)} />
     </div>
   {/if}
 </div>
