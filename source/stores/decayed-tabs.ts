@@ -1,16 +1,17 @@
 import browser from "webextension-polyfill";
 
-import cacheable from "../lib/cacheable";
+import cacheable from "../lib/cacheable.js";
 import {
   DECAY_LOG_CACHE_KEY,
   DECAYED_TAB_PREFIX,
   KEEP_N_DECAYED_TABS,
   UPDATE_EVENT_TYPES,
-} from "../lib/constants";
-import { BrowserTab } from "../lib/types";
+} from "../lib/constants.js";
+import { TabBookmarkSchema } from "../lib/types.js";
+import { tabToTabBookMark } from "../lib/utils.js";
 
 const decayedTabs = () => {
-  const { subscribe, update, sync } = cacheable<BrowserTab[]>(
+  const { subscribe, update, sync } = cacheable<TabBookmarkSchema[]>(
     DECAY_LOG_CACHE_KEY,
     UPDATE_EVENT_TYPES
   );
@@ -18,18 +19,17 @@ const decayedTabs = () => {
   const add = (decayingTab: browser.Tabs.Tab) => {
     update(value =>
       [
-        { ...decayingTab, _id: decayingTab.id, id: `${DECAYED_TAB_PREFIX}-{temp}` } as BrowserTab,
-        ...(value
-          ? value.filter(decayedTab => decayingTab.url !== decayedTab.url)
-          : ([] as BrowserTab[])),
+        tabToTabBookMark(decayingTab, -1, DECAYED_TAB_PREFIX),
+        ...(value ? value.filter(decayedTab => decayingTab.url !== String(decayedTab.href)) : []),
       ]
         .slice(0, KEEP_N_DECAYED_TABS)
         .map(
-          (tab: BrowserTab, idx: number) =>
+          (tab: TabBookmarkSchema, idx: number) =>
             ({
               ...tab,
               id: `${DECAYED_TAB_PREFIX}-${idx}`,
-            }) as BrowserTab
+              _id: idx,
+            }) as TabBookmarkSchema
         )
     );
   };

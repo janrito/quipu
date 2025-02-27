@@ -1,13 +1,21 @@
-import memoize from "lodash/memoize";
+import { memoize } from "lodash";
 import { URLPattern } from "urlpattern-polyfill";
 import browser from "webextension-polyfill";
 
-import { BrowserMessage, Parameters } from "./types";
+import { BROWSER_TAB_PREFIX } from "./constants.js";
+import type {
+  BookmarkSchemaInCard,
+  BrowserMessage,
+  GenericBookmarkSchema,
+  Parameters,
+  QuipuError,
+  TabBookmarkSchema,
+} from "./types.js";
 
 /**
  * Attempts to parse JSON from a string, otherwise returns false
  */
-export const tryParseJSON = (jsonString: string) => {
+export const tryParseJSONSettings = (jsonString: string) => {
   try {
     const o = JSON.parse(jsonString);
     if (o && typeof o === "object") return o;
@@ -39,17 +47,53 @@ export const encodeParameters = (parameters: Parameters): string =>
 
 export const randomSuffix = () => Math.round(Math.random() * 100000);
 
+export class InvalidBookmark extends Error implements QuipuError {
+  name: string = "InvalidBookmark";
+  status: number;
+
+  constructor(status = -1, message?: string) {
+    super(message);
+
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, InvalidBookmark);
+    }
+
+    this.status = status;
+  }
+}
+
 /**
  * Transforms a browser tab as returned from the `browser.tabs`
  * interface object to a bookmark object as expected by the pinboard API
  */
-export const browserTabToBookmark = (browserTab: browser.Tabs.Tab) => ({
-  description: browserTab.title,
-  href: browserTab.url,
-  favIcon: browserTab.favIconUrl,
-  tags: "",
-  time: formatDate(),
-});
+
+export const tabToTabBookMark = (
+  tab: browser.Tabs.Tab,
+  idx: number,
+  prefix: string = BROWSER_TAB_PREFIX
+): TabBookmarkSchema => {
+  if (tab.url === undefined) {
+    throw new InvalidBookmark(-1, "URL is undefined");
+  }
+  if (tab.id === undefined) {
+    throw new InvalidBookmark(-1, "tab ID is undefined");
+  }
+
+  return {
+    type: "Tab",
+    id: `${prefix}-${idx}`,
+    _id: tab.id,
+    tags: [],
+    description: tab.title || "",
+    href: new URL(tab.url),
+    favIconUrl: tab.favIconUrl ? new URL(tab.favIconUrl) : undefined,
+    time: new Date().valueOf(),
+    lastAccessed: tab.lastAccessed,
+    windowId: tab.windowId || -1, // assign a negative window to a tab without window, this should not exist
+    index: tab.index,
+  };
+};
 
 /**
  * Close a tab
@@ -81,8 +125,8 @@ const currentTab = memoize(async () => await browser.tabs.getCurrent());
 /**
  * Open a url in a new tab next to the current one
  */
-export const newTab = async (url: string) => {
-  browser.tabs.create({ url, active: false, index: (await currentTab()).index + 1 });
+export const newTab = async (url: URL) => {
+  browser.tabs.create({ url: String(url), active: false, index: (await currentTab()).index + 1 });
 };
 
 /**
@@ -129,7 +173,7 @@ export const compileValidURLPatterns = (lines: string[]): URLPattern[] =>
 /**
  * Test if URL matches pattern
  */
-export const findURLPattern = (url: string, patterns: URLPattern[]): URLPattern =>
+export const findURLPattern = (url: URL | string, patterns: URLPattern[]): URLPattern =>
   (url ? patterns.find(pattern => pattern.test(url)) : undefined) as URLPattern;
 /**
  * Pretty format a half life
@@ -202,4 +246,18 @@ export const tabIdToLifetimeId = (tabId: number) => String(tabId);
  */
 export const isBrowserMessage = (message: unknown): message is BrowserMessage => {
   return (message && typeof message === "object" && "eventType" in message) as boolean;
+};
+
+/**
+ * Type guard to determine if an object is a TabBookmarkSchema
+ */
+export const isTab = (obj: GenericBookmarkSchema): obj is TabBookmarkSchema => {
+  return "type" in obj && obj.type === "Tab";
+};
+
+/**
+ * Type guard to determine if an object is a BookmarkSchemaInCard
+ */
+export const isBookmarkSchemaInCard = (obj: GenericBookmarkSchema): obj is BookmarkSchemaInCard => {
+  return "type" in obj && obj.type === "Bookmark" && "_cardTag" in obj;
 };

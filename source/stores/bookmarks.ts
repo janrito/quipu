@@ -1,9 +1,8 @@
-import debounce from "lodash/debounce";
-import memoize from "lodash/memoize";
+import { debounce, memoize } from "lodash";
 import { writable } from "svelte/store";
 
-import { postsAdd, postsAll, postsDelete } from "../lib/pinboard-api";
-import { BookmarkSchema, BookmarksStore } from "../lib/types";
+import { PinboardAPIError, postsAdd, postsAll, postsDelete } from "../lib/pinboard-api.js";
+import { BookmarksStore, GenericBookmarkSchema, TabBookmarkSchema } from "../lib/types.js";
 
 const createBookmarksStore = (apiToken: string, tags: string[]) => {
   const initialValue: BookmarksStore = {
@@ -34,7 +33,7 @@ const createBookmarksStore = (apiToken: string, tags: string[]) => {
             errors: currentValue.errors,
           }));
         })
-        .catch((e: Error) => {
+        .catch((e: PinboardAPIError) => {
           // clear loading timer on error
           clearTimeout(showLoadingTimer);
 
@@ -51,7 +50,7 @@ const createBookmarksStore = (apiToken: string, tags: string[]) => {
     { maxWait: 300, leading: true }
   );
 
-  const addBookmark = (newBookmark: BookmarkSchema) =>
+  const addBookmark = (newBookmark: TabBookmarkSchema) =>
     postsAdd(
       apiToken,
       newBookmark.href,
@@ -60,7 +59,7 @@ const createBookmarksStore = (apiToken: string, tags: string[]) => {
       newBookmark.tags,
       "no"
     )
-      .catch((e: Error) => {
+      .catch((e: PinboardAPIError) => {
         //add error to messages
         update(currentValue => ({ ...currentValue, errors: [e, ...currentValue.errors] }));
         // rethrow
@@ -68,9 +67,9 @@ const createBookmarksStore = (apiToken: string, tags: string[]) => {
       })
       .then(sync);
 
-  const updateBookmark = (bookmark: BookmarkSchema) =>
+  const updateBookmark = (bookmark: GenericBookmarkSchema) =>
     postsAdd(apiToken, bookmark.href, bookmark.description, bookmark.extended, bookmark.tags, "yes")
-      .catch((e: Error) => {
+      .catch((e: PinboardAPIError) => {
         //add error to messages
         update(currentValue => ({ ...currentValue, errors: [e, ...currentValue.errors] }));
         // rethrow
@@ -78,9 +77,9 @@ const createBookmarksStore = (apiToken: string, tags: string[]) => {
       })
       .then(sync);
 
-  const deleteBookmark = (bookmark: BookmarkSchema) =>
-    postsDelete(apiToken, bookmark.href)
-      .catch((e: Error) => {
+  const deleteBookmark = (href: URL) =>
+    postsDelete(apiToken, href)
+      .catch((e: PinboardAPIError) => {
         //add error to messages
         update(currentValue => ({ ...currentValue, errors: [e, ...currentValue.errors] }));
         // rethrow

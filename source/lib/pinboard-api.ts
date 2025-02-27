@@ -1,16 +1,23 @@
 import cache from "webext-storage-cache/legacy.js";
 
-import { BookmarkSchema, Parameters, PinBoardAPIBookmarkSchema, TagMap } from "./types";
-import { encodeParameters, formatDate } from "./utils";
+import type {
+  BookmarkSchema,
+  Parameters,
+  PinBoardAPIBookmarkSchema,
+  QuipuError,
+  TagMap,
+} from "./types.js";
+import { encodeParameters, formatDate } from "./utils.js";
 
 const BOOKMARK_PREFIX = `quipu-bookmark`;
 
 // TODO: subclass this error in order to enable error handling when appropriate
 // e.g. a bookmark that already exists, which can be modified instead
-class PinboardAPIError extends Error {
+export class PinboardAPIError extends Error implements QuipuError {
+  name: string = "PinboardAPIError";
   status: number;
-  description: string;
-  constructor(status = -1, description = "Unknown Error", message?: string) {
+
+  constructor(status = -1, message?: string) {
     super(message);
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
@@ -18,9 +25,7 @@ class PinboardAPIError extends Error {
       Error.captureStackTrace(this, PinboardAPIError);
     }
 
-    this.name = "PinboardAPIError";
     this.status = status;
-    this.description = description;
   }
 }
 
@@ -93,18 +98,18 @@ export const tagsGet = auth(
 
 export const preprocessBookmark = (data: PinBoardAPIBookmarkSchema[]): BookmarkSchema[] =>
   data.map((bookmarkData: PinBoardAPIBookmarkSchema, idx: number) => ({
+    type: "Bookmark",
     ...bookmarkData,
+    href: new URL(bookmarkData.href),
+    _id: idx,
     id: `${BOOKMARK_PREFIX}-${idx}`,
     tags: bookmarkData.tags.split(" "),
     time: Date.parse(bookmarkData.time),
   }));
 
 export const postsAll = auth(
-  async (apiToken: string, tags: string[] = []): Promise<BookmarkSchema[]> => {
-    return cachedFetchAPI(apiToken, "posts/all", { tag: tags.filter(t => t) }).then(
-      preprocessBookmark
-    );
-  }
+  async (apiToken: string, tags: string[] = []): Promise<BookmarkSchema[]> =>
+    cachedFetchAPI(apiToken, "posts/all", { tag: tags.filter(t => t) }).then(preprocessBookmark)
 );
 
 export const postsAdd = auth(

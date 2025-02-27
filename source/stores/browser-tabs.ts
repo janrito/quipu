@@ -1,40 +1,47 @@
-import throttle from "lodash/throttle";
+import { throttle } from "lodash";
 import { readable } from "svelte/store";
 import browser from "webextension-polyfill";
 
-import { BROWSER_TAB_PREFIX, TAB_QUERY, UPDATE_EVENT_TYPES } from "../lib/constants";
-import { BrowserTab } from "../lib/types";
+import { TAB_QUERY, UPDATE_EVENT_TYPES } from "../lib/constants.js";
+import { TabBookmarkSchema } from "../lib/types.js";
+import { tabToTabBookMark } from "../lib/utils.js";
 
-export default readable([], (set: (value: BrowserTab[]) => void) => {
+export default readable([], (set: (value: TabBookmarkSchema[][]) => void) => {
   const updateTabs = throttle(
     async () => {
-      const tabs: BrowserTab[] = await browser.tabs.query(TAB_QUERY).then(async tabs => {
+      const tabs: TabBookmarkSchema[][] = await browser.tabs.query(TAB_QUERY).then(async tabs => {
         const currentWindow = await browser.windows.getCurrent();
         return (
           [
             ...tabs
-              .map((tab, idx) => ({
-                ...tab,
-                id: `${BROWSER_TAB_PREFIX}-${idx}`,
-                _id: tab.id,
-              }))
+              .filter(tab => tab.url)
+              .map((tab, idx) => tabToTabBookMark(tab, idx))
               // sort by the order that each tab appears
-              .sort((a, b) => (a.index < b.index ? -1 : a.index > b.index ? 1 : 0))
+              .sort((a, b) => a.index - b.index)
               .reduce((accumulator, current) => {
                 // group tabs by window
                 if (accumulator.has(current.windowId)) {
-                  accumulator.get(current.windowId).push(current);
+                  accumulator.set(current.windowId, [
+                    ...(accumulator.get(current.windowId) || []),
+                    current,
+                  ]);
                 } else {
                   accumulator.set(current.windowId, [current]);
                 }
+
                 return accumulator;
-              }, new Map())
+              }, new Map<number, TabBookmarkSchema[]>())
               .entries(),
           ]
-            .sort((windowA, windowB) =>
+            .sort((windowA, windowB) => {
               // order current window first
-              windowA[0] === currentWindow.id ? -1 : windowB[0] === currentWindow.id ? 1 : 0
-            )
+              if (windowA[0] === currentWindow.id) {
+                return -1;
+              } else if (windowB[0] === currentWindow.id) {
+                return 1;
+              }
+              return 0;
+            })
             // remove window id
             .map(d => d[1])
         );
