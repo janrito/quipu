@@ -1,15 +1,23 @@
 {
+  "name": "quipu",
+  "version": "0.2.0",
+  "description": "Quipu is a simple Pinboard powered session manager.",
+  "homepage_url": "https://github.com/janrito/quipu",
   "private": true,
   "scripts": {
-    "watch": "TARGET=firefox vite dev",
-    "watch-chrome": "vite dev",
-    "build": "vite build",
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
     "lint": "run-p lint:*",
     "lint-fix": "run-p 'lint:* -- --fix'",
-    "lint:css": "stylelint source/**/*.css source/**/*.pcss",
+    "lint:css": "stylelint src/**/*.css src/**/*.pcss",
     "lint:js": "eslint --fix .",
     "lint:prettier": "prettier --check .",
-    "test": "run-p lint:* build"
+    "postinstall": "wxt prepare"
   },
   "browserslist": [
     "last 2 Chrome version",
@@ -20,18 +28,16 @@
     "webext-storage-cache": "^6.0.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.9",
-    "@babel/eslint-parser": "^7.26.8",
     "@fontsource/iosevka": "^5.1.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
-    "@sveltejs/vite-plugin-svelte": "^5.0.3",
-    "@sveltejs/vite-plugin-svelte-inspector": "^4.0.1",
     "@tailwindcss/postcss": "^4.0.6",
     "@tailwindcss/vite": "^4.0.6",
+    "@tsconfig/svelte": "^5.0.4",
     "@types/lodash": "^4.17.15",
     "@types/webextension-polyfill": "^0.12.2",
     "@typescript-eslint/eslint-plugin": "^8.25.0",
-    "autoprefixer": "^10.4.20",
+    "@wxt-dev/auto-icons": "^1.0.2",
+    "@wxt-dev/module-svelte": "^2.0.3",
     "eslint": "^9.21.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
@@ -40,7 +46,6 @@
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-svelte": "^2.46.1",
     "globals": "^15.15.0",
-    "lightningcss": "^1.29.1",
     "lodash": "^4.17.21",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.5.2",
@@ -60,9 +65,8 @@
     "tailwindcss": "^4.0.6",
     "typescript-eslint": "^8.24.0",
     "urlpattern-polyfill": "^10.0.0",
-    "vite": "^6.1.1",
-    "vite-plugin-web-extension": "^4.4.3",
-    "webextension-polyfill": "^0.12.0"
+    "webextension-polyfill": "^0.12.0",
+    "wxt": "^0.19.27"
   },
   "webExt": {
     "sourceDir": "dist"

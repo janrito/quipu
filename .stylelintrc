@@ -1,26 +1,14 @@
 {
-    "plugins": [
-      "stylelint-prettier"
+  "plugins": ["stylelint-prettier"],
+  "extends": ["stylelint-config-standard", "stylelint-prettier/recommended"],
+  "rules": {
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": ["extends", "apply", "screen", "theme", "config", "utility"]
+      }
     ],
-    "extends": [
-      "stylelint-config-standard",
-      "stylelint-prettier/recommended"
-    ],
-    "rules": {
-      "at-rule-no-unknown": [
-        true,
-        {
-          "ignoreAtRules": [
-            "extends",
-            "apply",
-            "tailwind",
-            "components",
-            "utilities",
-            "screen",
-            "layer"
-          ]
-        }
-      ],
-      "font-weight-notation": "numeric"
-    }
+    "font-weight-notation": "numeric",
+    "import-notation": "string"
   }
+}

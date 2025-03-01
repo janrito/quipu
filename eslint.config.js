@@ -5,7 +5,10 @@ import globals from "globals";
 import svelteParser from "svelte-eslint-parser";
 import typescript from "typescript-eslint";
 
+import autoImports from "./.wxt/eslint-auto-imports.mjs";
+
 export default [
+  autoImports,
   js.configs.recommended,
   ...typescript.configs.recommended,
   ...svelte.configs["flat/recommended"],
@@ -63,7 +66,8 @@ export default [
   {
     ignores: [
       "node_modules",
-      "dist",
+      ".output",
+      ".wxt",
       "package.json",
       "package-lock.json",
       "*.config.js",

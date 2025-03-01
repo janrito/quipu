@@ -1,17 +1,8 @@
 {
+  "extends": "./.wxt/tsconfig.json",
   "compilerOptions": {
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "checkJs": true,
+    "useDefineForClassFields": true,
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
-    "module": "Node16",
-    "target": "esnext" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
-    "moduleResolution": "node16",
-    "noEmit": true,
-    "outDir": "./dist",
-    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "strict": true /* Enable all strict type-checking options. */
-  },
-  "include": ["source/**/*.ts", "source/**/*.svelte", "source/**/*.js"],
-  "exclude": []
+  }
 }

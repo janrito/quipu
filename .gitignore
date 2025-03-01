@@ -1,6 +1,6 @@
 node_modules
-yarn.lock
-dist
-.parcel-cache
 .DS_Store
 .vscode
+.output
+.wxt
+web-ext.config.ts
