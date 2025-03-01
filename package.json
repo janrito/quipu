@@ -24,8 +24,7 @@
     "last 2 Firefox version"
   ],
   "dependencies": {
-    "webext-options-sync": "^4.3.0",
-    "webext-storage-cache": "^6.0.3"
+    "webext-options-sync": "^4.3.0"
   },
   "devDependencies": {
     "@fontsource/iosevka": "^5.1.0",

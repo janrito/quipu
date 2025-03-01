@@ -1,4 +1,4 @@
-import cache from "webext-storage-cache/legacy.js";
+import { storage } from "wxt/storage";
 
 import type {
   BookmarkSchema,
@@ -7,7 +7,7 @@ import type {
   QuipuError,
   TagMap,
 } from "./types.js";
-import { encodeParameters, formatDate } from "./utils.js";
+import { encodeParameters, formatDate, yesterday } from "./utils.js";
 
 const BOOKMARK_PREFIX = `quipu-bookmark`;
 
@@ -70,20 +70,54 @@ const auth = <TArgs extends unknown[], TReturn>(fn: PinboardFunction<TArgs, TRet
 };
 
 export const postsUpdate = auth(async apiToken =>
-  fetchAPI(apiToken, "posts/update").then(data => data.update_time)
+  fetchAPI(apiToken, "posts/update").then(data => new Date(data.update_time))
 );
 
 const cachedFetchAPI = async (apiToken: string, route: string, parameters: Parameters = {}) =>
   postsUpdate(apiToken).then(async lastUpdate => {
-    const cacheKey = `${lastUpdate}||${route}?${encodeParameters(parameters)}`;
-    return cache.get(cacheKey).then(data => {
-      if (data) {
-        return data;
-      }
-      return fetchAPI(apiToken, route, parameters).then(data =>
-        cache.set(cacheKey, data, { days: 1 })
+    const cacheKey = `${route}?${encodeParameters(parameters)}`;
+    const cachedRoute = storage.defineItem<unknown, { lastUpdate: number; cachedOn: number }>(
+      `session:${cacheKey}`
+    );
+    return cachedRoute
+      .getMeta()
+      .then(meta => {
+        if (!meta.lastUpdate || !meta.cachedOn) {
+          throw new Error("Invalid Metadata");
+        }
+
+        if (
+          // data must be cached as of the last update reported by the API
+          new Date(meta.lastUpdate).valueOf() !== lastUpdate.valueOf() ||
+          // data must be cached for less than a day
+          new Date(meta.cachedOn) < yesterday()
+        ) {
+          throw new Error("Expired Data");
+        }
+        // get cached data
+        return cachedRoute.getValue().then(data => {
+          if (data) {
+            return data;
+          }
+          throw new Error("No Cached Data Found");
+        });
+      })
+      .catch(() =>
+        // if an error was thrown,
+        // due to a missed cache, malformed data, or anything else,
+        // request the data again
+        fetchAPI(apiToken, route, parameters).then(data => {
+          // cache data and set metadata
+          Promise.all([
+            cachedRoute.setValue(data),
+            cachedRoute.setMeta({
+              lastUpdate: lastUpdate.valueOf(),
+              cachedOn: new Date().valueOf(),
+            }),
+          ]);
+          return data;
+        })
       );
-    });
   });
 
 const preprocessTags = (tags: { [key: string]: number }): TagMap[] =>

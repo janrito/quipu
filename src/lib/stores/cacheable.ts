@@ -1,12 +1,19 @@
 import { throttle } from "lodash";
 import { writable } from "svelte/store";
-import cache from "webext-storage-cache/legacy.js";
 import browser from "webextension-polyfill";
+import { storage } from "wxt/storage";
 
-const cacheable = <T>(cacheKey: string, updateOnEvents: Array<keyof typeof browser.tabs>) => {
+const cacheable = <T>(
+  cacheKey: string,
+  updateOnEvents: Array<keyof typeof browser.tabs>,
+  initial: T
+) => {
+  const cache = storage.defineItem<T>(`session:cache-${cacheKey}`, { init: () => initial });
   const reader = (set: (value: T) => void) => async () => {
-    await cache.get(cacheKey).then(value => {
-      set((value && typeof value === "string" ? JSON.parse(value) : []) as T);
+    await cache.getValue().then(value => {
+      if (value) {
+        set(value);
+      }
     });
   };
   const { subscribe, set } = writable([] as T, set => {
@@ -37,9 +44,9 @@ const cacheable = <T>(cacheKey: string, updateOnEvents: Array<keyof typeof brows
   const read = reader(set);
 
   const updateAndCache = async (fn: (value: T) => T) => {
-    await cache.get(cacheKey).then(value => {
-      const newValue = fn((value && typeof value === "string" ? JSON.parse(value) : []) as T);
-      cache.set(cacheKey, JSON.stringify(newValue));
+    await cache.getValue().then(value => {
+      const newValue = fn(value);
+      cache.setValue(newValue);
       set(newValue);
     });
   };

@@ -13,7 +13,8 @@ import cacheable from "./cacheable.js";
 const decayedTabs = () => {
   const { subscribe, update, sync } = cacheable<TabBookmarkSchema[]>(
     DECAY_LOG_CACHE_KEY,
-    UPDATE_EVENT_TYPES
+    UPDATE_EVENT_TYPES,
+    []
   );
 
   const add = (decayingTab: browser.Tabs.Tab) => {

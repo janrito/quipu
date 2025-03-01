@@ -29,6 +29,16 @@ export const tryParseJSONSettings = (jsonString: string) => {
 export const formatDate = (date = new Date()) => date.toISOString().replace(/\.\d{3}Z$/g, "Z");
 
 /**
+ * Returns a Date object representing yesterday's date at the current time
+ * @returns {Date} A Date object set to 24 hours before the current time
+ */
+export const yesterday = () => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d;
+};
+
+/**
  * Encodes keys and values to be passed as URL parameters as expected by
  * the pinboard API.
  * If multiple values in a key, they will be joined by a `+`

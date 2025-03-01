@@ -1,5 +1,5 @@
-import cache from "webext-storage-cache/legacy.js";
+import { storage } from "wxt/storage";
 
 export const clearEntireCache = async () => {
-  await cache.clear();
+  await storage.clear("session");
 };
