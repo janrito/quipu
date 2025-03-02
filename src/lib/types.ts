@@ -18,14 +18,6 @@ export interface AppSettingsSchema {
   tabDecayExceptions: string[];
 }
 
-export interface EncodedAppSettingsSchema {
-  pinboardAPIToken: string;
-  pinboardRootTag: string;
-  pages: string;
-  tabDecayHalfLife: number;
-  tabDecayExceptions: string;
-}
-
 export interface QuipuError extends Error {
   status: number;
 }

@@ -1,42 +1,26 @@
-import OptionsSync from "webext-options-sync";
+import LZString from "lz-string";
+import { storage } from "wxt/storage";
 
-import type { AppSettingsSchema, EncodedAppSettingsSchema, PageSchema } from "./types.js";
+import type { AppSettingsSchema } from "./types.js";
 
-export const decodeOptions = (obj: EncodedAppSettingsSchema): AppSettingsSchema => ({
-  pinboardAPIToken: obj.pinboardAPIToken,
-  pinboardRootTag: obj.pinboardRootTag,
-  pages: JSON.parse(obj.pages) as PageSchema[],
-  tabDecayHalfLife: Number(obj.tabDecayHalfLife),
-  tabDecayExceptions: JSON.parse(obj.tabDecayExceptions) as string[],
-});
-
-export const encodeOptions = (obj: AppSettingsSchema): EncodedAppSettingsSchema => ({
-  pinboardAPIToken: obj.pinboardAPIToken,
-  pinboardRootTag: obj.pinboardRootTag,
-  pages: JSON.stringify(obj.pages),
-  tabDecayHalfLife: obj.tabDecayHalfLife,
-  tabDecayExceptions: JSON.stringify(obj.tabDecayExceptions),
-});
-
-export const optionsStorage = new OptionsSync({
-  defaults: {
-    pinboardAPIToken: "",
-    pinboardRootTag: ".quipu",
-    pages: '[{ "name": "Home", "cards": ["Clipboard", "to-read"] }]',
-    tabDecayHalfLife: 30 * 24 * 60 * 60 * 1000,
-    tabDecayExceptions: "[]",
-  },
-  migrations: [
-    savedOptions => {
-      // Stringify pages and tabDecayExceptions if they are not strings
-      if (typeof savedOptions.pages !== "string") {
-        savedOptions.pages = JSON.stringify(savedOptions.pages);
-      }
-      if (typeof savedOptions.tabDecayExceptions !== "string") {
-        savedOptions.tabDecayExceptions = JSON.stringify(savedOptions.tabDecayExceptions);
-      }
+const { decompressFromEncodedURIComponent } = LZString;
+const fallback = {
+  pinboardAPIToken: "",
+  pinboardRootTag: ".quipu",
+  pages: [{ name: "Home", cards: ["Clipboard", "to-read"] }],
+  tabDecayHalfLife: 30 * 24 * 60 * 60 * 1000,
+  tabDecayExceptions: [],
+};
+export const optionsStorage = storage.defineItem<AppSettingsSchema>("sync:options", {
+  init: () => fallback,
+  version: 2,
+  migrations: {
+    2: (compressedOptions: string): AppSettingsSchema => {
+      return (
+        compressedOptions && compressedOptions.length
+          ? JSON.parse(decompressFromEncodedURIComponent(compressedOptions))
+          : fallback
+      ) as AppSettingsSchema;
     },
-    OptionsSync.migrations.removeUnused,
-  ],
-  logging: true,
+  },
 });

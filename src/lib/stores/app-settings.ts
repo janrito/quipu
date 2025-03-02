@@ -2,7 +2,7 @@ import { writable } from "svelte/store";
 import browser from "webextension-polyfill";
 
 import { UPDATED_SETTINGS_EVENT } from "../constants.js";
-import { decodeOptions, encodeOptions, optionsStorage } from "../options-storage.js";
+import { optionsStorage } from "../options-storage.js";
 import { AppSettingsSchema, BrowserMessage, PageSchema } from "../types.js";
 
 const generateNewName = (currentNames: string[], prefix: string = "New", n: number = 0) => {
@@ -20,16 +20,13 @@ const storable = () => {
   const { subscribe, set } = writable<AppSettingsSchema>();
 
   const read = async () => {
-    await optionsStorage.getAll().then(value => {
-      currentValue = decodeOptions(value);
-      set(currentValue);
+    await optionsStorage.getValue().then(value => {
+      set(value);
     });
   };
 
   const setAndSave = (value: AppSettingsSchema) => {
-    const encodedValue = encodeOptions(value);
-
-    optionsStorage.setAll(encodedValue).then(() => {
+    Promise.all([optionsStorage.setValue(value), optionsStorage.setMeta({ v: 2 })]).then(() => {
       set(value);
       currentValue = value;
     });
