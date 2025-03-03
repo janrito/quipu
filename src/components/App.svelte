@@ -37,8 +37,11 @@ const toggleAppSettings = () => {
     <div class="flex h-full w-full flex-row overflow-hidden">
       <div class="h-full flex-grow overflow-hidden py-3">
         {#if $appSettings}
-          {#if appSettingsActive}<AppSettingsEditor
-              closeEditor={toggleAppSettings} />{:else}<Bookmarks />{/if}
+          {#if appSettingsActive}
+            <AppSettingsEditor closeEditor={toggleAppSettings} />
+          {:else}
+            <Bookmarks />
+          {/if}
         {/if}
       </div>
       <div class="h-full w-56 flex-none bg-gray-100 p-2 dark:bg-gray-800"><Tabs /></div>

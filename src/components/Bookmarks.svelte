@@ -16,6 +16,7 @@ const renameTab = (oldName: string, newName: string) => {
   const index = $appSettings.pages.map(page => page.name).indexOf(oldName);
   if (index === -1) return;
   appSettings.renamePage(index, newName);
+  currentPageName = $appSettings.pages[index].name;
 };
 
 const deleteTab = (name: string) => {
@@ -39,6 +40,9 @@ const reorderTab = (newOrder: string[]) => {
   {deleteTab}
   reorderTabs={reorderTab}>
   {#if $appSettings.pages && $appSettings.pages.length > 0}
-    <Page pageIndex={$appSettings.pages.findIndex(p => p.name === currentPageName)} />
+    {@const pageIndex = $appSettings.pages.findIndex(p => p.name === currentPageName)}
+    {#if pageIndex >= 0}
+      <Page {pageIndex} />
+    {/if}
   {/if}
 </UITabs>

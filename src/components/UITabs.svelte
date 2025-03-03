@@ -73,10 +73,6 @@ const styleDraggedTab = (element: HTMLElement | undefined) => {
   if (!element) return;
   modifyElementClasses(element, ["shadow-xl", "ring-1", "ring-gray-200"]);
 };
-
-$effect(() => {
-  selectedTab = tabs.find(t => t === selectedTab) ? selectedTab : tabs[0];
-});
 </script>
 
 <div class="flex h-full flex-col">
@@ -102,10 +98,7 @@ $effect(() => {
             () => tab.name === selectedTab, selected => selected && (selectedTab = tab.name)
           }
           deleteTab={deleteTabDispatcher(tab.name)}
-          renameTab={newName => {
-            renameTab(tab.name, newName);
-            selectedTab = selectedTab === tab.name ? newName : selectedTab;
-          }} />
+          renameTab={newName => renameTab(tab.name, newName)} />
       {/each}
     </div>
 
