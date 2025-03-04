@@ -1,9 +1,8 @@
 import { writable } from "svelte/store";
-import browser from "webextension-polyfill";
 
-import { UPDATED_SETTINGS_EVENT } from "../constants.js";
+import { sendMessage } from "../messaging.js";
 import { optionsStorage } from "../options-storage.js";
-import { AppSettingsSchema, BrowserMessage, PageSchema } from "../types.js";
+import { AppSettingsSchema, PageSchema } from "../types.js";
 
 const generateNewName = (currentNames: string[], prefix: string = "New", n: number = 0) => {
   const _prefix = prefix.replaceAll(/\s+/gi, "-");
@@ -30,8 +29,8 @@ const storable = () => {
     Promise.all([optionsStorage.setValue(value), optionsStorage.setMeta({ v: 2 })]).then(() => {
       set(value);
       currentValue = value;
+      sendMessage("updatedSettings", undefined);
     });
-    browser.runtime.sendMessage({ eventType: UPDATED_SETTINGS_EVENT } as BrowserMessage);
   };
 
   const updateAndSave = (fn: (value: AppSettingsSchema) => AppSettingsSchema) => {

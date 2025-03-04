@@ -1,7 +1,5 @@
 import browser from "webextension-polyfill";
 
-import type { BrowserEventType } from "./types.js";
-
 export const BROWSER_TAB_PREFIX = "tab";
 export const DECAYED_TAB_PREFIX = "decayed-tab";
 
@@ -20,7 +18,6 @@ export const KEEP_N_DECAYED_TABS = 100;
 
 export const DECAY_LOG_CACHE_KEY = "decay-log";
 export const TAB_DECAY_LIFETIMES_CACHE_KEY = "decay-lifetimes";
-export const UPDATED_SETTINGS_EVENT: BrowserEventType = "updatedSettings";
 
 // long delays create problems for setTimeout, they will actually fire immediately
 // we also don't want to create events that are so far into the future

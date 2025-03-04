@@ -84,9 +84,3 @@ export interface TabLifetimeSchema {
 export interface tabLifetimesSchema {
   [lifetimeId: string]: TabLifetimeSchema;
 }
-
-export type BrowserEventType = "updatedSettings";
-
-export interface BrowserMessage {
-  eventType: BrowserEventType;
-}

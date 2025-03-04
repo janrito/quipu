@@ -24,7 +24,7 @@
     "last 2 Firefox version"
   ],
   "devDependencies": {
-    "@fontsource/iosevka": "^5.1.0",
+    "@fontsource/iosevka": "^5.2.5",
     "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
     "@tailwindcss/postcss": "^4.0.6",
     "@tailwindcss/vite": "^4.0.6",
@@ -32,6 +32,7 @@
     "@types/lodash": "^4.17.15",
     "@types/webextension-polyfill": "^0.12.2",
     "@typescript-eslint/eslint-plugin": "^8.25.0",
+    "@webext-core/messaging": "^2.2.0",
     "@wxt-dev/auto-icons": "^1.0.2",
     "@wxt-dev/module-svelte": "^2.0.3",
     "eslint": "^9.21.0",

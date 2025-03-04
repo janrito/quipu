@@ -3,17 +3,17 @@ import { get } from "svelte/store";
 import { URLPattern } from "urlpattern-polyfill";
 import browser from "webextension-polyfill";
 
-import { MAX_DELAY_TO_SCHEDULE, TAB_QUERY, UPDATED_SETTINGS_EVENT } from "~/lib/constants.js";
+import { MAX_DELAY_TO_SCHEDULE, TAB_QUERY } from "~/lib/constants.js";
+import { onMessage } from "~/lib/messaging";
 import appSettings from "~/lib/stores/app-settings.js";
 import decayedTabs from "~/lib/stores/decayed-tabs.js";
 import tabLifetimes from "~/lib/stores/tab-lifetimes.js";
-import { AppSettingsSchema, BrowserMessage, tabLifetimesSchema } from "~/lib/types.js";
+import { AppSettingsSchema, tabLifetimesSchema } from "~/lib/types.js";
 import {
   calculateDelay,
   closeTab,
   compileValidURLPatterns,
   findURLPattern,
-  isBrowserMessage,
   lifetimeIdToTabId,
   sampleLifetime,
   tabIdToLifetimeId,
@@ -156,19 +156,13 @@ const onUpdatedHandler = () => {
   updateTabLifetimes();
 };
 
-const messageHandler = async (message: BrowserMessage | unknown) => {
-  if (isBrowserMessage(message)) {
-    switch (message.eventType) {
-      case UPDATED_SETTINGS_EVENT:
-        updateTabLifetimes([], true);
-    }
-  }
-};
-
-export default defineBackground(() => {
+export default defineBackground(async () => {
   // Executed when background is loaded
 
   browser.tabs.onActivated.addListener(onActivatedHandler);
   browser.tabs.onUpdated.addListener(onUpdatedHandler);
-  browser.runtime.onMessage.addListener(messageHandler);
+
+  onMessage("updatedSettings", () => {
+    updateTabLifetimes([], true);
+  });
 });

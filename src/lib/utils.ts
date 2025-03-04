@@ -5,7 +5,6 @@ import browser from "webextension-polyfill";
 import { BROWSER_TAB_PREFIX } from "./constants.js";
 import type {
   BookmarkSchemaInCard,
-  BrowserMessage,
   GenericBookmarkSchema,
   Parameters,
   QuipuError,
@@ -250,13 +249,6 @@ export const calculateDelay = (lifetime: number, lastAccessed?: number | undefin
  */
 export const lifetimeIdToTabId = (lifetimeId: string) => Number(lifetimeId);
 export const tabIdToLifetimeId = (tabId: number) => String(tabId);
-
-/** Check if an object of type unknown, is in fact a BrowserMessage
- *
- */
-export const isBrowserMessage = (message: unknown): message is BrowserMessage => {
-  return (message && typeof message === "object" && "eventType" in message) as boolean;
-};
 
 /**
  * Type guard to determine if an object is a TabBookmarkSchema
