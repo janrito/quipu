@@ -3,16 +3,20 @@ import { writable } from "svelte/store";
 import browser from "webextension-polyfill";
 import { storage } from "wxt/storage";
 
-const cacheable = <T>(
+function cacheable<T extends object, ST extends object = T>(
   cacheKey: string,
   updateOnEvents: Array<keyof typeof browser.tabs>,
-  initial: T
-) => {
-  const cache = storage.defineItem<T>(`session:cache-${cacheKey}`, { init: () => initial });
+  initial: ST,
+  serialize: (value: T) => ST = value => value as unknown as ST,
+  deserialize: (value: ST) => T = value => value as unknown as T
+) {
+  const cache = storage.defineItem<ST>(`local:cache-${cacheKey}`, {
+    init: () => initial,
+  });
   const reader = (set: (value: T) => void) => async () => {
     await cache.getValue().then(value => {
       if (value) {
-        set(value);
+        set(deserialize(value));
       }
     });
   };
@@ -45,8 +49,8 @@ const cacheable = <T>(
 
   const updateAndCache = async (fn: (value: T) => T) => {
     await cache.getValue().then(value => {
-      const newValue = fn(value);
-      cache.setValue(newValue);
+      const newValue = fn(deserialize(value));
+      cache.setValue(serialize(newValue));
       set(newValue);
     });
   };
@@ -57,5 +61,5 @@ const cacheable = <T>(
     subscribe,
     update: updateAndCache,
   };
-};
+}
 export default cacheable;

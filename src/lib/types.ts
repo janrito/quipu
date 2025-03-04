@@ -52,6 +52,11 @@ export interface TabBookmarkSchema extends GenericBookmarkSchema {
   index: number;
 }
 
+export type SerializedTabBookmarkSchema = Omit<TabBookmarkSchema, "favIconUrl" | "href"> & {
+  href: string;
+  favIconUrl?: string;
+};
+
 export interface BookmarksStore {
   data: BookmarkSchema[];
   loading: boolean;
