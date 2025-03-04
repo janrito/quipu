@@ -17,6 +17,7 @@
     "lint:css": "stylelint src/**/*.css src/**/*.pcss",
     "lint:js": "eslint --fix .",
     "lint:prettier": "prettier --check .",
+    "test": "run-p lint check",
     "postinstall": "wxt prepare"
   },
   "browserslist": [
