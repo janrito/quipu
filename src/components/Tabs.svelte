@@ -2,7 +2,6 @@
 import { onMount } from "svelte";
 import type { DndEvent } from "svelte-dnd-action";
 import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME, TRIGGERS } from "svelte-dnd-action";
-import { run } from "svelte/legacy";
 
 import { UPDATE_DECAY_DISPLAY_INTERVAL } from "~/lib/constants.js";
 import browserTabs from "~/lib/stores/browser-tabs.js";
@@ -30,9 +29,6 @@ import Bookmark from "./Bookmark.svelte";
 let tempBrowserTabs: (DraggableBookmarkSchema & TabBookmarkSchema)[][] = $state([]);
 let tempDecayedTabs: DraggableBookmarkSchema[] = $state([]);
 
-// keep track of active tab lifetimes
-let updatedLifetimes = $state($tabLifetimes);
-
 let drawingWindowTabs = $derived(tempBrowserTabs.length ? tempBrowserTabs : [...$browserTabs]);
 let drawingDecayedTabs = $derived(
   tempDecayedTabs.length ? tempDecayedTabs : ([...$decayedTabs] as DraggableBookmarkSchema[])
@@ -55,8 +51,8 @@ const handleDragDecayedTab = () => {
   tempDecayedTabs = [];
 };
 
-const getTabLifetime = (tab: TabBookmarkSchema, updatedLifetimes: tabLifetimesSchema) => {
-  const tabLifetimeMeta = updatedLifetimes[tabIdToLifetimeId(tab._id)] || { lifetime: undefined };
+const getTabLifetime = (tab: TabBookmarkSchema, lifetimes: tabLifetimesSchema) => {
+  const tabLifetimeMeta = lifetimes[tabIdToLifetimeId(tab._id)] || { lifetime: undefined };
   const { lifetime } = tabLifetimeMeta;
   return lifetime;
 };
@@ -121,10 +117,6 @@ const styleDraggedTab = (element: HTMLElement | undefined) => {
   if (!element) return;
   modifyElementClasses(element, ["shadow-xl"]);
 };
-
-run(() => {
-  updatedLifetimes = $tabLifetimes;
-});
 </script>
 
 <div class="h-full overflow-x-hidden overflow-y-auto pr-3">
@@ -145,7 +137,7 @@ run(() => {
       onconsider={handleDragTabConsider(windowIndex)}
       onfinalize={handleDragTab}>
       {#each tabs as tab (tab.id)}
-        {@const lifetime = getTabLifetime(tab, updatedLifetimes)}
+        {@const lifetime = getTabLifetime(tab, $tabLifetimes)}
         <Bookmark
           key={tab.id}
           description={tab.description}
