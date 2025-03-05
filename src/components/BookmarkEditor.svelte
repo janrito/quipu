@@ -1,8 +1,4 @@
-<script lang="ts">
-import type { BookmarkSchema } from "~/lib/types.js";
-
-import IconDelete from "./IconDelete.svelte";
-
+<script lang="ts" module>
 interface Props {
   description: string;
   href: URL;
@@ -15,6 +11,14 @@ interface Props {
   close: () => void;
 }
 
+type tagType = "cardTag" | "leafTag" | "parentTag";
+</script>
+
+<script lang="ts">
+import type { BookmarkSchema } from "~/lib/types.js";
+
+import IconDelete from "./IconDelete.svelte";
+
 let {
   description = $bindable(),
   href,
@@ -26,8 +30,6 @@ let {
   deleteBookmark,
   close,
 }: Props = $props();
-
-type tagType = "cardTag" | "leafTag" | "parentTag";
 
 const pickTagType = (tag: string): tagType => {
   if (parentTags.includes(tag)) {

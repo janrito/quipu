@@ -107,7 +107,7 @@ const leafTagStyle =
         onkeydown={runOnEnter(closeBookmark)}
         onclick={runOnClick(closeBookmark)}
         class="group/close-button block cursor-pointer align-top text-sm text-red-300 hover:text-red-500">
-        <IconDelete class="drop-shadow-sm group-hover/close-button:drop-shadow-lg" />
+        <IconDelete className="drop-shadow-sm group-hover/close-button:drop-shadow-lg" />
       </div>
     </div>
   {/if}

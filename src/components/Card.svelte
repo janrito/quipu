@@ -5,6 +5,24 @@
 }
 </style>
 
+<script lang="ts" module>
+interface Props {
+  name: string;
+  bookmarks?: DraggableBookmarkSchema[];
+  parentTags?: string[];
+  untagged?: boolean;
+  editMode?: boolean;
+  deleteBookmark: (href: URL) => void;
+  addNewBookmark: (bookmark: TabBookmarkSchema) => void;
+  updateBookmark: (bookmark: GenericBookmarkSchema) => void;
+  highlightBookmark: (bookmarkId: string) => void;
+  syncBookmarks: () => void;
+  renameCard?: (newName: string) => void;
+  deleteCard?: () => void;
+  createNewCard: () => void;
+}
+</script>
+
 <script lang="ts">
 import { delay } from "lodash";
 import type { DndEvent } from "svelte-dnd-action";
@@ -21,22 +39,6 @@ import type {
 import { isBookmarkSchemaInCard, isTab, modifyElementClasses, newTab } from "../lib/utils.js";
 import Bookmark from "./Bookmark.svelte";
 import TagEditor from "./TagEditor.svelte";
-
-interface Props {
-  name: string;
-  bookmarks?: DraggableBookmarkSchema[];
-  parentTags?: string[];
-  untagged?: boolean;
-  editMode?: boolean;
-  deleteBookmark: (href: URL) => void;
-  addNewBookmark: (bookmark: TabBookmarkSchema) => void;
-  updateBookmark: (bookmark: GenericBookmarkSchema) => void;
-  highlightBookmark: (bookmarkId: string) => void;
-  syncBookmarks: () => void;
-  renameCard?: (newName: string) => void;
-  deleteCard?: () => void;
-  createNewCard: () => void;
-}
 
 let {
   name,

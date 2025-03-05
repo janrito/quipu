@@ -1,15 +1,17 @@
-<script lang="ts">
-import { focus } from "~/lib/actions.js";
-import type { TagMap } from "~/lib/types.js";
-
-import IconDelete from "./IconDelete.svelte";
-
+<script lang="ts" module>
 interface Props {
   value: string;
   suggestedTags: TagMap[];
   deleteTag: () => void;
   close: () => void;
 }
+</script>
+
+<script lang="ts">
+import { focus } from "~/lib/actions.js";
+import type { TagMap } from "~/lib/types.js";
+
+import IconDelete from "./IconDelete.svelte";
 
 let { value = $bindable(), suggestedTags, close, deleteTag }: Props = $props();
 

@@ -1,3 +1,15 @@
+<script lang="ts" module>
+interface Props {
+  pageIndex: number;
+}
+
+interface DraggableCardSchema {
+  name: string;
+  id: number;
+  [SHADOW_ITEM_MARKER_PROPERTY_NAME]?: boolean;
+}
+</script>
+
 <script lang="ts">
 import type { DndEvent } from "svelte-dnd-action";
 import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
@@ -16,16 +28,6 @@ import { closeTab, modifyElementClasses } from "~/lib/utils.js";
 import BookmarkEditor from "./BookmarkEditor.svelte";
 import Card from "./Card.svelte";
 import Spinner from "./Spinner.svelte";
-
-interface Props {
-  pageIndex: number;
-}
-
-interface DraggableCardSchema {
-  name: string;
-  id: number;
-  [SHADOW_ITEM_MARKER_PROPERTY_NAME]?: boolean;
-}
 
 let { pageIndex = $bindable() }: Props = $props();
 let page: PageSchema = $derived($appSettings.pages[pageIndex]);
