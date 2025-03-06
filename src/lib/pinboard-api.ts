@@ -77,7 +77,7 @@ const cachedFetchAPI = async (apiToken: string, route: string, parameters: Param
   postsUpdate(apiToken).then(async lastUpdate => {
     const cacheKey = `${route}?${encodeParameters(parameters)}`;
     const cachedRoute = storage.defineItem<unknown, { lastUpdate: number; cachedOn: number }>(
-      `session:${cacheKey}`
+      `local:${cacheKey}`
     );
     return cachedRoute
       .getMeta()

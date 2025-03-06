@@ -1,5 +1,5 @@
 import { storage } from "wxt/storage";
 
 export const clearEntireCache = async () => {
-  await storage.clear("session");
+  await storage.clear("local");
 };
