@@ -48,10 +48,11 @@ function cacheable<T extends object, ST extends object = T>(
   const read = reader(set);
 
   const updateAndCache = async (fn: (value: T) => T) => {
-    await cache.getValue().then(value => {
+    await cache.getValue().then(async value => {
       const newValue = fn(deserialize(value));
-      cache.setValue(serialize(newValue));
-      set(newValue);
+      await cache.setValue(serialize(newValue)).then(() => {
+        set(newValue);
+      });
     });
   };
 
