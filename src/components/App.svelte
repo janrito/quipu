@@ -1,3 +1,10 @@
+<style lang="postcss">
+@reference "../assets/main.pcss";
+:global(body) {
+  @apply font-mono text-base leading-relaxed font-normal text-gray-800;
+}
+</style>
+
 <script lang="ts">
 import appSettings from "~/lib/stores/app-settings.js";
 
@@ -12,8 +19,7 @@ const toggleAppSettings = () => {
 };
 </script>
 
-<div
-  class="flex h-screen w-screen flex-col justify-between font-mono text-base leading-relaxed font-normal text-gray-800">
+<div class="flex h-screen w-screen flex-col justify-between">
   <header class="h-7 border-b border-head-600 bg-head-800 px-3 py-1">
     <div class="flex h-full flex-row">
       <div class="h-full">
