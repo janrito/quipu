@@ -2,7 +2,7 @@ import { debounce, memoize } from "lodash";
 import { writable } from "svelte/store";
 
 import { PinboardAPIError, postsAdd, postsAll, postsDelete } from "../pinboard-api.js";
-import { BookmarksStore, GenericBookmarkSchema, TabBookmarkSchema } from "../types.js";
+import { BookmarkSchema, BookmarksStore, TabBookmarkSchema } from "../types.js";
 
 const createBookmarksStore = (apiToken: string, tags: string[]) => {
   const initialValue: BookmarksStore = {
@@ -67,7 +67,7 @@ const createBookmarksStore = (apiToken: string, tags: string[]) => {
       })
       .then(sync);
 
-  const updateBookmark = (bookmark: GenericBookmarkSchema) =>
+  const updateBookmark = (bookmark: BookmarkSchema) =>
     postsAdd(apiToken, bookmark.href, bookmark.description, bookmark.extended, bookmark.tags, "yes")
       .catch((e: PinboardAPIError) => {
         //add error to messages

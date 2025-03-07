@@ -4,8 +4,8 @@ import browser from "webextension-polyfill";
 
 import { BROWSER_TAB_PREFIX } from "./constants.js";
 import type {
+  BookmarkOrTab,
   BookmarkSchemaInCard,
-  GenericBookmarkSchema,
   Parameters,
   QuipuError,
   TabBookmarkSchema,
@@ -251,15 +251,27 @@ export const lifetimeIdToTabId = (lifetimeId: string) => Number(lifetimeId);
 export const tabIdToLifetimeId = (tabId: number) => String(tabId);
 
 /**
+ * Type guard to determine if an object is a BookmarkOrTab
+ */
+export const isBookmarkOrTab = (obj: unknown): obj is BookmarkOrTab => {
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    "type" in obj &&
+    (obj.type === "Tab" || obj.type === "Bookmark")
+  );
+};
+
+/**
  * Type guard to determine if an object is a TabBookmarkSchema
  */
-export const isTab = (obj: GenericBookmarkSchema): obj is TabBookmarkSchema => {
+export const isTab = (obj: BookmarkOrTab): obj is TabBookmarkSchema => {
   return "type" in obj && obj.type === "Tab";
 };
 
 /**
  * Type guard to determine if an object is a BookmarkSchemaInCard
  */
-export const isBookmarkSchemaInCard = (obj: GenericBookmarkSchema): obj is BookmarkSchemaInCard => {
+export const isBookmarkSchemaInCard = (obj: BookmarkOrTab): obj is BookmarkSchemaInCard => {
   return "type" in obj && obj.type === "Bookmark" && "_cardTag" in obj;
 };

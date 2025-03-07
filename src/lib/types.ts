@@ -22,7 +22,7 @@ export interface QuipuError extends Error {
   status: number;
 }
 
-export interface GenericBookmarkSchema {
+interface BookmarkSchemaBase {
   href: URL;
   description: string;
   favIconUrl?: URL;
@@ -37,7 +37,7 @@ export interface DraggableBookmarkSchema extends GenericBookmarkSchema {
   [SHADOW_ITEM_MARKER_PROPERTY_NAME]?: boolean;
 }
 
-export interface BookmarkSchema extends GenericBookmarkSchema {
+export interface BookmarkSchema extends BookmarkSchemaBase {
   type: "Bookmark";
 }
 export interface BookmarkSchemaInCard extends BookmarkSchema {
@@ -45,12 +45,13 @@ export interface BookmarkSchemaInCard extends BookmarkSchema {
   _bookmarkId: string;
 }
 
-export interface TabBookmarkSchema extends GenericBookmarkSchema {
+export interface TabBookmarkSchema extends BookmarkSchemaBase {
   type: "Tab";
   lastAccessed?: number;
   windowId: number;
   index: number;
 }
+export type BookmarkOrTab = BookmarkSchema | TabBookmarkSchema;
 
 export type SerializedTabBookmarkSchema = Omit<TabBookmarkSchema, "favIconUrl" | "href"> & {
   href: string;
