@@ -11,7 +11,7 @@ interface Props {
   close: () => void;
 }
 
-type tagType = "cardTag" | "leafTag" | "parentTag";
+type tagType = "card" | "leaf" | "parent";
 </script>
 
 <script lang="ts">
@@ -33,11 +33,11 @@ let {
 
 const pickTagType = (tag: string): tagType => {
   if (parentTags.includes(tag)) {
-    return "parentTag";
+    return "parent";
   } else if (cardsInPage.includes(tag)) {
-    return "cardTag";
+    return "card";
   }
-  return "leafTag";
+  return "leaf";
 };
 
 let tagsToDraw = $derived(
@@ -80,15 +80,7 @@ const updateTags = (event: Event) => {
   tags = [...new Set(event.target.textContent?.trim().split(/\s+/) || [])];
 };
 
-const typeOrder: tagType[] = ["leafTag", "cardTag", "parentTag"];
-const tagStyle: Record<tagType, string> = {
-  parentTag:
-    "border-blue-400 bg-blue-50 text-blue-500 dark:border-blue-500 dark:bg-blue-900 dark:text-blue-400",
-  cardTag:
-    "border-green-400 bg-green-50 text-green-500 dark:border-green-500 dark:bg-green-900 dark:text-green-400",
-  leafTag:
-    "border-yellow-400 bg-yellow-50 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-400",
-};
+const typeOrder: tagType[] = ["leaf", "card", "parent"];
 </script>
 
 <div class="p-2">
@@ -120,7 +112,8 @@ const tagStyle: Record<tagType, string> = {
     {#if tagsToDraw}
       <p class="mb-2 text-sm font-extralight">
         {#each tagsToDraw as tag}
-          <span class="border-b-2 px-1 {tagStyle[tag.type]}">
+          <span
+            class="{tag.type} border-b-2 border-yellow-400 bg-yellow-50 px-1 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-400 [&.card]:border-green-400 [&.card]:bg-green-50 [&.card]:text-green-500 [&.card]:dark:border-green-500 [&.card]:dark:bg-green-900 [&.card]:dark:text-green-400 [&.parent]:border-blue-400 [&.parent]:bg-blue-50 [&.parent]:text-blue-500 [&.parent]:dark:border-blue-500 [&.parent]:dark:bg-blue-900 [&.parent]:dark:text-blue-400">
             {tag.name}
           </span>
           <span> </span>

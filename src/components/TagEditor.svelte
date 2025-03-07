@@ -71,7 +71,6 @@ const selectSuggestedTag = (tag: TagMap) => () => {
   value = tag.name;
   close();
 };
-const selectedSuggestedTagStyle = "bg-gray-200 dark:bg-gray-700";
 </script>
 
 <div class="relative flex min-w-fit flex-row text-sm">
@@ -95,8 +94,8 @@ const selectedSuggestedTagStyle = "bg-gray-200 dark:bg-gray-700";
             <span
               role="button"
               tabindex="0"
-              class="block px-1 pt-0.5 pb-0 {selectedSuggestedTagIdx === tagIdx &&
-                selectedSuggestedTagStyle}"
+              class:selected={selectedSuggestedTagIdx === tagIdx}
+              class="block px-1 pt-0.5 pb-0 [&.selected]:bg-gray-200 [&.selected]:dark:bg-gray-700"
               onkeydown={e => e.key === "Enter" && selectSuggestedTag(tag)()}
               onclick={selectSuggestedTag(tag)}>
               {tag.name}</span>

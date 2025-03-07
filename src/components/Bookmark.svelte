@@ -67,37 +67,13 @@ const runOnEnter = (callback: () => void) => (event: KeyboardEvent) => {
   }
 };
 
-const decayStyle = (lowProps: string, midProps: string, highProps: string): string => {
+const decayStyle = (): string => {
   if (decay <= 0.7) {
-    return lowProps;
+    return "low-decay";
   } else if (decay <= 0.9) {
-    return midProps;
+    return "mid-decay";
   }
-  return highProps;
-};
-
-const decayProgressBackground = decayStyle(
-  "bg-blue-500 dark:bg-blue-500",
-  "bg-orange-500 dark:bg-orange-400",
-  "bg-red-500 dark:bg-red-400"
-);
-
-const tooltipBackground = decayStyle(
-  "bg-blue-200 dark:bg-blue-700",
-  "bg-orange-200 dark:bg-orange-700",
-  "bg-red-200 dark:bg-red-700"
-);
-const tooltipForeground = decayStyle(
-  "text-blue-400 dark:text-blue-500",
-  "text-orange-400 dark:text-orange-500",
-  "text-red-400 dark:text-red-500"
-);
-const tooltipAlignment = decayStyle("left-1", "left-10", "-right-2");
-
-const tagStyle = {
-  parent:
-    "border-blue-400 bg-blue-50 text-blue-500 dark:border-blue-500 dark:bg-blue-900 dark:text-blue-500",
-  leaf: "border-yellow-400 bg-yellow-50 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-500",
+  return "high-decay";
 };
 
 $effect(() => {
@@ -172,10 +148,12 @@ $effect(() => {
       {#if decay}
         <!-- tooltip -->
         <div
-          class="absolute -bottom-9 z-10 hidden group-hover/tooltip:flex {tooltipAlignment} mt-6 flex-col items-center">
-          <div class="-mb-2 h-3 w-3 rotate-45 {tooltipBackground}"></div>
+          class="{decayStyle()} absolute -bottom-9 z-10 mt-6 hidden flex-col items-center group-hover/tooltip:flex [&.high-decay]:-right-2 [&.low-decay]:left-1 [&.mid-decay]:left-10">
+          <div
+            class="{decayStyle()} -mb-2 h-3 w-3 rotate-45 [&.high-decay]:bg-red-200 [&.high-decay]:dark:bg-red-700 [&.low-decay]:bg-blue-200 [&.low-decay]:dark:bg-blue-700 [&.mid-decay]:bg-orange-200 [&.mid-decay]:dark:bg-orange-700">
+          </div>
           <span
-            class="whitespace-no-wrap relative p-2 text-xs leading-none shadow-lg {tooltipBackground} {tooltipForeground}"
+            class="{decayStyle()} whitespace-no-wrap relative p-2 text-xs leading-none shadow-lg [&.high-decay]:bg-red-200 [&.high-decay]:text-red-400 [&.high-decay]:dark:bg-red-700 [&.high-decay]:dark:text-red-500 [&.low-decay]:bg-blue-200 [&.low-decay]:text-blue-400 [&.low-decay]:dark:bg-blue-700 [&.low-decay]:dark:text-blue-500 [&.mid-decay]:bg-orange-200 [&.mid-decay]:text-orange-400 [&.mid-decay]:dark:bg-orange-700 [&.mid-decay]:dark:text-orange-500"
             >Decay: {Math.round(decay * 100)}%</span>
         </div>
       {/if}
@@ -192,7 +170,8 @@ $effect(() => {
         <p class="truncate text-xs font-extralight">
           {#each sortedTags as tag}
             <span
-              class="inline-block border-b px-1 {tag.isParent ? tagStyle.parent : tagStyle.leaf}"
+              class:parent={tag.isParent}
+              class="inline-block border-b border-yellow-400 bg-yellow-50 px-1 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-500 [&.parent]:border-blue-400 [&.parent]:bg-blue-50 [&.parent]:text-blue-500 [&.parent]:dark:border-blue-500 [&.parent]:dark:bg-blue-900 [&.parent]:dark:text-blue-500"
               >{tag.name}</span>
             <span> </span>
           {/each}
@@ -202,7 +181,10 @@ $effect(() => {
   </div>
   <div class="-m-1 mt-2 h-px shrink-0">
     <div class="w-full bg-gray-200 dark:bg-gray-700">
-      <div class="{decayProgressBackground} h-px" style="width: {decay * 100}%"></div>
+      <div
+        class="{decayStyle()} h-px [&.high-decay]:bg-red-500 [&.high-decay]:dark:bg-red-400 [&.low-decay]:bg-blue-500 [&.low-decay]:dark:bg-blue-500 [&.mid-decay]:bg-orange-500 [&.mid-decay]:dark:bg-orange-400"
+        style="width: {decay * 100}%">
+      </div>
     </div>
   </div>
 </div>
