@@ -67,6 +67,17 @@ const storable = () => {
     }
   };
 
+  const reorderCards = (pageIndex: number, cards: string[]) => {
+    if (
+      new Set(cards).symmetricDifference(new Set(currentValue.pages[pageIndex].cards)).size === 0
+    ) {
+      updateAndSave((value: AppSettingsSchema) => {
+        value.pages[pageIndex].cards = cards;
+        return value;
+      });
+    }
+  };
+
   const newPage = () => {
     updateAndSave((value: AppSettingsSchema) => {
       value.pages = [
@@ -114,6 +125,7 @@ const storable = () => {
     read,
     newCard,
     renameCard,
+    reorderCards,
     newPage,
     renamePage,
     reorderPages,
