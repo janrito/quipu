@@ -2,28 +2,23 @@
 interface Props {
   pageIndex: number;
 }
-
-interface DraggableCardSchema {
-  name: string;
-  id: number;
-  [SHADOW_ITEM_MARKER_PROPERTY_NAME]?: boolean;
-}
 </script>
 
 <script lang="ts">
-import type { DndEvent } from "svelte-dnd-action";
-import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
+import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
+import type { Edge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/types";
+import { reorderWithEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/reorder-with-edge";
+import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 
 import appSettings from "~/lib/stores/app-settings.js";
 import createBookmarksStore from "~/lib/stores/bookmarks.js";
 import type {
+  BookmarkOrTab,
   BookmarkSchema,
   BookmarkSchemaInCard,
-  GenericBookmarkSchema,
   PageSchema,
-  TabBookmarkSchema,
 } from "~/lib/types.js";
-import { closeTab, modifyElementClasses } from "~/lib/utils.js";
+import { closeTab, isBookmarkOrTab, isBookmarkSchemaInCard, isTab } from "~/lib/utils.js";
 
 import BookmarkEditor from "./BookmarkEditor.svelte";
 import Card from "./Card.svelte";
@@ -32,22 +27,9 @@ import Spinner from "./Spinner.svelte";
 let { pageIndex = $bindable() }: Props = $props();
 let page: PageSchema = $derived($appSettings.pages[pageIndex]);
 
-let tempCards: DraggableCardSchema[] = $state([]);
 let highlightedBookmarkId: string | undefined = $state(undefined);
 let parentTags = $derived([$appSettings.pinboardRootTag, page.name].filter(tag => tag));
 let bookmarksStore = $derived(createBookmarksStore($appSettings.pinboardAPIToken, parentTags));
-
-let cards = $derived.by(() => {
-  if (tempCards.length) {
-    return tempCards;
-  }
-  if ($appSettings.pages[pageIndex].cards) {
-    return $appSettings.pages[pageIndex].cards.map(
-      (name, id) => ({ id, name }) as DraggableCardSchema
-    );
-  }
-  return [];
-});
 
 let bookmarks = $derived($bookmarksStore.data);
 
@@ -109,39 +91,9 @@ const deleteCardDispatcher = (cardIndex: number) => () => {
   );
 };
 
-const handleReorderCardsConsider = (event: CustomEvent<DndEvent<DraggableCardSchema>>) => {
-  tempCards = event.detail.items;
-};
-
-const handleReorderCards = (event: CustomEvent<DndEvent<DraggableCardSchema>>) => {
-  const order = [...new Set(event.detail.items.map(card => card.id))];
-
-  if (order.length === $appSettings.pages[pageIndex].cards.length) {
-    $appSettings.pages[pageIndex].cards = order.map(
-      index => $appSettings.pages[pageIndex].cards[index]
-    );
-  }
-  tempCards = [];
-};
-
-const updateBookmark = (bookmark: GenericBookmarkSchema) => {
-  bookmarksStore.updateBookmark(bookmark);
-};
-
 const deleteBookmark = (href: URL) => {
   bookmarksStore.deleteBookmark(href);
 };
-const addNewBookmark = (bookmark: TabBookmarkSchema) => {
-  bookmarksStore
-    .addBookmark(bookmark)
-    .then(() => {
-      // close tab after adding bookmark
-      closeTab(bookmark._id);
-    })
-    // ignore error, it is already logged
-    .catch(() => {});
-};
-
 const syncBookmarks = () => {
   bookmarksStore.sync();
 };
@@ -150,13 +102,85 @@ const highlightBookmark = (id: string) => {
   highlightedBookmarkId = id;
 };
 
-const styleDraggedCard = (element: HTMLElement | undefined) => {
-  if (!element) return;
-  modifyElementClasses(element, ["shadow-xl"]);
+const onCardDrop = (sourceName: string, targetData: { name: string; edge: Edge }) => {
+  const indexOfSource = page.cards.findIndex(c => c === sourceName);
+  const indexOfTarget = page.cards.findIndex(c => c === targetData.name);
+  if (indexOfTarget < 0 || indexOfSource < 0) {
+    return;
+  }
+  const closestEdgeOfTarget = extractClosestEdge(targetData);
+  const newOrder = reorderWithEdge({
+    list: page.cards,
+    startIndex: indexOfSource,
+    indexOfTarget,
+    closestEdgeOfTarget,
+    axis: "vertical",
+  });
+
+  appSettings.reorderCards(pageIndex, newOrder);
+  pageIndex = pageIndex;
 };
 
-const narrowPanelStyle = "w-3/5";
-const widePanelStyle = "w-full";
+const onBookmarkDrop = (targetName: string, tentativeBookmark: BookmarkOrTab) => {
+  if (isTab(tentativeBookmark)) {
+    bookmarksStore
+      .addBookmark({
+        ...tentativeBookmark,
+        tags: [...parentTags, targetName],
+      })
+      .then(() => {
+        // close tab after adding bookmark
+        closeTab(tentativeBookmark._id);
+      })
+      .catch(() => {}); // ignore error, it is already logged
+  } else if (
+    isBookmarkSchemaInCard(tentativeBookmark) &&
+    tentativeBookmark._cardTag !== targetName
+  ) {
+    // existing bookmark, update details
+    bookmarksStore.updateBookmark({
+      ...tentativeBookmark,
+      tags: [
+        ...new Set([
+          // keep tags previously in this bookmark, but remove the card it's been dragged from
+          ...tentativeBookmark.tags.filter(tag => tag !== tentativeBookmark._cardTag),
+          // make sure the parent tags are present
+          ...parentTags,
+          // add the current card
+          targetName,
+          // // if copying, add the original card tag
+          // ...(altKeyActive ? [droppedBookmark._cardTag] : []),
+        ]),
+      ],
+    });
+  }
+};
+
+$effect(() => {
+  monitorForElements({
+    canMonitor: ({ source }) => source.data.type === "card" || source.data.type === "bookmark",
+    onDrop: ({ source, location }) => {
+      const target = location.current.dropTargets[0];
+
+      if (!target) {
+        return;
+      }
+      const sourceData = source.data;
+      const targetData = target.data;
+
+      if (targetData.type !== "card") {
+        return;
+      }
+
+      if (sourceData.type === "card") {
+        onCardDrop(sourceData.name as string, targetData as { name: string; edge: Edge });
+        return;
+      } else if (sourceData.type === "bookmark" && isBookmarkOrTab(sourceData.bookmark)) {
+        onBookmarkDrop(targetData.name as string, sourceData.bookmark);
+      }
+    },
+  });
+});
 </script>
 
 {#each errors as error}
@@ -169,53 +193,33 @@ const widePanelStyle = "w-full";
 {/each}
 <div class="flex h-full w-full flex-row overflow-hidden">
   <div
-    class="flex h-full flex-col overflow-x-hidden overflow-y-auto pr-3 {highlightedBookmark
-      ? narrowPanelStyle
-      : widePanelStyle}">
+    class="peer-[]/highlighted:w-3/5 flex h-full w-full flex-col overflow-x-hidden overflow-y-auto pr-3">
     {#if loading}
       <Spinner />
-    {:else if (bookmarks && bookmarks.length > 0) || (cards && cards.length)}
-      {#if cards}
-        <div
-          class="flex flex-col"
-          use:dndzone={{
-            items: cards,
-            dropTargetStyle: {},
-            dropFromOthersDisabled: true,
-            transformDraggedElement: styleDraggedCard,
-          }}
-          onconsider={handleReorderCardsConsider}
-          onfinalize={handleReorderCards}>
-          {#each cards as card (card.id)}
-            <Card
-              {...card}
-              bookmarks={filterBookmarksByTag(bookmarks, card.name)}
-              {parentTags}
-              {highlightBookmark}
-              {deleteBookmark}
-              renameCard={renameCardDispatcher(card.id)}
-              createNewCard={createNewCardDispatcher(card.id)}
-              deleteCard={deleteCardDispatcher(card.id)}
-              {addNewBookmark}
-              {syncBookmarks}
-              {updateBookmark} />
-          {/each}
-        </div>
+    {:else if (bookmarks && bookmarks.length > 0) || (page.cards && page.cards.length)}
+      {#if page.cards}
+        {#each page.cards as card, cardIndex}
+          <Card
+            name={card}
+            bookmarks={filterBookmarksByTag(bookmarks, card)}
+            {parentTags}
+            {highlightBookmark}
+            {deleteBookmark}
+            renameCard={renameCardDispatcher(cardIndex)}
+            createNewCard={createNewCardDispatcher(cardIndex)}
+            deleteCard={deleteCardDispatcher(cardIndex)}
+            {syncBookmarks} />
+        {/each}
       {/if}
       <Card
         name="..."
-        bookmarks={filterBookmarksWithoutTags(
-          bookmarks,
-          cards.map(card => card.name)
-        )}
+        bookmarks={filterBookmarksWithoutTags(bookmarks, page.cards)}
         {highlightBookmark}
         {deleteBookmark}
         {parentTags}
         untagged={true}
-        createNewCard={createNewCardDispatcher(cards.length)}
-        {addNewBookmark}
-        {syncBookmarks}
-        {updateBookmark} />
+        createNewCard={createNewCardDispatcher(page.cards.length)}
+        {syncBookmarks} />
     {:else}
       <p class="py-20 text-center text-lg text-gray-300 dark:text-gray-600">
         Add a
@@ -228,12 +232,14 @@ const widePanelStyle = "w-full";
     {/if}
   </div>
   {#if highlightedBookmark}
-    <div class="flex h-full w-2/5 flex-col overflow-x-hidden overflow-y-auto pr-3">
+    <div class="peer/highlighted flex h-full w-2/5 flex-col overflow-x-hidden overflow-y-auto pr-3">
       <BookmarkEditor
         {...highlightedBookmark}
         {parentTags}
         cardsInPage={$appSettings.pages[pageIndex].cards}
-        {updateBookmark}
+        updateBookmark={bookmark => {
+          bookmarksStore.updateBookmark(bookmark);
+        }}
         {deleteBookmark}
         close={() => (highlightedBookmarkId = undefined)} />
     </div>

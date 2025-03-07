@@ -1,5 +1,3 @@
-import { SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
-
 export type ParameterValue = Array<boolean | number | string> | boolean | number | string;
 export type Parameters = {
   [key: string]: ParameterValue;
@@ -31,10 +29,6 @@ interface BookmarkSchemaBase {
   time: number;
   id: string;
   _id: number;
-}
-
-export interface DraggableBookmarkSchema extends GenericBookmarkSchema {
-  [SHADOW_ITEM_MARKER_PROPERTY_NAME]?: boolean;
 }
 
 export interface BookmarkSchema extends BookmarkSchemaBase {

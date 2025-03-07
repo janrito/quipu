@@ -1,43 +1,49 @@
-<style>
-@reference "../assets/main.pcss";
-:global(#dnd-action-dragged-el) {
-  @apply shadow-xl;
-}
-</style>
-
-<script lang="ts">
-import IconDelete from "./IconDelete.svelte";
-
+<script lang="ts" module>
 interface Props {
-  key: string;
-  description: string;
-  href: URL;
-  tags?: string[];
+  bookmark: BookmarkOrTab;
   parentTags?: string[];
-  favIconUrl?: URL;
   decay?: number;
   closeEnabled?: boolean;
-  openBookmark: () => void;
+  element?: HTMLDivElement;
+  preview?: boolean;
+  openBookmark?: () => void;
   closeBookmark?: () => void;
   highlightBookmark?: (key: string) => void;
 }
+interface DragState {
+  state: "idle" | "in-flight";
+  edge?: Edge;
+}
+</script>
+
+<script lang="ts">
+import type { BookmarkOrTab } from "@/lib/types";
+import type { Edge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/types";
+import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { preserveOffsetOnSource } from "@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source";
+import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
+import { mount, unmount } from "svelte";
+
+import Self from "./Bookmark.svelte";
+import IconDelete from "./IconDelete.svelte";
 
 let {
-  key,
-  description,
-  href,
-  tags = [],
+  bookmark,
   parentTags = [],
-  favIconUrl,
+  preview = false,
   decay = 0,
   closeEnabled = true,
-  openBookmark,
+  element = $bindable(undefined),
+  openBookmark = () => {},
   closeBookmark = () => {},
   highlightBookmark = () => {},
 }: Props = $props();
 
-let tagsToDraw = $derived(
-  tags
+const idle: DragState = { state: "idle" };
+let dragState: DragState = $state(idle);
+
+let sortedTags = $derived(
+  bookmark.tags
     .map(tag => ({ name: tag, isParent: parentTags.includes(tag) }))
     .sort((a, b) => {
       if (a.isParent === b.isParent) {
@@ -87,16 +93,49 @@ const tooltipForeground = decayStyle(
   "text-red-400 dark:text-red-500"
 );
 const tooltipAlignment = decayStyle("left-1", "left-10", "-right-2");
-const parentTagStyle =
-  "border-blue-400 bg-blue-50 text-blue-500 dark:border-blue-500 dark:bg-blue-900 dark:text-blue-500";
-const leafTagStyle =
-  "border-yellow-400 bg-yellow-50 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-500";
+
+const tagStyle = {
+  parent:
+    "border-blue-400 bg-blue-50 text-blue-500 dark:border-blue-500 dark:bg-blue-900 dark:text-blue-500",
+  leaf: "border-yellow-400 bg-yellow-50 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-500",
+};
+
+$effect(() => {
+  if (element) {
+    draggable({
+      element,
+      canDrag: () => (element ? true : false),
+      onDragStart: () => (dragState = { state: "in-flight" }),
+      onDrop: () => (dragState = idle),
+      getInitialData: () => ({ bookmark, type: "bookmark" }),
+      onGenerateDragPreview({ nativeSetDragImage, location, source }) {
+        setCustomNativeDragPreview({
+          nativeSetDragImage,
+          getOffset: preserveOffsetOnSource({
+            element: source.element,
+            input: location.current.input,
+          }),
+          render({ container }) {
+            const preview = mount(Self, {
+              target: container,
+              props: { bookmark, preview: true, closeEnabled: false },
+            });
+            return () => unmount(preview);
+          },
+        });
+      },
+    });
+  }
+});
 </script>
 
 <div
+  bind:this={element}
   role="button"
   tabindex="0"
-  class="group/bookmark relative m-1.5 flex cursor-pointer flex-col bg-gray-50 p-1 shadow-gray-900 dark:bg-gray-900"
+  class:preview
+  class:in-flight={dragState.state === "in-flight"}
+  class="group/bookmark relative m-1.5 flex cursor-pointer flex-col bg-gray-50 p-1 shadow-gray-900 dark:bg-gray-900 [&.in-flight]:opacity-40 [&.preview]:w-50 [&.preview]:flex-none [&.preview]:opacity-100 [&.preview]:drop-shadow-lg"
   onkeydown={runOnEnter(openBookmark)}
   onclick={runOnClick(openBookmark)}>
   {#if closeEnabled}
@@ -113,18 +152,18 @@ const leafTagStyle =
   {/if}
   <div class="flex grow flex-row">
     <div class="group/tooltip w-5 flex-none overflow-hidden pt-1 pr-1">
-      {#if favIconUrl}
-        <img class="h-4 w-4" src={String(favIconUrl)} alt={description} />
+      {#if bookmark.favIconUrl}
+        <img class="h-4 w-4" src={String(bookmark.favIconUrl)} alt={bookmark.description} />
       {:else}
         <div class="-mt-1 ml-1 h-4 w-4">
           <span
             role="button"
             tabindex="0"
-            onkeydown={e => e.key === "Enter" && highlightBookmark(key)}
+            onkeydown={e => e.key === "Enter" && highlightBookmark(bookmark.id)}
             onclick={e => {
               e.stopPropagation();
               e.preventDefault();
-              highlightBookmark(key);
+              highlightBookmark(bookmark.id);
             }}
             class="block cursor-pointer align-top text-sm text-gray-200 group-hover/bookmark:text-blue-800 dark:text-gray-700 dark:group-hover/bookmark:text-blue-100"
             >¶</span>
@@ -143,16 +182,17 @@ const leafTagStyle =
     </div>
     <div class="flex-grow overflow-hidden">
       <p class="mt-0.5 truncate text-xs font-normal">
-        {#if description}{description}{:else}{href.hostname}{/if}
+        {#if bookmark.description}{bookmark.description}{:else}{bookmark.href.hostname}{/if}
       </p>
       <p class="mb-0.5 truncate text-2xs font-extralight text-gray-300 dark:text-gray-600">
-        <span class="font-normal">{href.hostname}</span
-        >{#if href.port}:{href.port}{/if}{href.pathname}{href.search}{href.hash}
+        <span class="font-normal">{bookmark.href.hostname}</span>{#if bookmark.href.port}:{bookmark
+            .href.port}{/if}{bookmark.href.pathname}{bookmark.href.search}{bookmark.href.hash}
       </p>
-      {#if tagsToDraw && tags.length > 0}
+      {#if sortedTags && bookmark.tags.length > 0}
         <p class="truncate text-xs font-extralight">
-          {#each tagsToDraw as tag}
-            <span class="inline-block border-b px-1 {tag.isParent ? parentTagStyle : leafTagStyle}"
+          {#each sortedTags as tag}
+            <span
+              class="inline-block border-b px-1 {tag.isParent ? tagStyle.parent : tagStyle.leaf}"
               >{tag.name}</span>
             <span> </span>
           {/each}
