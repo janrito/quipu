@@ -79,3 +79,5 @@ export interface TabLifetimeSchema {
 export interface tabLifetimesSchema {
   [lifetimeId: string]: TabLifetimeSchema;
 }
+
+export type AllowedDropTargetDropEffect = Exclude<DataTransfer["dropEffect"], "none">;

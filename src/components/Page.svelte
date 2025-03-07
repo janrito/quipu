@@ -13,6 +13,7 @@ import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/ad
 import appSettings from "~/lib/stores/app-settings.js";
 import createBookmarksStore from "~/lib/stores/bookmarks.js";
 import type {
+  AllowedDropTargetDropEffect,
   BookmarkOrTab,
   BookmarkSchema,
   BookmarkSchemaInCard,
@@ -121,7 +122,11 @@ const onCardDrop = (sourceName: string, targetData: { name: string; edge: Edge }
   pageIndex = pageIndex;
 };
 
-const onBookmarkDrop = (targetName: string, tentativeBookmark: BookmarkOrTab) => {
+const onBookmarkDrop = (
+  targetName: string,
+  tentativeBookmark: BookmarkOrTab,
+  action: AllowedDropTargetDropEffect
+) => {
   if (isTab(tentativeBookmark)) {
     bookmarksStore
       .addBookmark({
@@ -142,14 +147,15 @@ const onBookmarkDrop = (targetName: string, tentativeBookmark: BookmarkOrTab) =>
       ...tentativeBookmark,
       tags: [
         ...new Set([
-          // keep tags previously in this bookmark, but remove the card it's been dragged from
-          ...tentativeBookmark.tags.filter(tag => tag !== tentativeBookmark._cardTag),
+          // keep tags previously in this bookmark,
+          // but remove the card it's been dragged from if not copying
+          ...(action === "copy"
+            ? tentativeBookmark.tags
+            : tentativeBookmark.tags.filter(tag => tag !== tentativeBookmark._cardTag)),
           // make sure the parent tags are present
           ...parentTags,
           // add the current card
           targetName,
-          // // if copying, add the original card tag
-          // ...(altKeyActive ? [droppedBookmark._cardTag] : []),
         ]),
       ],
     });
@@ -176,7 +182,7 @@ $effect(() => {
         onCardDrop(sourceData.name as string, targetData as { name: string; edge: Edge });
         return;
       } else if (sourceData.type === "bookmark" && isBookmarkOrTab(sourceData.bookmark)) {
-        onBookmarkDrop(targetData.name as string, sourceData.bookmark);
+        onBookmarkDrop(targetData.name as string, sourceData.bookmark, target.dropEffect);
       }
     },
   });

@@ -36,7 +36,7 @@ import appSettings from "~/lib/stores/app-settings.js";
 import createTagStore from "~/lib/stores/tags.js";
 import type { BookmarkSchema } from "~/lib/types.js";
 
-import { isBookmarkSchemaInCard, newTab } from "../lib/utils.js";
+import { isBookmarkOrTab, isBookmarkSchemaInCard, isTab, newTab } from "../lib/utils.js";
 import Bookmark from "./Bookmark.svelte";
 import TagEditor from "./TagEditor.svelte";
 
@@ -107,6 +107,17 @@ $effect(() => {
           return true;
         }
         return false;
+      },
+      getDropEffect: ({ input, source }) => {
+        if (
+          input.altKey &&
+          source.data.type === "bookmark" &&
+          isBookmarkOrTab(source.data.bookmark) &&
+          !isTab(source.data.bookmark)
+        ) {
+          return "copy";
+        }
+        return "move";
       },
       getData: ({ input, source }) => {
         const initialData = { name: name, type: "card" };
