@@ -1,4 +1,4 @@
-<style>
+<style lang="postcss">
 @reference "../assets/main.pcss";
 
 .spinner:after {
