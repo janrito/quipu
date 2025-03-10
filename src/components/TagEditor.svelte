@@ -57,8 +57,12 @@ const handleKeydown = (event: KeyboardEvent) => {
     event.preventDefault();
     event.target.value = value;
     close();
-  } else if (event.key === "Enter" && selectedSuggestedTagIdx >= 0) {
-    value = drawSuggestedTags[selectedSuggestedTagIdx]?.name || event.target.value;
+  } else if (event.key === "Enter") {
+    if (selectedSuggestedTagIdx >= 0) {
+      value = drawSuggestedTags[selectedSuggestedTagIdx]?.name || event.target.value;
+    } else {
+      value = event.target.value;
+    }
     close();
   } else if (event.key === "ArrowUp" && selectedSuggestedTagIdx >= 0) {
     selectedSuggestedTagIdx -= 1;
@@ -67,8 +71,8 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 };
 
-const selectSuggestedTag = (tag: TagMap) => () => {
-  value = tag.name;
+const selectSuggestedTag = (tag: string) => {
+  value = tag;
   close();
 };
 </script>
@@ -87,7 +91,7 @@ const selectSuggestedTag = (tag: TagMap) => () => {
     onclick={handleDelete}><IconDelete /></button>
   {#if drawSuggestedTags.length > 0}
     <div
-      class="absolute top-5 left-0 z-20 w-36 border-b-2 border-gray-300 bg-gray-100 shadow dark:border-gray-600 dark:bg-gray-800">
+      class="absolute top-7 left-0 z-20 w-36 border-b-2 border-gray-300 bg-gray-100 shadow dark:border-gray-600 dark:bg-gray-800">
       <ul>
         {#each drawSuggestedTags as tag, tagIdx}
           <li class="p-0">
@@ -96,8 +100,9 @@ const selectSuggestedTag = (tag: TagMap) => () => {
               tabindex="0"
               class:selected={selectedSuggestedTagIdx === tagIdx}
               class="block px-1 pt-0.5 pb-0 [&.selected]:bg-gray-200 [&.selected]:dark:bg-gray-700"
-              onkeydown={e => e.key === "Enter" && selectSuggestedTag(tag)()}
-              onclick={selectSuggestedTag(tag)}>
+              onkeydown={e => e.key === "Enter" && selectSuggestedTag(tag.name)}
+              onclick={() => selectSuggestedTag(tag.name)}
+              onmousedown={e => e.preventDefault()}>
               {tag.name}</span>
           </li>
         {/each}

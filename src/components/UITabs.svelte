@@ -85,8 +85,8 @@ $effect(() => {
 </script>
 
 <div class="flex h-full flex-col">
-  <nav class="flexflex-shrink-0 flex-row pl-5">
-    <div class="grid auto-cols-max grid-flow-col gap-x-0 overflow-x-scroll">
+  <nav class="flex flex-shrink-0 flex-row pl-5">
+    <div class="flex flex-row flex-wrap">
       {#each tabs as tab}
         <UITab
           label={tab}
@@ -96,14 +96,13 @@ $effect(() => {
           deleteTab={deleteTabDispatcher(tab)}
           renameTab={newName => renameTab(tab, newName)} />
       {/each}
+      {#if editable}
+        <a
+          class="mx-1.5 -mb-0.5 px-1.5 text-sm font-normal text-gray-200 dark:text-gray-700"
+          href="#new-tab"
+          onclick={handleClickCreateNewTab}>+</a>
+      {/if}
     </div>
-
-    {#if editable}
-      <a
-        class="mx-1.5 -mb-0.5 px-1.5 text-sm font-normal text-gray-200 dark:text-gray-700"
-        href="#new-tab"
-        onclick={handleClickCreateNewTab}>+</a>
-    {/if}
   </nav>
   <div class="flex-grow overflow-hidden">
     {@render children?.()}
