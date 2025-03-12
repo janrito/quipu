@@ -1,75 +1,45 @@
 name: Release
 
-env:
-  DIRECTORY: distribution
-
 on:
   push:
     branches:
       - "main"
 
 jobs:
-  Version:
-    outputs:
-      created: ${{ steps.daily-version.outputs.created }}
-      version: ${{ steps.daily-version.outputs.version }}
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 20
-      - uses: actions/setup-node@v3
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 23
           cache: "npm"
           cache-dependency-path: package-lock.json
-      - name: install
-        run: npm ci || npm install
-      - run: npm test
       - uses: fregante/daily-version-action@v2
         name: Create tag if necessary
         id: daily-version
+      - if: steps.daily-version.outputs.created
+        name: "Update extension's meta"
+        run: npx --yes dot-json@1 ./package.json version ${{ steps.daily-version.outputs.version  }}
+      - name: install
+        run: npm ci || npm install
+      - name: Build & zip artifacts
+        run: |
+          npm run zip
+          npm run zip:firefox
       - if: steps.daily-version.outputs.created
         name: Create Github release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd $DIRECTORY
-          zip -r quipu.zip *
-          gh release create "${{ steps.daily-version.outputs.version }}" --generate-notes quipu.zip
-
-  Submit:
-    needs: Version
-    if: github.event_name == 'workflow_dispatch' || needs.Version.outputs.created
-    strategy:
-      fail-fast: false
-      matrix:
-        command:
-          - firefox
-          - chrome
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: "npm"
-          cache-dependency-path: package-lock.json
-      - name: install
-        run: npm ci || npm install
-      - run: npm run build --if-present
-      - name: "Update extension's meta"
-        run: npx dot-json@1 $DIRECTORY/manifest.json version ${{ needs.Version.outputs.version }}
-      - name: Submit
+          gh release create "${{ steps.daily-version.outputs.version }}" --generate-notes .output/*.zip
+      - name: Submit to stores
         run: |
-          case ${{ matrix.command }} in
-            chrome)
-              cd $DIRECTORY && npx chrome-webstore-upload-cli@2 upload --auto-publish
-              ;;
-            firefox)
-              cd $DIRECTORY && npx web-ext-submit@7
-              ;;
-          esac
+          npm run env -- wxt submit \
+           --chrome-zip .output/*-chrome.zip \
+           --firefox-zip .output/*-firefox.zip --firefox-sources-zip .output/*-sources.zip
         env:
           EXTENSION_ID: ${{ secrets.EXTENSION_ID }}
           CLIENT_ID: ${{ secrets.CLIENT_ID }}

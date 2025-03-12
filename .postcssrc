@@ -1,9 +1,0 @@
-{
-  "plugins": {
-    "postcss-custom-properties": true,
-    "postcss-import": true,
-    "postcss-nested": true,
-    "postcss-url": true,
-    "tailwindcss": "tailwind.config.js"
-  }
-}

@@ -1,102 +1,66 @@
 {
+  "name": "quipu",
+  "version": "0.2.0",
+  "description": "Quipu is a simple Pinboard powered session manager.",
+  "homepage_url": "https://github.com/janrito/quipu",
   "private": true,
   "scripts": {
-    "build": "NODE_ENV=production parcel build source/manifest.json --no-content-hash --no-source-maps --dist-dir distribution --no-cache --detailed-report 0",
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
     "lint": "run-p lint:*",
     "lint-fix": "run-p 'lint:* -- --fix'",
-    "lint:css": "stylelint source/**/*.css source/**/*.pcss",
-    "lint:js": "eslint --fix \"source/**/*.{js,svelte}\"",
-    "lint:prettier": "prettier --plugin-search-dir=. --check \"source/**/*.{js,svelte,pcss,css,html}\"",
-    "test": "run-p lint:* build",
-    "watch": "parcel watch source/manifest.json --dist-dir distribution --no-cache --no-hmr"
+    "lint:css": "stylelint src/**/*.css src/**/*.pcss",
+    "lint:js": "eslint --fix .",
+    "lint:prettier": "prettier --check .",
+    "test": "run-p lint check",
+    "postinstall": "wxt prepare"
   },
   "browserslist": [
     "last 2 Chrome version",
     "last 2 Firefox version"
   ],
-  "stylelint": {
-    "plugins": [
-      "stylelint-prettier"
-    ],
-    "extends": [
-      "stylelint-config-standard",
-      "stylelint-config-styled-components",
-      "stylelint-config-prettier"
-    ],
-    "rules": {
-      "at-rule-no-unknown": [
-        true,
-        {
-          "ignoreAtRules": [
-            "extends",
-            "apply",
-            "tailwind",
-            "components",
-            "utilities",
-            "screen",
-            "layer"
-          ]
-        }
-      ],
-      "font-weight-notation": "numeric"
-    }
-  },
-  "dependencies": {
-    "webext-options-sync": "^4.0.1",
-    "webext-storage-cache": "^5.1.1",
-    "webextension-polyfill": "^0.10.0"
-  },
   "devDependencies": {
-    "@babel/core": "^7.20.7",
-    "@babel/eslint-parser": "^7.19.1",
-    "@fontsource/iosevka": "^4.5.4",
-    "@parcel/config-webextension": "^2.8.3",
-    "@parcel/css": "^1.14.0",
-    "@parcel/optimizer-cssnano": "^2.8.3",
-    "@parcel/optimizer-htmlnano": "^2.8.2",
-    "@parcel/packager-css": "^2.8.2",
-    "@parcel/packager-html": "^2.8.2",
-    "@parcel/transformer-css": "^2.8.2",
-    "@parcel/transformer-html": "^2.8.2",
-    "@parcel/transformer-postcss": "^2.8.2",
-    "@parcel/transformer-posthtml": "^2.8.2",
-    "@parcel/transformer-webextension": "^2.8.2",
-    "@trivago/prettier-plugin-sort-imports": "^4.0.0",
-    "@types/lodash": "^4.14.191",
-    "autoprefixer": "^10.4.13",
-    "eslint": "^8.31.0",
-    "eslint-config-prettier": "^8.6.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-svelte3": "^4.0.0",
-    "lightningcss": "^1.17.1",
+    "@atlaskit/pragmatic-drag-and-drop": "^1.5.1",
+    "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.0.3",
+    "@fontsource/iosevka": "^5.2.5",
+    "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
+    "@tailwindcss/postcss": "^4.0.13",
+    "@tailwindcss/vite": "^4.0.13",
+    "@tsconfig/svelte": "^5.0.4",
+    "@types/lodash": "^4.17.16",
+    "@types/webextension-polyfill": "^0.12.3",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@webext-core/messaging": "^2.2.0",
+    "@wxt-dev/auto-icons": "^1.0.2",
+    "@wxt-dev/module-svelte": "^2.0.3",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-svelte": "^3.1.0",
+    "globals": "^16.0.0",
     "lodash": "^4.17.21",
+    "lz-string": "^1.5.0",
     "npm-run-all": "^4.1.5",
-    "parcel": "^2.8.3",
-    "parcel-transformer-svelte": "^1.2.3",
-    "postcss": "^8.4.21",
-    "postcss-custom-properties": "^13.1.1",
-    "postcss-import": "^15.1.0",
-    "postcss-url": "^10.1.3",
-    "prettier": "^2.8.3",
-    "prettier-plugin-svelte": "^2.9.0",
-    "prettier-plugin-tailwindcss": "^0.2.2",
-    "stylelint": "^14.16.1",
-    "stylelint-config-prettier": "^9.0.4",
-    "stylelint-config-standard": "^29.0.0",
-    "stylelint-config-styled-components": "^0.1.1",
-    "stylelint-prettier": "^2.0.0",
-    "stylelint-processor-styled-components": "^1.10.0",
-    "svelte": "^3.55.1",
-    "svelte-check": "^3.0.3",
-    "svelte-dnd-action": "^0.9.22",
-    "svelte-preprocess": "^5.0.0",
-    "tailwindcss": "^3.2.4",
-    "urlpattern-polyfill": "^6.0.2"
+    "prettier": "^3.5.3",
+    "prettier-plugin-svelte": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "stylelint": "^16.15.0",
+    "stylelint-config-standard": "^37.0.0",
+    "stylelint-prettier": "^5.0.3",
+    "svelte": "^5.23.0",
+    "svelte-check": "^4.1.5",
+    "tailwindcss": "^4.0.13",
+    "typescript-eslint": "^8.26.1",
+    "urlpattern-polyfill": "^10.0.0",
+    "wxt": "^0.19.29"
   },
   "webExt": {
-    "sourceDir": "distribution"
-  }
+    "sourceDir": "dist"
+  },
+  "type": "module"
 }

@@ -1,17 +1,20 @@
 name: Test
 
 on:
-  - pull_request
-  - push
-
+  pull_request:
+    branches:
+      - main
+      - release-*
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
         with:
-          node-version: 16
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23
           cache: "npm"
           cache-dependency-path: package-lock.json
       - run: npm install
