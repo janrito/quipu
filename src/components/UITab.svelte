@@ -6,7 +6,6 @@ interface Props {
   editable?: boolean;
   preview?: boolean;
   deleteTab?: () => void;
-  renameTab?: (newTabName: string) => void;
 }
 
 interface DragState {
@@ -33,13 +32,12 @@ import TagEditor from "./TagEditor.svelte";
 import UITab from "./UITab.svelte";
 
 let {
-  label,
+  label = $bindable(),
   element = $bindable(undefined),
   selected = $bindable(false),
   editable = false,
   preview = false,
   deleteTab = () => {},
-  renameTab = () => {},
 }: Props = $props();
 
 const idle: DragState = { state: "idle" };
@@ -118,10 +116,7 @@ $effect(() => {
 {/snippet}
 
 {#if editable && editMode && selected}
-  <TagEditor
-    deleteTag={deleteTab}
-    close={() => (editMode = false)}
-    bind:value={() => label, newName => renameTab(newName)}
+  <TagEditor deleteTag={deleteTab} close={() => (editMode = false)} bind:value={label} />
 {:else}
   {@render indicator(dragState.edge, "left")}
   <a

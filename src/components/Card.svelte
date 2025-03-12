@@ -30,7 +30,6 @@ import {
   draggable,
   dropTargetForElements,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { delay } from "lodash";
 
 import type { BookmarkSchema } from "~/lib/types.js";
 
@@ -72,9 +71,7 @@ const enterEditMode = (event: Event) => {
 };
 const exitEditMode = () => {
   if (!untagged) {
-    delay(() => {
-      editMode = false;
-    }, 100);
+    editMode = false;
   }
 };
 

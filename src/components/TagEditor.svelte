@@ -7,6 +7,8 @@ interface Props {
 </script>
 
 <script lang="ts">
+import { throttle } from "lodash";
+
 import { focus } from "~/lib/actions.js";
 import appSettings from "~/lib/stores/app-settings.js";
 import createTagStore from "~/lib/stores/tags.js";
@@ -16,6 +18,7 @@ import IconDelete from "./IconDelete.svelte";
 let { value = $bindable(), close, deleteTag }: Props = $props();
 
 let prefix = $state(value);
+let isDeleting = $state(false);
 let selectedSuggestedTagIdx = $state(-1);
 let tagStore = createTagStore($appSettings.pinboardAPIToken);
 
@@ -26,29 +29,36 @@ let drawSuggestedTags = $derived.by(() => {
   return $tagStore.slice(0, 5);
 });
 
-const handleEdit = (event: Event) => {
-  if (!event.target || !(event.target instanceof HTMLInputElement)) {
-    return;
-  }
-  value = event.target.value;
-  close();
+const handleClose = throttle(
+  () => {
+    if (!isDeleting && prefix !== value) {
+      value = prefix;
+    }
+
+    close();
+  },
+  200,
+  { trailing: true }
+);
+
+const handleBlur = () => {
+  handleClose();
 };
 
 const handleDelete = (event: Event) => {
   event.preventDefault();
+  prefix = value;
+  isDeleting = true;
   deleteTag();
-  close();
+  handleClose();
 };
 
 const handleKeyUp = (event: KeyboardEvent) => {
   if (!event.target || !(event.target instanceof HTMLInputElement)) {
     return;
   }
-  const newPrefix = event.target.value;
-  if (newPrefix !== prefix) {
-    selectedSuggestedTagIdx = 0;
-    prefix = newPrefix;
-  }
+
+  selectedSuggestedTagIdx = drawSuggestedTags.length === 1 ? 0 : -1;
 };
 const handleKeydown = (event: KeyboardEvent) => {
   if (!event.target || !(event.target instanceof HTMLInputElement)) {
@@ -56,15 +66,13 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
   if (event.key === "Escape") {
     event.preventDefault();
-    event.target.value = value;
-    close();
+    prefix = value;
+    handleClose();
   } else if (event.key === "Enter") {
-    if (selectedSuggestedTagIdx >= 0) {
-      value = drawSuggestedTags[selectedSuggestedTagIdx]?.name || event.target.value;
-    } else {
-      value = event.target.value;
+    if (selectedSuggestedTagIdx >= 0 && drawSuggestedTags[selectedSuggestedTagIdx]) {
+      prefix = drawSuggestedTags[selectedSuggestedTagIdx].name;
     }
-    close();
+    handleClose();
   } else if (event.key === "ArrowUp" && selectedSuggestedTagIdx >= 0) {
     selectedSuggestedTagIdx -= 1;
   } else if (event.key === "ArrowDown" && selectedSuggestedTagIdx < drawSuggestedTags.length - 1) {
@@ -73,8 +81,8 @@ const handleKeydown = (event: KeyboardEvent) => {
 };
 
 const selectSuggestedTag = (tag: string) => {
-  value = tag;
-  close();
+  prefix = tag;
+  handleClose();
 };
 </script>
 
@@ -82,14 +90,15 @@ const selectSuggestedTag = (tag: string) => {
   <input
     type="text"
     class="h-full w-36 border-0 border-b-2 border-gray-200 bg-gray-100 px-0.5 pr-6 pl-1 dark:border-gray-700 dark:bg-gray-800"
-    {value}
-    onblur={handleEdit}
+    bind:value={prefix}
+    onblur={handleBlur}
     onkeydown={handleKeydown}
     onkeyup={handleKeyUp}
     use:focus />
   <button
     class="mr-2 -ml-6 text-red-300 hover:text-red-500 dark:text-red-600 dark:hover:text-red-400"
-    onclick={handleDelete}><IconDelete /></button>
+    onclick={handleDelete}
+    onmousedown={e => e.preventDefault()}><IconDelete /></button>
   {#if drawSuggestedTags.length > 0}
     <div
       class="absolute top-7 left-0 z-20 w-36 border-b-2 border-gray-300 bg-gray-100 shadow dark:border-gray-600 dark:bg-gray-800">
