@@ -149,9 +149,13 @@ const handleDeleteTag = () => !untagged && deleteCard();
 
 <div
   bind:this={element}
-  class:over={dragState.state === "over" && dragState.edge === undefined}
-  class:in-flight={dragState.state === "in-flight"}
-  class="flex flex-col [&.in-flight]:opacity-40 [&.over]:bg-gray-50 [&.over]:dark:bg-gray-950">
+  class={[
+    "flex flex-col",
+    "[&.in-flight]:opacity-40",
+    "[&.over]:bg-gray-50 [&.over]:dark:bg-gray-950",
+    dragState.state === "over" && dragState.edge === undefined && "over",
+    dragState.state === "in-flight" && "in-flight",
+  ]}>
   {#if editMode && !untagged}
     <div class="ml-7 flex-shrink-0 py-3">
       <TagEditor
@@ -161,8 +165,11 @@ const handleDeleteTag = () => !untagged && deleteCard();
     </div>
   {:else}
     <h3
-      class:untagged
-      class="ml-7 py-3 text-sm text-gray-400 dark:text-gray-500 [&.untagged]:text-gray-200 [&.untagged]:dark:text-gray-700">
+      class={[
+        "ml-7 py-3 text-sm text-gray-400 dark:text-gray-500",
+        untagged && "untagged",
+        "[&.untagged]:text-gray-200 [&.untagged]:dark:text-gray-700",
+      ]}>
       <a href="#edit-card-{name}" onclick={enterEditMode}>{name}</a>
       <span class="text-xs text-gray-300 dark:text-gray-600"> ({bookmarks.length})</span>
       {#if bookmarks.length > 1}

@@ -122,10 +122,15 @@ $effect(() => {
   <a
     bind:this={element}
     href="#page-{label}"
-    class:in-flight={dragState.state === "in-flight"}
-    class:selected
-    class:preview
-    class="mx-0 mt-0 truncate border-b-2 border-gray-300 bg-white px-3 pb-1 text-sm font-extralight text-gray-400 hover:border-gray-400 dark:border-gray-600 dark:bg-black dark:text-gray-500 hover:dark:border-gray-500 [&.in-flight]:opacity-40 [&.preview]:pt-1 [&.preview]:pb-2 [&.preview]:drop-shadow-lg [&.selected]:border-gray-600 [&.selected]:text-gray-800 [&.selected]:dark:border-gray-300 [&.selected]:dark:text-gray-200"
+    class={[
+      "mx-0 mt-0 truncate border-b-2 border-gray-300 bg-white px-3 pb-1 text-sm font-extralight text-gray-400 hover:border-gray-400 dark:border-gray-600 dark:bg-black dark:text-gray-500 hover:dark:border-gray-500",
+      "[&.in-flight]:opacity-40",
+      "[&.preview]:pt-1 [&.preview]:pb-2 [&.preview]:drop-shadow-lg",
+      "[&.selected]:border-gray-600 [&.selected]:text-gray-800 [&.selected]:dark:border-gray-300 [&.selected]:dark:text-gray-200",
+      dragState.state === "in-flight" && "in-flight",
+      selected && "selected",
+      preview && "preview",
+    ]}
     onclick={handleClick}>{label}</a>
   {@render indicator(dragState.edge, "right")}
 {/if}

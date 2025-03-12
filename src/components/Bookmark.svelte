@@ -109,9 +109,13 @@ $effect(() => {
   bind:this={element}
   role="button"
   tabindex="0"
-  class:preview
-  class:in-flight={dragState.state === "in-flight"}
-  class="group/bookmark relative m-1.5 flex cursor-pointer flex-col bg-gray-50 p-1 shadow-gray-900 dark:bg-gray-900 [&.in-flight]:opacity-40 [&.preview]:w-50 [&.preview]:flex-none [&.preview]:opacity-100 [&.preview]:drop-shadow-lg"
+  class={[
+    "group/bookmark relative m-1.5 flex cursor-pointer flex-col bg-gray-50 p-1 shadow-gray-900 dark:bg-gray-900",
+    dragState.state === "in-flight" && "in-flight",
+    preview && "preview",
+    "[&.in-flight]:opacity-40",
+    "[&.preview]:w-50 [&.preview]:flex-none [&.preview]:opacity-100 [&.preview]:drop-shadow-lg",
+  ]}
   onkeydown={runOnEnter(openBookmark)}
   onclick={runOnClick(openBookmark)}>
   {#if closeEnabled}
@@ -170,9 +174,11 @@ $effect(() => {
         <p class="truncate text-xs font-extralight">
           {#each sortedTags as tag (tag.name)}
             <span
-              class:parent={tag.isParent}
-              class="inline-block border-b border-yellow-400 bg-yellow-50 px-1 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-500 [&.parent]:border-blue-400 [&.parent]:bg-blue-50 [&.parent]:text-blue-500 [&.parent]:dark:border-blue-500 [&.parent]:dark:bg-blue-900 [&.parent]:dark:text-blue-500"
-              >{tag.name}</span>
+              class={[
+                "inline-block border-b border-yellow-400 bg-yellow-50 px-1 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-500",
+                tag.isParent && "parent",
+                "[&.parent]:border-blue-400 [&.parent]:bg-blue-50 [&.parent]:text-blue-500 [&.parent]:dark:border-blue-500 [&.parent]:dark:bg-blue-900 [&.parent]:dark:text-blue-500",
+              ]}>{tag.name}</span>
             <span> </span>
           {/each}
         </p>

@@ -102,8 +102,11 @@ const selectSuggestedTag = (tag: string) => {
             <span
               role="button"
               tabindex="0"
-              class:selected={selectedSuggestedTagIdx === tagIdx}
-              class="block px-1 pt-0.5 pb-0 [&.selected]:bg-gray-200 [&.selected]:dark:bg-gray-700"
+              class={[
+                "block px-1 pt-0.5 pb-0",
+                selectedSuggestedTagIdx === tagIdx && "selected",
+                "[&.selected]:bg-gray-200 [&.selected]:dark:bg-gray-700",
+              ]}
               onkeydown={e => e.key === "Enter" && selectSuggestedTag(tag.name)}
               onclick={() => selectSuggestedTag(tag.name)}
               onmousedown={e => e.preventDefault()}>
