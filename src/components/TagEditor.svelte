@@ -53,14 +53,7 @@ const handleDelete = (event: Event) => {
   handleClose();
 };
 
-const handleKeyUp = (event: KeyboardEvent) => {
-  if (!event.target || !(event.target instanceof HTMLInputElement)) {
-    return;
-  }
-
-  selectedSuggestedTagIdx = drawSuggestedTags.length === 1 ? 0 : -1;
-};
-const handleKeydown = (event: KeyboardEvent) => {
+const handleUp = (event: KeyboardEvent) => {
   if (!event.target || !(event.target instanceof HTMLInputElement)) {
     return;
   }
@@ -77,6 +70,8 @@ const handleKeydown = (event: KeyboardEvent) => {
     selectedSuggestedTagIdx -= 1;
   } else if (event.key === "ArrowDown" && selectedSuggestedTagIdx < drawSuggestedTags.length - 1) {
     selectedSuggestedTagIdx += 1;
+  } else if (drawSuggestedTags.length === 1) {
+    selectedSuggestedTagIdx = 0;
   }
 };
 
@@ -92,8 +87,7 @@ const selectSuggestedTag = (tag: string) => {
     class="h-full w-36 border-0 border-b-2 border-gray-200 bg-gray-100 px-0.5 pr-6 pl-1 dark:border-gray-700 dark:bg-gray-800"
     bind:value={prefix}
     onblur={handleBlur}
-    onkeydown={handleKeydown}
-    onkeyup={handleKeyUp}
+    onkeyup={handleUp}
     use:focus />
   <button
     class="mr-2 -ml-6 text-red-300 hover:text-red-500 dark:text-red-600 dark:hover:text-red-400"
