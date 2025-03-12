@@ -44,18 +44,9 @@ const decayedTabs = () => {
   const add = (decayingTab: browser.Tabs.Tab) => {
     update(value =>
       [
-        tabToTabBookMark(decayingTab, -1, DECAYED_TAB_PREFIX),
+        tabToTabBookMark(decayingTab, DECAYED_TAB_PREFIX),
         ...(value ? value.filter(decayedTab => decayingTab.url !== String(decayedTab.href)) : []),
-      ]
-        .slice(0, KEEP_N_DECAYED_TABS)
-        .map(
-          (tab: TabBookmarkSchema, idx: number) =>
-            ({
-              ...tab,
-              id: `${DECAYED_TAB_PREFIX}-${idx}`,
-              _id: idx,
-            }) as TabBookmarkSchema
-        )
+      ].slice(0, KEEP_N_DECAYED_TABS)
     );
   };
 

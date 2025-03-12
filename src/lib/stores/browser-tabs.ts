@@ -15,7 +15,7 @@ export default readable([], (set: (value: TabBookmarkSchema[][]) => void) => {
           [
             ...tabs
               .filter(tab => tab.url)
-              .map((tab, idx) => tabToTabBookMark(tab, idx))
+              .map(tab => tabToTabBookMark(tab))
               // sort by the order that each tab appears
               .sort((a, b) => a.index - b.index)
               .reduce((accumulator, current) => {

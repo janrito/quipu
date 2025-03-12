@@ -131,12 +131,12 @@ export const tagsGet = auth(
 );
 
 export const preprocessBookmark = (data: PinBoardAPIBookmarkSchema[]): BookmarkSchema[] =>
-  data.map((bookmarkData: PinBoardAPIBookmarkSchema, idx: number) => ({
+  data.map((bookmarkData: PinBoardAPIBookmarkSchema, index: number) => ({
     type: "Bookmark",
     ...bookmarkData,
     href: new URL(bookmarkData.href),
-    _id: idx,
-    id: `${BOOKMARK_PREFIX}-${idx}`,
+    _index: index,
+    id: `${BOOKMARK_PREFIX}-${index}`,
     tags: bookmarkData.tags.split(" "),
     time: Date.parse(bookmarkData.time),
   }));

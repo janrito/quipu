@@ -5,6 +5,7 @@ import browser from "webextension-polyfill";
 import { BROWSER_TAB_PREFIX } from "./constants.js";
 import type {
   BookmarkOrTab,
+  BookmarkSchema,
   BookmarkSchemaInCard,
   Parameters,
   QuipuError,
@@ -79,7 +80,6 @@ export class InvalidBookmark extends Error implements QuipuError {
 
 export const tabToTabBookMark = (
   tab: browser.Tabs.Tab,
-  idx: number,
   prefix: string = BROWSER_TAB_PREFIX
 ): TabBookmarkSchema => {
   if (tab.url === undefined) {
@@ -91,8 +91,7 @@ export const tabToTabBookMark = (
 
   return {
     type: "Tab",
-    id: `${prefix}-${idx}`,
-    _id: tab.id,
+    id: `${prefix}-${tab.windowId || "[N]"}-${tab.id}`,
     tags: [],
     description: tab.title || "",
     href: new URL(tab.url),
@@ -101,28 +100,37 @@ export const tabToTabBookMark = (
     lastAccessed: tab.lastAccessed,
     windowId: tab.windowId || -1, // assign a negative window to a tab without window, this should not exist
     index: tab.index,
+    browserTabId: tab.id,
   };
 };
 
 /**
  * Close a tab
  */
-export const closeTab = (tabId: number) => {
-  browser.tabs.remove(tabId);
+export const closeTab = (tab: browser.Tabs.Tab | TabBookmarkSchema) => {
+  if (isTabBookmarkSchema(tab)) {
+    browser.tabs.remove(tab.browserTabId);
+  } else if (tab.id) {
+    browser.tabs.remove(tab.id);
+  }
 };
 
 /**
  * Switch to a window
  */
-export const switchToWindow = (windowId: number) => {
-  browser.windows.update(windowId, { focused: true });
+export const switchToWindow = (tab: TabBookmarkSchema) => {
+  if (isTabBookmarkSchema(tab)) {
+    browser.windows.update(tab.windowId, { focused: true });
+  }
 };
 
 /**
  * Switch to a tab
  */
-export const switchToTab = (tabId: number) => {
-  browser.tabs.update(tabId, { active: true });
+export const switchToTab = (tab: TabBookmarkSchema) => {
+  if (isTabBookmarkSchema(tab)) {
+    browser.tabs.update(tab.browserTabId, { active: true });
+  }
 };
 
 /**
@@ -250,28 +258,42 @@ export const calculateDelay = (lifetime: number, lastAccessed?: number | undefin
 export const lifetimeIdToTabId = (lifetimeId: string) => Number(lifetimeId);
 export const tabIdToLifetimeId = (tabId: number) => String(tabId);
 
-/**
- * Type guard to determine if an object is a BookmarkOrTab
- */
-export const isBookmarkOrTab = (obj: unknown): obj is BookmarkOrTab => {
-  return (
-    typeof obj === "object" &&
-    obj !== null &&
-    "type" in obj &&
-    (obj.type === "Tab" || obj.type === "Bookmark")
-  );
+export const getTabLifetimeId = (tab: browser.Tabs.Tab | TabBookmarkSchema): string | undefined => {
+  if (isTabBookmarkSchema(tab)) {
+    return String(tab.browserTabId);
+  } else if (tab.id) {
+    return String(tab.id);
+  }
+};
+
+const _isObj = (obj: unknown): obj is object => {
+  return typeof obj === "object" && obj !== null;
 };
 
 /**
  * Type guard to determine if an object is a TabBookmarkSchema
  */
-export const isTab = (obj: BookmarkOrTab): obj is TabBookmarkSchema => {
-  return "type" in obj && obj.type === "Tab";
+export const isTabBookmarkSchema = (obj: unknown): obj is TabBookmarkSchema => {
+  return _isObj(obj) && "type" in obj && obj.type === "Tab";
+};
+
+/**
+ * Type guard to determine if an object is a TabBookmarkSchema
+ */
+export const isBookmarkSchema = (obj: unknown): obj is BookmarkSchema => {
+  return _isObj(obj) && "type" in obj && obj.type === "Bookmark";
+};
+
+/**
+ * Type guard to determine if an object is a BookmarkOrTab
+ */
+export const isBookmarkOrTab = (obj: unknown): obj is BookmarkOrTab => {
+  return isTabBookmarkSchema(obj) || isBookmarkSchema(obj);
 };
 
 /**
  * Type guard to determine if an object is a BookmarkSchemaInCard
  */
-export const isBookmarkSchemaInCard = (obj: BookmarkOrTab): obj is BookmarkSchemaInCard => {
-  return "type" in obj && obj.type === "Bookmark" && "_cardTag" in obj;
+export const isBookmarkSchemaInCard = (obj: unknown): obj is BookmarkSchemaInCard => {
+  return isBookmarkSchema(obj) && "_cardTag" in obj;
 };

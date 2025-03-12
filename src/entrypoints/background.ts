@@ -14,6 +14,7 @@ import {
   closeTab,
   compileValidURLPatterns,
   findURLPattern,
+  getTabLifetimeId,
   lifetimeIdToTabId,
   sampleLifetime,
   tabIdToLifetimeId,
@@ -22,10 +23,10 @@ import {
 const decayTab = debounce(tabId => {
   browser.tabs.get(tabId).then(tab => {
     decayedTabs.add(tab);
-    closeTab(tabId);
+    closeTab(tab);
     tabLifetimes.update(currentTabLifetimes => {
-      const lifetimeId = tabIdToLifetimeId(tabId);
-      if (currentTabLifetimes[lifetimeId]) {
+      const lifetimeId = getTabLifetimeId(tab);
+      if (lifetimeId && currentTabLifetimes[lifetimeId]) {
         delete currentTabLifetimes[lifetimeId];
       }
       return currentTabLifetimes;
@@ -58,7 +59,10 @@ const setNewTabLifetime = (
     return currentTabLifetimes;
   }
 
-  const lifetimeId = tabIdToLifetimeId(tab.id);
+  const lifetimeId = getTabLifetimeId(tab);
+  if (!lifetimeId) {
+    return currentTabLifetimes;
+  }
   const { timerId, lifetime } = currentTabLifetimes[lifetimeId] || {
     lifetime: sampleLifetime(tabDecayHalfLife),
   };
@@ -103,7 +107,9 @@ const updateTabLifetimes = debounce(
 
         // keep track of all existing tabs
         tabIds.add(tab.id);
-        const lifetimeId = tabIdToLifetimeId(tab.id);
+        const lifetimeId = getTabLifetimeId(tab);
+
+        if (!lifetimeId) return;
 
         const isSet = currentTabLifetimes[lifetimeId] !== undefined;
 

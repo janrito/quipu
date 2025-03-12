@@ -9,10 +9,10 @@ import type { TabBookmarkSchema, tabLifetimesSchema } from "~/lib/types.js";
 import {
   calculateDelay,
   closeTab,
+  getTabLifetimeId,
   newTab,
   switchToTab,
   switchToWindow,
-  tabIdToLifetimeId,
 } from "~/lib/utils.js";
 
 import Bookmark from "./Bookmark.svelte";
@@ -27,7 +27,10 @@ onMount(() => {
 });
 
 const getTabLifetime = (tab: TabBookmarkSchema, lifetimes: tabLifetimesSchema) => {
-  const tabLifetimeMeta = lifetimes[tabIdToLifetimeId(tab._id)] || { lifetime: undefined };
+  const lifetimeId = getTabLifetimeId(tab);
+  const tabLifetimeMeta = (lifetimeId && lifetimes[lifetimeId]) || {
+    lifetime: undefined,
+  };
   const { lifetime } = tabLifetimeMeta;
   return lifetime;
 };
@@ -51,10 +54,10 @@ const calculateDecay = (tab: TabBookmarkSchema, lifetime: number) => {
         bookmark={tab}
         {...lifetime ? { decay: calculateDecay(tab, lifetime) } : {}}
         openBookmark={() => {
-          switchToWindow(tab.windowId);
-          switchToTab(tab._id);
+          switchToWindow(tab);
+          switchToTab(tab);
         }}
-        closeBookmark={() => closeTab(tab._id)} />
+        closeBookmark={() => closeTab(tab)} />
     {/each}
   {/each}
   <h3 class="mt-3 pl-5 text-sm font-extralight">

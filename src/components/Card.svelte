@@ -33,7 +33,7 @@ import {
 
 import type { BookmarkSchema } from "~/lib/types.js";
 
-import { isBookmarkOrTab, isBookmarkSchemaInCard, isTab, newTab } from "../lib/utils.js";
+import { isBookmarkSchema, isBookmarkSchemaInCard, newTab } from "../lib/utils.js";
 import Bookmark from "./Bookmark.svelte";
 import TagEditor from "./TagEditor.svelte";
 
@@ -103,12 +103,7 @@ $effect(() => {
         return false;
       },
       getDropEffect: ({ input, source }) => {
-        if (
-          input.altKey &&
-          source.data.type === "bookmark" &&
-          isBookmarkOrTab(source.data.bookmark) &&
-          !isTab(source.data.bookmark)
-        ) {
+        if (input.altKey && isBookmarkSchema(source.data.bookmark)) {
           return "copy";
         }
         return "move";

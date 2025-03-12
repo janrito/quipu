@@ -28,11 +28,11 @@ interface BookmarkSchemaBase {
   tags: string[];
   time: number;
   id: string;
-  _id: number;
 }
 
 export interface BookmarkSchema extends BookmarkSchemaBase {
   type: "Bookmark";
+  _index: number;
 }
 export interface BookmarkSchemaInCard extends BookmarkSchema {
   _cardTag: string;
@@ -44,6 +44,7 @@ export interface TabBookmarkSchema extends BookmarkSchemaBase {
   lastAccessed?: number;
   windowId: number;
   index: number;
+  browserTabId: number;
 }
 export type BookmarkOrTab = BookmarkSchema | TabBookmarkSchema;
 

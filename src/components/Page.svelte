@@ -18,7 +18,12 @@ import type {
   BookmarkSchema,
   BookmarkSchemaInCard,
 } from "~/lib/types.js";
-import { closeTab, isBookmarkOrTab, isBookmarkSchemaInCard, isTab } from "~/lib/utils.js";
+import {
+  closeTab,
+  isBookmarkOrTab,
+  isBookmarkSchemaInCard,
+  isTabBookmarkSchema,
+} from "~/lib/utils.js";
 
 import BookmarkEditor from "./BookmarkEditor.svelte";
 import Card from "./Card.svelte";
@@ -76,7 +81,7 @@ const filterBookmarksWithoutTags = (bookmarks: BookmarkSchema[], tags: string[])
   return bookmarks.filter(bookmark => !tags.some(tag => bookmark.tags.includes(tag)));
 };
 
-const createNewCard = (cardIndex: number) => {
+const createNewCard = (cardIndex?: number) => {
   appSettings.newCard(pageIndex, cardIndex);
 };
 
@@ -125,7 +130,7 @@ const onBookmarkDrop = (
   tentativeBookmark: BookmarkOrTab,
   action: AllowedDropTargetDropEffect
 ) => {
-  if (isTab(tentativeBookmark)) {
+  if (isTabBookmarkSchema(tentativeBookmark)) {
     bookmarksStore
       .addBookmark({
         ...tentativeBookmark,
@@ -133,7 +138,7 @@ const onBookmarkDrop = (
       })
       .then(() => {
         // close tab after adding bookmark
-        closeTab(tentativeBookmark._id);
+        closeTab(tentativeBookmark);
       })
       .catch(() => {}); // ignore error, it is already logged
   } else if (
@@ -222,7 +227,7 @@ $effect(() => {
         {deleteBookmark}
         {parentTags}
         untagged={true}
-        createNewCard={() => createNewCard($appSettings.pages[pageIndex].cards.length)}
+        createNewCard={() => createNewCard($appSettings.pages[pageIndex].cards?.length)}
         {syncBookmarks} />
     {:else}
       <p class="py-20 text-center text-lg text-gray-300 dark:text-gray-600">
