@@ -3,7 +3,6 @@ interface Props {
   tabs: string[];
   selectedTab: string;
   editable?: boolean;
-  suggestedTags?: TagMap[];
   createNewTab?: () => void;
   renameTab?: (oldTabName: string, newTabName: string) => void;
   deleteTab?: (tabName: string) => void;
@@ -18,15 +17,12 @@ import { reorderWithEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/r
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import type { Snippet } from "svelte";
 
-import type { TagMap } from "~/lib/types.js";
-
 import UITab from "./UITab.svelte";
 
 let {
   tabs = $bindable(),
   selectedTab = $bindable(tabs[0]),
   editable = false,
-  suggestedTags = [],
   createNewTab = () => {},
   renameTab = () => {},
   deleteTab = () => {},
@@ -34,7 +30,7 @@ let {
   children,
 }: Props = $props();
 
-const deleteTabDispatcher = (tabName: string) => () => {
+const deleteTabAndSelectNext = (tabName: string) => {
   if (tabs.length > 1) {
     const selectedTabIdx = tabs.findIndex(tab => tab === tabName);
     selectedTab = tabs[selectedTabIdx >= 1 ? selectedTabIdx - 1 : selectedTabIdx];
@@ -89,12 +85,10 @@ $effect(() => {
     <div class="flex flex-row flex-wrap">
       {#each tabs as tab}
         <UITab
-          label={tab}
+          bind:label={() => tab, newName => renameTab(tab, newName)}
           {editable}
-          {suggestedTags}
           bind:selected={() => tab === selectedTab, selected => selected && (selectedTab = tab)}
-          deleteTab={deleteTabDispatcher(tab)}
-          renameTab={newName => renameTab(tab, newName)} />
+          deleteTab={() => deleteTabAndSelectNext(tab)} />
       {/each}
       {#if editable}
         <a

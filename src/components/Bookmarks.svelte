@@ -1,12 +1,10 @@
 <script lang="ts">
 import appSettings from "~/lib/stores/app-settings.js";
-import createTagStore from "~/lib/stores/tags.js";
 
 import Page from "./Page.svelte";
 import UITabs from "./UITabs.svelte";
 
 let currentPageName = $state($appSettings.pages[0].name);
-let tagStore = createTagStore($appSettings.pinboardAPIToken);
 
 const createNewTab = () => {
   appSettings.newPage();
@@ -35,7 +33,6 @@ const reorderTab = (newOrder: string[]) => {
   tabs={$appSettings.pages.map(page => page.name)}
   bind:selectedTab={currentPageName}
   editable={true}
-  suggestedTags={$tagStore}
   {createNewTab}
   {renameTab}
   {deleteTab}

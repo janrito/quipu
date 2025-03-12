@@ -4,7 +4,6 @@ interface Props {
   element?: HTMLAnchorElement;
   selected?: boolean;
   editable?: boolean;
-  suggestedTags?: TagMap[];
   preview?: boolean;
   deleteTab?: () => void;
   renameTab?: (newTabName: string) => void;
@@ -30,8 +29,6 @@ import { preserveOffsetOnSource } from "@atlaskit/pragmatic-drag-and-drop/elemen
 import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import { mount, unmount } from "svelte";
 
-import type { TagMap } from "~/lib/types.js";
-
 import TagEditor from "./TagEditor.svelte";
 import UITab from "./UITab.svelte";
 
@@ -41,7 +38,6 @@ let {
   selected = $bindable(false),
   editable = false,
   preview = false,
-  suggestedTags = [],
   deleteTab = () => {},
   renameTab = () => {},
 }: Props = $props();
@@ -126,7 +122,6 @@ $effect(() => {
     deleteTag={deleteTab}
     close={() => (editMode = false)}
     bind:value={() => label, newName => renameTab(newName)}
-    {suggestedTags} />
 {:else}
   {@render indicator(dragState.edge, "left")}
   <a

@@ -32,8 +32,6 @@ import {
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { delay } from "lodash";
 
-import appSettings from "~/lib/stores/app-settings.js";
-import createTagStore from "~/lib/stores/tags.js";
 import type { BookmarkSchema } from "~/lib/types.js";
 
 import { isBookmarkOrTab, isBookmarkSchemaInCard, isTab, newTab } from "../lib/utils.js";
@@ -54,7 +52,6 @@ let {
   createNewCard,
 }: Props = $props();
 
-let tagStore = $derived(createTagStore($appSettings.pinboardAPIToken));
 const idle: DragState = { state: "idle" };
 let dragState: DragState = $state(idle);
 
@@ -168,8 +165,7 @@ const handleDeleteTag = () => !untagged && deleteCard();
       <TagEditor
         deleteTag={handleDeleteTag}
         close={exitEditMode}
-        bind:value={() => name, (newName: string) => renameCard(newName)}
-        suggestedTags={$tagStore} />
+        bind:value={() => name, (newName: string) => renameCard(newName)} />
     </div>
   {:else}
     <h3

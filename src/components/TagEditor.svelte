@@ -1,7 +1,6 @@
 <script lang="ts" module>
 interface Props {
   value: string;
-  suggestedTags: TagMap[];
   deleteTag: () => void;
   close: () => void;
 }
@@ -9,20 +8,22 @@ interface Props {
 
 <script lang="ts">
 import { focus } from "~/lib/actions.js";
-import type { TagMap } from "~/lib/types.js";
+import appSettings from "~/lib/stores/app-settings.js";
+import createTagStore from "~/lib/stores/tags.js";
 
 import IconDelete from "./IconDelete.svelte";
 
-let { value = $bindable(), suggestedTags, close, deleteTag }: Props = $props();
+let { value = $bindable(), close, deleteTag }: Props = $props();
 
 let prefix = $state(value);
 let selectedSuggestedTagIdx = $state(-1);
+let tagStore = createTagStore($appSettings.pinboardAPIToken);
 
 let drawSuggestedTags = $derived.by(() => {
   if (prefix) {
-    return suggestedTags.filter(tag => tag.name.startsWith(prefix)).slice(0, 5);
+    return $tagStore.filter(tag => tag.name.startsWith(prefix)).slice(0, 5);
   }
-  return suggestedTags.slice(0, 5);
+  return $tagStore.slice(0, 5);
 });
 
 const handleEdit = (event: Event) => {
