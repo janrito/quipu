@@ -38,14 +38,13 @@ const storable = () => {
   };
 
   const newCard = (pageIndex: number, cardIndex: number = 0) => {
-    const currentCards = currentValue.pages[pageIndex].cards;
-    if (currentCards) {
-      const _cardIndex = cardIndex <= currentCards.length ? cardIndex : 0;
+    if (currentValue.pages[pageIndex].cards) {
+      const _cardIndex = cardIndex <= currentValue.pages[pageIndex].cards.length ? cardIndex : 0;
       updateAndSave((value: AppSettingsSchema) => {
         value.pages[pageIndex].cards = [
-          ...currentCards.slice(0, _cardIndex),
-          generateNewName(currentCards, "New"),
-          ...currentCards.slice(_cardIndex),
+          ...value.pages[pageIndex].cards.slice(0, _cardIndex),
+          generateNewName(value.pages[pageIndex].cards, "New"),
+          ...value.pages[pageIndex].cards.slice(_cardIndex),
         ];
         return value;
       });
@@ -73,6 +72,18 @@ const storable = () => {
     ) {
       updateAndSave((value: AppSettingsSchema) => {
         value.pages[pageIndex].cards = cards;
+        return value;
+      });
+    }
+  };
+
+  const deleteCard = (pageIndex: number, cardIndex: number) => {
+    if (currentValue.pages[pageIndex] && currentValue.pages[pageIndex].cards[cardIndex]) {
+      updateAndSave((value: AppSettingsSchema) => {
+        value.pages[pageIndex].cards = value.pages[pageIndex].cards.filter((_, index) => {
+          return index !== cardIndex;
+        });
+
         return value;
       });
     }
@@ -116,6 +127,15 @@ const storable = () => {
     }
   };
 
+  const deletePage = (pageIndex: number) => {
+    if (currentValue.pages[pageIndex]) {
+      updateAndSave((value: AppSettingsSchema) => {
+        value.pages = value.pages.filter((_, index) => index !== pageIndex);
+        return value;
+      });
+    }
+  };
+
   read();
 
   return {
@@ -126,9 +146,11 @@ const storable = () => {
     newCard,
     renameCard,
     reorderCards,
+    deleteCard,
     newPage,
     renamePage,
     reorderPages,
+    deletePage,
   };
 };
 

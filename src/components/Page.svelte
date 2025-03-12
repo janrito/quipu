@@ -76,20 +76,18 @@ const filterBookmarksWithoutTags = (bookmarks: BookmarkSchema[], tags: string[])
   return bookmarks.filter(bookmark => !tags.some(tag => bookmark.tags.includes(tag)));
 };
 
-const createNewCardDispatcher = (cardIndex: number) => () => {
+const createNewCard = (cardIndex: number) => {
   appSettings.newCard(pageIndex, cardIndex);
 };
 
-const renameCardDispatcher = (cardIndex: number) => (newName: string) => {
+const renameCard = (cardIndex: number, newName: string) => {
   if (newName) {
     appSettings.renameCard(pageIndex, cardIndex, newName);
   }
 };
 
-const deleteCardDispatcher = (cardIndex: number) => () => {
-  $appSettings.pages[pageIndex].cards = $appSettings.pages[pageIndex].cards.filter(
-    (_, index) => index !== cardIndex
-  );
+const deleteCard = (cardIndex: number) => {
+  appSettings.deleteCard(pageIndex, cardIndex);
 };
 
 const deleteBookmark = (href: URL) => {
@@ -211,9 +209,9 @@ $effect(() => {
             {parentTags}
             {highlightBookmark}
             {deleteBookmark}
-            renameCard={renameCardDispatcher(cardIndex)}
-            createNewCard={createNewCardDispatcher(cardIndex)}
-            deleteCard={deleteCardDispatcher(cardIndex)}
+            renameCard={newName => renameCard(cardIndex, newName)}
+            createNewCard={() => createNewCard(cardIndex)}
+            deleteCard={() => deleteCard(cardIndex)}
             {syncBookmarks} />
         {/each}
       {/if}
@@ -224,7 +222,7 @@ $effect(() => {
         {deleteBookmark}
         {parentTags}
         untagged={true}
-        createNewCard={createNewCardDispatcher(page.cards.length)}
+        createNewCard={() => createNewCard(page.cards.length)}
         {syncBookmarks} />
     {:else}
       <p class="py-20 text-center text-lg text-gray-300 dark:text-gray-600">
@@ -232,7 +230,7 @@ $effect(() => {
         <a
           class="text-gray-400 dark:text-gray-500"
           href="#new-card"
-          onclick={createNewCardDispatcher(0)}>card</a>
+          onclick={() => createNewCard(0)}>card</a>
         or some bookmarks here!
       </p>
     {/if}

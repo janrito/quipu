@@ -20,9 +20,10 @@ const renameTab = (oldName: string, newName: string) => {
 };
 
 const deleteTab = (name: string) => {
-  if ($appSettings.pages.length > 1) {
-    $appSettings.pages = $appSettings.pages.filter(page => name !== page.name);
-  }
+  if ($appSettings.pages.length <= 1) return;
+  const index = $appSettings.pages.map(page => page.name).indexOf(name);
+  if (index === -1) return;
+  appSettings.deletePage(index);
 };
 
 const reorderTab = (newOrder: string[]) => {
