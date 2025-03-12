@@ -39,7 +39,7 @@ const calculateDecay = (tab: TabBookmarkSchema, lifetime: number) => {
 </script>
 
 <div class="h-full overflow-x-hidden overflow-y-auto pr-3">
-  {#each $browserTabs as tabs, windowIndex}
+  {#each $browserTabs as tabs, windowIndex (windowIndex)}
     <h3 class="pl-5 text-sm font-extralight">
       {#if windowIndex === 0}Current
       {/if}Window Tabs
@@ -61,7 +61,7 @@ const calculateDecay = (tab: TabBookmarkSchema, lifetime: number) => {
     Decayed Tabs <span class="text-gray-300 dark:text-gray-600">({$decayedTabs.length})</span>
   </h3>
 
-  {#each $decayedTabs as decayedTab}
+  {#each $decayedTabs as decayedTab (decayedTab.id)}
     <Bookmark
       bookmark={decayedTab}
       closeEnabled={false}

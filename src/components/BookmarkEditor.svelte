@@ -111,7 +111,7 @@ const typeOrder: tagType[] = ["leaf", "card", "parent"];
 
     {#if tagsToDraw}
       <p class="mb-2 text-sm font-extralight">
-        {#each tagsToDraw as tag}
+        {#each tagsToDraw as tag (tag.name)}
           <span
             class="{tag.type} border-b-2 border-yellow-400 bg-yellow-50 px-1 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-400 [&.card]:border-green-400 [&.card]:bg-green-50 [&.card]:text-green-500 [&.card]:dark:border-green-500 [&.card]:dark:bg-green-900 [&.card]:dark:text-green-400 [&.parent]:border-blue-400 [&.parent]:bg-blue-50 [&.parent]:text-blue-500 [&.parent]:dark:border-blue-500 [&.parent]:dark:bg-blue-900 [&.parent]:dark:text-blue-400">
             {tag.name}

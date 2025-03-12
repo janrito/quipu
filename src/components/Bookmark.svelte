@@ -168,7 +168,7 @@ $effect(() => {
       </p>
       {#if sortedTags && bookmark.tags.length > 0}
         <p class="truncate text-xs font-extralight">
-          {#each sortedTags as tag}
+          {#each sortedTags as tag (tag.name)}
             <span
               class:parent={tag.isParent}
               class="inline-block border-b border-yellow-400 bg-yellow-50 px-1 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-500 [&.parent]:border-blue-400 [&.parent]:bg-blue-50 [&.parent]:text-blue-500 [&.parent]:dark:border-blue-500 [&.parent]:dark:bg-blue-900 [&.parent]:dark:text-blue-500"

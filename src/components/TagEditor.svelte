@@ -103,7 +103,7 @@ const selectSuggestedTag = (tag: string) => {
     <div
       class="absolute top-7 left-0 z-20 w-36 border-b-2 border-gray-300 bg-gray-100 shadow dark:border-gray-600 dark:bg-gray-800">
       <ul>
-        {#each drawSuggestedTags as tag, tagIdx}
+        {#each drawSuggestedTags as tag, tagIdx (tag.name)}
           <li class="p-0">
             <span
               role="button"

@@ -83,7 +83,7 @@ $effect(() => {
 <div class="flex h-full flex-col">
   <nav class="flex flex-shrink-0 flex-row pl-5">
     <div class="flex flex-row flex-wrap">
-      {#each tabs as tab}
+      {#each tabs as tab (tab)}
         <UITab
           bind:label={() => tab, newName => renameTab(tab, newName)}
           {editable}

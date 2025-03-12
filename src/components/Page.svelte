@@ -187,7 +187,7 @@ $effect(() => {
 });
 </script>
 
-{#each errors as error}
+{#each errors as error (error)}
   <div class="overflow-hidden pr-3">
     <p class="border-b-2 border-red-200 bg-red-100 py-2 pl-7 text-sm text-red-300">
       <span class=" text-red-500">{error.status}</span>
@@ -202,7 +202,7 @@ $effect(() => {
       <Spinner />
     {:else if (bookmarks && bookmarks.length > 0) || ($appSettings.pages[pageIndex].cards && $appSettings.pages[pageIndex].cards.length)}
       {#if $appSettings.pages[pageIndex].cards}
-        {#each $appSettings.pages[pageIndex].cards as card, cardIndex}
+        {#each $appSettings.pages[pageIndex].cards as card, cardIndex (card)}
           <Card
             name={card}
             bookmarks={filterBookmarksByTag(bookmarks, card)}
