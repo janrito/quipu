@@ -17,7 +17,6 @@ import type {
   BookmarkOrTab,
   BookmarkSchema,
   BookmarkSchemaInCard,
-  PageSchema,
 } from "~/lib/types.js";
 import { closeTab, isBookmarkOrTab, isBookmarkSchemaInCard, isTab } from "~/lib/utils.js";
 
@@ -26,10 +25,11 @@ import Card from "./Card.svelte";
 import Spinner from "./Spinner.svelte";
 
 let { pageIndex = $bindable() }: Props = $props();
-let page: PageSchema = $derived($appSettings.pages[pageIndex]);
 
 let highlightedBookmarkId: string | undefined = $state(undefined);
-let parentTags = $derived([$appSettings.pinboardRootTag, page.name].filter(tag => tag));
+let parentTags = $derived(
+  [$appSettings.pinboardRootTag, $appSettings.pages[pageIndex].name].filter(tag => tag)
+);
 let bookmarksStore = $derived(createBookmarksStore($appSettings.pinboardAPIToken, parentTags));
 
 let bookmarks = $derived($bookmarksStore.data);
@@ -102,14 +102,14 @@ const highlightBookmark = (id: string) => {
 };
 
 const onCardDrop = (sourceName: string, targetData: { name: string; edge: Edge }) => {
-  const indexOfSource = page.cards.findIndex(c => c === sourceName);
-  const indexOfTarget = page.cards.findIndex(c => c === targetData.name);
+  const indexOfSource = $appSettings.pages[pageIndex].cards.findIndex(c => c === sourceName);
+  const indexOfTarget = $appSettings.pages[pageIndex].cards.findIndex(c => c === targetData.name);
   if (indexOfTarget < 0 || indexOfSource < 0) {
     return;
   }
   const closestEdgeOfTarget = extractClosestEdge(targetData);
   const newOrder = reorderWithEdge({
-    list: page.cards,
+    list: $appSettings.pages[pageIndex].cards,
     startIndex: indexOfSource,
     indexOfTarget,
     closestEdgeOfTarget,
@@ -200,9 +200,9 @@ $effect(() => {
     class="peer-[]/highlighted:w-3/5 flex h-full w-full flex-col overflow-x-hidden overflow-y-auto pr-3">
     {#if loading}
       <Spinner />
-    {:else if (bookmarks && bookmarks.length > 0) || (page.cards && page.cards.length)}
-      {#if page.cards}
-        {#each page.cards as card, cardIndex}
+    {:else if (bookmarks && bookmarks.length > 0) || ($appSettings.pages[pageIndex].cards && $appSettings.pages[pageIndex].cards.length)}
+      {#if $appSettings.pages[pageIndex].cards}
+        {#each $appSettings.pages[pageIndex].cards as card, cardIndex}
           <Card
             name={card}
             bookmarks={filterBookmarksByTag(bookmarks, card)}
@@ -217,12 +217,12 @@ $effect(() => {
       {/if}
       <Card
         name="..."
-        bookmarks={filterBookmarksWithoutTags(bookmarks, page.cards)}
+        bookmarks={filterBookmarksWithoutTags(bookmarks, $appSettings.pages[pageIndex].cards)}
         {highlightBookmark}
         {deleteBookmark}
         {parentTags}
         untagged={true}
-        createNewCard={() => createNewCard(page.cards.length)}
+        createNewCard={() => createNewCard($appSettings.pages[pageIndex].cards.length)}
         {syncBookmarks} />
     {:else}
       <p class="py-20 text-center text-lg text-gray-300 dark:text-gray-600">
