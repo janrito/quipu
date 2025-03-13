@@ -104,8 +104,8 @@ const selectSuggestedTag = (tag: string) => {
               tabindex="0"
               class={[
                 "block px-1 pt-0.5 pb-0",
-                selectedSuggestedTagIdx === tagIdx && "selected",
-                "[&.selected]:bg-gray-200 [&.selected]:dark:bg-gray-700",
+                selectedSuggestedTagIdx === tagIdx && "selected-tag",
+                "selected-tag:bg-gray-200 selected-tag:dark:bg-gray-700",
               ]}
               onkeydown={e => e.key === "Enter" && selectSuggestedTag(tag.name)}
               onclick={() => selectSuggestedTag(tag.name)}
