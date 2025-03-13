@@ -92,7 +92,14 @@ $effect(() => {
 
     dropTargetForElements({
       element,
-      getIsSticky: () => true,
+      getIsSticky: ({ source }) => {
+        if (source.data.type === "card") {
+          // we want stickiness when reorganising a card
+          return true;
+        }
+        // but not when dragging a bookmark
+        return false;
+      },
       canDrop: ({ source }) => {
         if (source.data.type === "card" && source.data.name !== name) {
           return true;
