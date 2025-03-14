@@ -14,7 +14,6 @@ export default {
   semi: true,
   singleQuote: false,
   tailwindStylesheet: "./src/assets/main.pcss",
-  tailwindConfig: "tailwind.config.js",
   trailingComma: "es5",
   useTabs: false,
   tabWidth: 2,

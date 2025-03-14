@@ -4,7 +4,6 @@ interface Props {
   parentTags?: string[];
   decay?: number;
   closeEnabled?: boolean;
-  element?: HTMLDivElement;
   preview?: boolean;
   openBookmark?: () => void;
   closeBookmark?: () => void;
@@ -23,6 +22,7 @@ import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { preserveOffsetOnSource } from "@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source";
 import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import { mount, unmount } from "svelte";
+import type { Action } from "svelte/action";
 
 import Self from "./Bookmark.svelte";
 import IconDelete from "./IconDelete.svelte";
@@ -33,7 +33,6 @@ let {
   preview = false,
   decay = 0,
   closeEnabled = true,
-  element = $bindable(undefined),
   openBookmark = () => {},
   closeBookmark = () => {},
   highlightBookmark = () => {},
@@ -76,11 +75,11 @@ const decayStyle = (): string => {
   return "high-decay";
 };
 
-$effect(() => {
-  if (element) {
+const draggableBookmark: Action = (node: HTMLElement) => {
+  $effect(() => {
     draggable({
-      element,
-      canDrag: () => (element ? true : false),
+      element: node,
+      canDrag: () => (node ? true : false),
       onDragStart: () => (dragState = { state: "in-flight" }),
       onDrop: () => (dragState = idle),
       getInitialData: () => ({ bookmark, type: "bookmark" }),
@@ -94,30 +93,30 @@ $effect(() => {
           render({ container }) {
             const preview = mount(Self, {
               target: container,
-              props: { bookmark, preview: true, closeEnabled: false },
+              props: { bookmark, preview: true, closeEnabled: false, parentTags: parentTags },
             });
             return () => unmount(preview);
           },
         });
       },
     });
-  }
-});
+  });
+};
 </script>
 
 <div
-  bind:this={element}
+  use:draggableBookmark
   role="button"
   tabindex="0"
+  onkeydown={runOnEnter(openBookmark)}
+  onclick={runOnClick(openBookmark)}
   class={[
     "group/bookmark relative m-1.5 flex cursor-pointer flex-col bg-gray-50 p-1 shadow-gray-900 dark:bg-gray-900",
+    "in-flight:opacity-40",
+    "preview:w-50 preview:flex-none preview:cursor-grabbing preview:opacity-100 preview:drop-shadow-lg",
     dragState.state === "in-flight" && "in-flight",
     preview && "preview",
-    "[&.in-flight]:opacity-40",
-    "[&.preview]:w-50 [&.preview]:flex-none [&.preview]:opacity-100 [&.preview]:drop-shadow-lg",
-  ]}
-  onkeydown={runOnEnter(openBookmark)}
-  onclick={runOnClick(openBookmark)}>
+  ]}>
   {#if closeEnabled}
     <div class="z-10 -mb-5 ml-5 hidden h-5 flex-row justify-end pl-1 group-hover/bookmark:flex">
       <div
@@ -152,13 +151,28 @@ $effect(() => {
       {#if decay}
         <!-- tooltip -->
         <div
-          class="{decayStyle()} absolute -bottom-9 z-10 mt-6 hidden flex-col items-center group-hover/tooltip:flex [&.high-decay]:-right-2 [&.low-decay]:left-1 [&.mid-decay]:left-10">
+          class={[
+            decayStyle(),
+            "low-decay:left-1 mid-decay:left-10 high-decay:-right-2",
+            "absolute -bottom-9 z-10 mt-6 hidden flex-col items-center group-hover/tooltip:flex",
+          ]}>
           <div
-            class="{decayStyle()} -mb-2 h-3 w-3 rotate-45 [&.high-decay]:bg-red-200 [&.high-decay]:dark:bg-red-700 [&.low-decay]:bg-blue-200 [&.low-decay]:dark:bg-blue-700 [&.mid-decay]:bg-orange-200 [&.mid-decay]:dark:bg-orange-700">
+            class={[
+              decayStyle(),
+              "-mb-2 h-3 w-3 rotate-45",
+              "low-decay:bg-blue-200 low-decay:dark:bg-blue-700",
+              "mid-decay:bg-orange-200 mid-decay:dark:bg-orange-700",
+              "high-decay:bg-red-200 high-decay:dark:bg-red-700",
+            ]}>
           </div>
           <span
-            class="{decayStyle()} whitespace-no-wrap relative p-2 text-xs leading-none shadow-lg [&.high-decay]:bg-red-200 [&.high-decay]:text-red-400 [&.high-decay]:dark:bg-red-700 [&.high-decay]:dark:text-red-500 [&.low-decay]:bg-blue-200 [&.low-decay]:text-blue-400 [&.low-decay]:dark:bg-blue-700 [&.low-decay]:dark:text-blue-500 [&.mid-decay]:bg-orange-200 [&.mid-decay]:text-orange-400 [&.mid-decay]:dark:bg-orange-700 [&.mid-decay]:dark:text-orange-500"
-            >Decay: {Math.round(decay * 100)}%</span>
+            class={[
+              decayStyle(),
+              "whitespace-no-wrap relative p-2 text-xs leading-none shadow-lg",
+              "low-decay:bg-blue-200 low-decay:text-blue-400 low-decay:dark:bg-blue-700 low-decay:dark:text-blue-500",
+              "mid-decay:bg-orange-200 mid-decay:text-orange-400 mid-decay:dark:bg-orange-700 mid-decay:dark:text-orange-500",
+              "high-decay:bg-red-200 high-decay:text-red-400 high-decay:dark:bg-red-700 high-decay:dark:text-red-500",
+            ]}>Decay: {Math.round(decay * 100)}%</span>
         </div>
       {/if}
     </div>
@@ -176,8 +190,8 @@ $effect(() => {
             <span
               class={[
                 "inline-block border-b border-yellow-400 bg-yellow-50 px-1 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-500",
-                tag.isParent && "parent",
-                "[&.parent]:border-blue-400 [&.parent]:bg-blue-50 [&.parent]:text-blue-500 [&.parent]:dark:border-blue-500 [&.parent]:dark:bg-blue-900 [&.parent]:dark:text-blue-500",
+                "parent-tag:border-blue-400 parent-tag:bg-blue-50 parent-tag:text-blue-500 parent-tag:dark:border-blue-500 parent-tag:dark:bg-blue-900 parent-tag:dark:text-blue-500",
+                tag.isParent && "parent-tag",
               ]}>{tag.name}</span>
             <span> </span>
           {/each}
@@ -188,7 +202,7 @@ $effect(() => {
   <div class="-m-1 mt-2 h-px shrink-0">
     <div class="w-full bg-gray-200 dark:bg-gray-700">
       <div
-        class="{decayStyle()} h-px [&.high-decay]:bg-red-500 [&.high-decay]:dark:bg-red-400 [&.low-decay]:bg-blue-500 [&.low-decay]:dark:bg-blue-500 [&.mid-decay]:bg-orange-500 [&.mid-decay]:dark:bg-orange-400"
+        class="{decayStyle()} h-px low-decay:bg-blue-500 low-decay:dark:bg-blue-500 mid-decay:bg-orange-500 mid-decay:dark:bg-orange-400 high-decay:bg-red-500 high-decay:dark:bg-red-400"
         style="width: {decay * 100}%">
       </div>
     </div>

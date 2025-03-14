@@ -5,7 +5,6 @@ interface Props {
   parentTags?: string[];
   untagged?: boolean;
   editMode?: boolean;
-  element?: HTMLDivElement;
   deleteBookmark: (href: URL) => void;
   highlightBookmark: (bookmarkId: string) => void;
   syncBookmarks: () => void;
@@ -15,7 +14,7 @@ interface Props {
 }
 
 interface DragState {
-  state: "idle" | "in-flight" | "over";
+  state: "dragged-over" | "idle" | "in-flight";
   edge?: Edge;
 }
 </script>
@@ -30,6 +29,7 @@ import {
   draggable,
   dropTargetForElements,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import type { Action } from "svelte/action";
 
 import type { BookmarkSchema } from "~/lib/types.js";
 
@@ -43,7 +43,6 @@ let {
   parentTags = [],
   untagged = false,
   editMode = $bindable(false),
-  element = $bindable(undefined),
   deleteBookmark,
   highlightBookmark,
   renameCard = () => {},
@@ -80,19 +79,30 @@ const handleCreateNewCard = (event: Event) => {
   createNewCard();
 };
 
-$effect(() => {
-  if (element) {
+const draggableCard: Action = (node: HTMLElement) => {
+  $effect(() => {
     draggable({
-      element,
-      canDrag: () => (element && !untagged ? true : false),
+      element: node,
+      canDrag: () => (!untagged ? true : false),
       onDragStart: () => (dragState = { state: "in-flight" }),
       onDrop: () => (dragState = idle),
       getInitialData: () => ({ name: name, type: "card" }),
     });
+  });
+};
 
+const droppableCard: Action = (node: HTMLElement) => {
+  $effect(() => {
     dropTargetForElements({
-      element,
-      getIsSticky: () => true,
+      element: node,
+      getIsSticky: ({ source }) => {
+        if (source.data.type === "card") {
+          // we want stickiness when reorganising a card
+          return true;
+        }
+        // but not when dragging a bookmark
+        return false;
+      },
       canDrop: ({ source }) => {
         if (source.data.type === "card" && source.data.name !== name) {
           return true;
@@ -114,18 +124,18 @@ $effect(() => {
           return initialData;
         }
         return attachClosestEdge(initialData, {
-          element: element!,
+          element: node!,
           input,
           allowedEdges: ["top", "bottom"],
         });
       },
       onDragEnter: ({ self }) => {
-        dragState = { state: "over", edge: extractClosestEdge(self.data) || undefined };
+        dragState = { state: "dragged-over", edge: extractClosestEdge(self.data) || undefined };
       },
       onDrag: ({ self }) => {
         const closestEdge = extractClosestEdge(self.data);
 
-        if (dragState.state === "over" && closestEdge && dragState.edge !== closestEdge) {
+        if (dragState.state === "dragged-over" && closestEdge && dragState.edge !== closestEdge) {
           dragState = { ...dragState, edge: closestEdge };
         }
       },
@@ -133,8 +143,8 @@ $effect(() => {
       onDragLeave: () => (dragState = idle),
       onDrop: () => (dragState = idle),
     });
-  }
-});
+  });
+};
 
 const handleDeleteTag = () => !untagged && deleteCard();
 </script>
@@ -148,12 +158,13 @@ const handleDeleteTag = () => !untagged && deleteCard();
 {@render indicator(dragState.edge, "top")}
 
 <div
-  bind:this={element}
+  use:draggableCard
+  use:droppableCard
   class={[
     "flex flex-col",
-    "[&.in-flight]:opacity-40",
-    "[&.over]:bg-gray-50 [&.over]:dark:bg-gray-950",
-    dragState.state === "over" && dragState.edge === undefined && "over",
+    "in-flight:opacity-40",
+    "dragged-over:bg-gray-50 dragged-over:dark:bg-gray-950",
+    dragState.state === "dragged-over" && dragState.edge === undefined && "dragged-over",
     dragState.state === "in-flight" && "in-flight",
   ]}>
   {#if editMode && !untagged}
@@ -168,7 +179,7 @@ const handleDeleteTag = () => !untagged && deleteCard();
       class={[
         "ml-7 py-3 text-sm text-gray-400 dark:text-gray-500",
         untagged && "untagged",
-        "[&.untagged]:text-gray-200 [&.untagged]:dark:text-gray-700",
+        "untagged:text-gray-200 untagged:dark:text-gray-700",
       ]}>
       <a href="#edit-card-{name}" onclick={enterEditMode}>{name}</a>
       <span class="text-xs text-gray-300 dark:text-gray-600"> ({bookmarks.length})</span>

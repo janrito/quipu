@@ -19,20 +19,23 @@ const toggleAppSettings = () => {
 };
 </script>
 
-<div class="flex h-screen w-screen flex-col justify-between">
-  <header class="h-7 border-b border-head-600 bg-head-800 px-3 py-1">
+<div class={["flex h-screen w-screen flex-col justify-between", import.meta.env.PROD ? "" : "dev"]}>
+  <header
+    class="h-7 border-b border-head-600 bg-head-800 px-3 py-1 dev:border-head-dev-600 dev:bg-head-dev-800">
     <div class="flex h-full flex-row">
       <div class="h-full">
-        <h1 class="ml-7 text-xs font-extralight text-head-400">quipu</h1>
+        <h1 class="ml-7 text-xs font-extralight text-head-400 dev:text-head-dev-400">
+          quipu{import.meta.env.PROD ? "" : ` (${import.meta.env.MODE})`}
+        </h1>
       </div>
       <div class="h-full flex-grow">
-        <p class="ml-3 text-xs font-extralight text-head-500">
+        <p class="ml-3 text-xs font-extralight text-head-500 dev:text-head-dev-500">
           <a class="" href="https://pinboard.in/" target="_blank" rel="noopener noreferrer"
             >pinboard</a>
         </p>
       </div>
       <div class="h-full w-56 flex-none">
-        <p class="ml-5 text-xs font-extralight text-head-500">
+        <p class="ml-5 text-xs font-extralight text-head-500 dev:text-head-dev-500">
           <a href="#settings" onclick={toggleAppSettings}>settings</a>
         </p>
       </div>
@@ -53,7 +56,8 @@ const toggleAppSettings = () => {
       <div class="h-full w-56 flex-none bg-gray-100 p-2 dark:bg-gray-800"><Tabs /></div>
     </div>
   </main>
-  <footer class="h-2 border-t border-head-600 bg-head-800 px-3 py-1">
+  <footer
+    class="h-2 border-t border-head-600 bg-head-800 px-3 py-1 dev:border-head-dev-600 dev:bg-head-dev-800">
     <div class="flex h-full flex-row"></div>
   </footer>
 </div>

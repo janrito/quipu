@@ -5,7 +5,15 @@
     "at-rule-no-unknown": [
       true,
       {
-        "ignoreAtRules": ["extends", "apply", "screen", "theme", "config", "utility"]
+        "ignoreAtRules": [
+          "extends",
+          "apply",
+          "screen",
+          "theme",
+          "config",
+          "utility",
+          "custom-variant"
+        ]
       }
     ],
     "font-weight-notation": "numeric",
