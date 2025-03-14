@@ -1,7 +1,6 @@
 <script lang="ts" module>
 interface Props {
   label: string;
-  element?: HTMLAnchorElement;
   selected?: boolean;
   editable?: boolean;
   preview?: boolean;
@@ -27,13 +26,13 @@ import {
 import { preserveOffsetOnSource } from "@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source";
 import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import { mount, unmount } from "svelte";
+import type { Action } from "svelte/action";
 
 import TagEditor from "./TagEditor.svelte";
 import UITab from "./UITab.svelte";
 
 let {
   label = $bindable(),
-  element = $bindable(undefined),
   selected = $bindable(false),
   editable = false,
   preview = false,
@@ -54,11 +53,11 @@ const handleClick = (event: Event) => {
   }
 };
 
-$effect(() => {
-  if (element) {
+const reorderable: Action = (node: HTMLElement) => {
+  $effect(() => {
     draggable({
-      element,
-      canDrag: () => (element && editable && !editMode ? true : false),
+      element: node,
+      canDrag: () => (editable && !editMode ? true : false),
       onDragStart: () => (dragState = { state: "in-flight" }),
       onDrop: () => (dragState = idle),
       getInitialData: () => ({ label, type: "UITab" }),
@@ -80,14 +79,14 @@ $effect(() => {
       },
     });
     dropTargetForElements({
-      element,
+      element: node,
       getIsSticky: () => true,
       canDrop: ({ source }) => source.data.type === "UITab" && source.data.label !== label,
       getData: ({ input }) =>
         attachClosestEdge(
           { label, type: "UITab" },
           {
-            element: element!,
+            element: node,
             input,
             allowedEdges: ["left", "right"],
           }
@@ -105,8 +104,8 @@ $effect(() => {
       onDragLeave: () => (dragState = idle),
       onDrop: () => (dragState = idle),
     });
-  }
-});
+  });
+};
 </script>
 
 {#snippet indicator(edge: Edge | undefined, side: Edge)}
@@ -120,7 +119,7 @@ $effect(() => {
 {:else}
   {@render indicator(dragState.edge, "left")}
   <a
-    bind:this={element}
+    use:reorderable
     href="#page-{label}"
     class={[
       "mx-0 mt-0 truncate border-b-2 border-gray-300 bg-white px-3 pb-1 text-sm font-extralight text-gray-400 hover:border-gray-400 dark:border-gray-600 dark:bg-black dark:text-gray-500 hover:dark:border-gray-500",

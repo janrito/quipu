@@ -5,7 +5,6 @@ interface Props {
   parentTags?: string[];
   untagged?: boolean;
   editMode?: boolean;
-  element?: HTMLDivElement;
   deleteBookmark: (href: URL) => void;
   highlightBookmark: (bookmarkId: string) => void;
   syncBookmarks: () => void;
@@ -30,6 +29,7 @@ import {
   draggable,
   dropTargetForElements,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import type { Action } from "svelte/action";
 
 import type { BookmarkSchema } from "~/lib/types.js";
 
@@ -43,7 +43,6 @@ let {
   parentTags = [],
   untagged = false,
   editMode = $bindable(false),
-  element = $bindable(undefined),
   deleteBookmark,
   highlightBookmark,
   renameCard = () => {},
@@ -80,18 +79,22 @@ const handleCreateNewCard = (event: Event) => {
   createNewCard();
 };
 
-$effect(() => {
-  if (element) {
+const draggableCard: Action = (node: HTMLElement) => {
+  $effect(() => {
     draggable({
-      element,
-      canDrag: () => (element && !untagged ? true : false),
+      element: node,
+      canDrag: () => (!untagged ? true : false),
       onDragStart: () => (dragState = { state: "in-flight" }),
       onDrop: () => (dragState = idle),
       getInitialData: () => ({ name: name, type: "card" }),
     });
+  });
+};
 
+const droppableCard: Action = (node: HTMLElement) => {
+  $effect(() => {
     dropTargetForElements({
-      element,
+      element: node,
       getIsSticky: ({ source }) => {
         if (source.data.type === "card") {
           // we want stickiness when reorganising a card
@@ -121,7 +124,7 @@ $effect(() => {
           return initialData;
         }
         return attachClosestEdge(initialData, {
-          element: element!,
+          element: node!,
           input,
           allowedEdges: ["top", "bottom"],
         });
@@ -140,8 +143,8 @@ $effect(() => {
       onDragLeave: () => (dragState = idle),
       onDrop: () => (dragState = idle),
     });
-  }
-});
+  });
+};
 
 const handleDeleteTag = () => !untagged && deleteCard();
 </script>
@@ -155,7 +158,8 @@ const handleDeleteTag = () => !untagged && deleteCard();
 {@render indicator(dragState.edge, "top")}
 
 <div
-  bind:this={element}
+  use:draggableCard
+  use:droppableCard
   class={[
     "flex flex-col",
     "in-flight:opacity-40",

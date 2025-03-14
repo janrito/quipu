@@ -4,7 +4,6 @@ interface Props {
   parentTags?: string[];
   decay?: number;
   closeEnabled?: boolean;
-  element?: HTMLDivElement;
   preview?: boolean;
   openBookmark?: () => void;
   closeBookmark?: () => void;
@@ -23,6 +22,7 @@ import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { preserveOffsetOnSource } from "@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source";
 import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import { mount, unmount } from "svelte";
+import type { Action } from "svelte/action";
 
 import Self from "./Bookmark.svelte";
 import IconDelete from "./IconDelete.svelte";
@@ -33,7 +33,6 @@ let {
   preview = false,
   decay = 0,
   closeEnabled = true,
-  element = $bindable(undefined),
   openBookmark = () => {},
   closeBookmark = () => {},
   highlightBookmark = () => {},
@@ -76,11 +75,11 @@ const decayStyle = (): string => {
   return "high-decay";
 };
 
-$effect(() => {
-  if (element) {
+const draggableBookmark: Action = (node: HTMLElement) => {
+  $effect(() => {
     draggable({
-      element,
-      canDrag: () => (element ? true : false),
+      element: node,
+      canDrag: () => (node ? true : false),
       onDragStart: () => (dragState = { state: "in-flight" }),
       onDrop: () => (dragState = idle),
       getInitialData: () => ({ bookmark, type: "bookmark" }),
@@ -101,23 +100,19 @@ $effect(() => {
         });
       },
     });
-  }
-});
+  });
+};
 </script>
 
 <div
-  bind:this={element}
-  role="button"
-  tabindex="0"
+  use:draggableBookmark
   class={[
-    "group/bookmark relative m-1.5 flex cursor-pointer flex-col bg-gray-50 p-1 shadow-gray-900 dark:bg-gray-900",
+    "group/bookmark relative m-1.5 flex cursor-grab flex-col bg-gray-50 p-1 shadow-gray-900 dark:bg-gray-900",
     "in-flight:opacity-40",
-    "preview:w-50 preview:flex-none preview:opacity-100 preview:drop-shadow-lg",
+    "preview:w-50 preview:flex-none preview:cursor-grabbing preview:opacity-100 preview:drop-shadow-lg",
     dragState.state === "in-flight" && "in-flight",
     preview && "preview",
-  ]}
-  onkeydown={runOnEnter(openBookmark)}
-  onclick={runOnClick(openBookmark)}>
+  ]}>
   {#if closeEnabled}
     <div class="z-10 -mb-5 ml-5 hidden h-5 flex-row justify-end pl-1 group-hover/bookmark:flex">
       <div
@@ -166,7 +161,12 @@ $effect(() => {
         </div>
       {/if}
     </div>
-    <div class="flex-grow overflow-hidden">
+    <div
+      class="flex-grow overflow-hidden"
+      role="button"
+      tabindex="0"
+      onkeydown={runOnEnter(openBookmark)}
+      onclick={runOnClick(openBookmark)}>
       <p class="mt-0.5 truncate text-xs font-normal">
         {#if bookmark.description}{bookmark.description}{:else}{bookmark.href.hostname}{/if}
       </p>
