@@ -106,8 +106,12 @@ const draggableBookmark: Action = (node: HTMLElement) => {
 
 <div
   use:draggableBookmark
+  role="button"
+  tabindex="0"
+  onkeydown={runOnEnter(openBookmark)}
+  onclick={runOnClick(openBookmark)}
   class={[
-    "group/bookmark relative m-1.5 flex cursor-grab flex-col bg-gray-50 p-1 shadow-gray-900 dark:bg-gray-900",
+    "group/bookmark relative m-1.5 flex cursor-pointer flex-col bg-gray-50 p-1 shadow-gray-900 dark:bg-gray-900",
     "in-flight:opacity-40",
     "preview:w-50 preview:flex-none preview:cursor-grabbing preview:opacity-100 preview:drop-shadow-lg",
     dragState.state === "in-flight" && "in-flight",
@@ -153,20 +157,26 @@ const draggableBookmark: Action = (node: HTMLElement) => {
             "absolute -bottom-9 z-10 mt-6 hidden flex-col items-center group-hover/tooltip:flex",
           ]}>
           <div
-            class="{decayStyle()} -mb-2 h-3 w-3 rotate-45 low-decay:bg-blue-200 low-decay:dark:bg-blue-700 mid-decay:bg-orange-200 mid-decay:dark:bg-orange-700 high-decay:bg-red-200 high-decay:dark:bg-red-700">
+            class={[
+              decayStyle(),
+              "-mb-2 h-3 w-3 rotate-45",
+              "low-decay:bg-blue-200 low-decay:dark:bg-blue-700",
+              "mid-decay:bg-orange-200 mid-decay:dark:bg-orange-700",
+              "high-decay:bg-red-200 high-decay:dark:bg-red-700",
+            ]}>
           </div>
           <span
-            class="{decayStyle()} whitespace-no-wrap relative p-2 text-xs leading-none shadow-lg low-decay:bg-blue-200 low-decay:text-blue-400 low-decay:dark:bg-blue-700 low-decay:dark:text-blue-500 mid-decay:bg-orange-200 mid-decay:text-orange-400 mid-decay:dark:bg-orange-700 mid-decay:dark:text-orange-500 high-decay:bg-red-200 high-decay:text-red-400 high-decay:dark:bg-red-700 high-decay:dark:text-red-500"
-            >Decay: {Math.round(decay * 100)}%</span>
+            class={[
+              decayStyle(),
+              "whitespace-no-wrap relative p-2 text-xs leading-none shadow-lg",
+              "low-decay:bg-blue-200 low-decay:text-blue-400 low-decay:dark:bg-blue-700 low-decay:dark:text-blue-500",
+              "mid-decay:bg-orange-200 mid-decay:text-orange-400 mid-decay:dark:bg-orange-700 mid-decay:dark:text-orange-500",
+              "high-decay:bg-red-200 high-decay:text-red-400 high-decay:dark:bg-red-700 high-decay:dark:text-red-500",
+            ]}>Decay: {Math.round(decay * 100)}%</span>
         </div>
       {/if}
     </div>
-    <div
-      class="flex-grow overflow-hidden"
-      role="button"
-      tabindex="0"
-      onkeydown={runOnEnter(openBookmark)}
-      onclick={runOnClick(openBookmark)}>
+    <div class="flex-grow overflow-hidden">
       <p class="mt-0.5 truncate text-xs font-normal">
         {#if bookmark.description}{bookmark.description}{:else}{bookmark.href.hostname}{/if}
       </p>
@@ -180,8 +190,8 @@ const draggableBookmark: Action = (node: HTMLElement) => {
             <span
               class={[
                 "inline-block border-b border-yellow-400 bg-yellow-50 px-1 text-yellow-500 dark:border-yellow-500 dark:bg-yellow-900 dark:text-yellow-500",
-                tag.isParent && "parent-tag",
                 "parent-tag:border-blue-400 parent-tag:bg-blue-50 parent-tag:text-blue-500 parent-tag:dark:border-blue-500 parent-tag:dark:bg-blue-900 parent-tag:dark:text-blue-500",
+                tag.isParent && "parent-tag",
               ]}>{tag.name}</span>
             <span> </span>
           {/each}
