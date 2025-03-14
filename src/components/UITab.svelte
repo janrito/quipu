@@ -8,7 +8,7 @@ interface Props {
 }
 
 interface DragState {
-  state: "idle" | "in-flight" | "dragged-over";
+  state: "dragged-over" | "idle" | "in-flight";
   edge?: Edge;
 }
 </script>
