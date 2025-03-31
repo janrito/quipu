@@ -55,7 +55,7 @@
     "svelte": "^5.23.0",
     "svelte-check": "^4.1.5",
     "tailwindcss": "^4.0.14",
-    "typescript-eslint": "^8.26.1",
+    "typescript-eslint": "^8.28.0",
     "urlpattern-polyfill": "^10.0.0",
     "wxt": "^0.19.29"
   },
