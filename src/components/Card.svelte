@@ -7,7 +7,7 @@ interface Props {
   editMode?: boolean;
   deleteBookmark: (href: URL) => void;
   highlightBookmark: (bookmarkId: string) => void;
-  syncBookmarks: () => void;
+
   renameCard?: (newName: string) => void;
   deleteCard?: () => void;
   createNewCard: () => void;
