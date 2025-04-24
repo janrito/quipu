@@ -27,4 +27,12 @@ export default defineConfig({
   imports: {
     eslintrc: { enabled: 9 },
   },
+  vite: ({ mode }) => ({
+    server:
+      mode === "development"
+        ? {
+            cors: true,
+          }
+        : {},
+  }),
 });

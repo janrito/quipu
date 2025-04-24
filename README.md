@@ -66,6 +66,6 @@ You can load a temporary extension on both Firefox and Chrome by pointing them t
 
 Make sure that your code conforms to the lint settings
 
-```
+```sh
 npm run lint
 ```

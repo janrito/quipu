@@ -1,7 +1,8 @@
 import { debounce } from "lodash";
 import { get } from "svelte/store";
 import { URLPattern } from "urlpattern-polyfill";
-import browser from "webextension-polyfill";
+import { Tabs } from "webextension-polyfill";
+import { browser } from "wxt/browser";
 
 import { MAX_DELAY_TO_SCHEDULE, TAB_QUERY } from "~/lib/constants.js";
 import { onMessage } from "~/lib/messaging";
@@ -50,7 +51,7 @@ const clearTabLifetimes = (tabIds: number[], currentTabLifetimes: tabLifetimesSc
 };
 
 const setNewTabLifetime = (
-  tab: browser.Tabs.Tab,
+  tab: Browser.tabs.Tab,
   currentTabLifetimes: tabLifetimesSchema,
   tabDecayHalfLife: number,
   tabDecayExceptions: URLPattern[] = []
@@ -152,7 +153,7 @@ const updateTabLifetimes = debounce(
   { leading: true, trailing: true }
 );
 
-const onActivatedHandler = (info: browser.Tabs.OnActivatedActiveInfoType) => {
+const onActivatedHandler = (info: Tabs.OnActivatedActiveInfoType) => {
   if (info.previousTabId) {
     updateTabLifetimes([info.previousTabId]);
   }

@@ -1,5 +1,4 @@
 import LZString from "lz-string";
-import { storage } from "wxt/storage";
 
 import type { AppSettingsSchema } from "./types.js";
 

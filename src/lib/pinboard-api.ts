@@ -1,5 +1,3 @@
-import { storage } from "wxt/storage";
-
 import type {
   BookmarkSchema,
   Parameters,

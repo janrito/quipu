@@ -1,6 +1,6 @@
 import { throttle } from "lodash";
 import { readable } from "svelte/store";
-import browser from "webextension-polyfill";
+import { browser } from "wxt/browser";
 
 import { TAB_QUERY, UPDATE_EVENT_TYPES } from "../constants.js";
 import { TabBookmarkSchema } from "../types.js";

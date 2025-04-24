@@ -98,9 +98,6 @@ const deleteCard = (cardIndex: number) => {
 const deleteBookmark = (href: URL) => {
   bookmarksStore.deleteBookmark(href);
 };
-const syncBookmarks = () => {
-  bookmarksStore.sync();
-};
 
 const highlightBookmark = (id: string) => {
   highlightedBookmarkId = id;
@@ -216,8 +213,7 @@ $effect(() => {
             {deleteBookmark}
             renameCard={newName => renameCard(cardIndex, newName)}
             createNewCard={() => createNewCard(cardIndex)}
-            deleteCard={() => deleteCard(cardIndex)}
-            {syncBookmarks} />
+            deleteCard={() => deleteCard(cardIndex)} />
         {/each}
       {/if}
       <Card
@@ -227,8 +223,7 @@ $effect(() => {
         {deleteBookmark}
         {parentTags}
         untagged={true}
-        createNewCard={() => createNewCard($appSettings.pages[pageIndex].cards?.length)}
-        {syncBookmarks} />
+        createNewCard={() => createNewCard($appSettings.pages[pageIndex].cards?.length)} />
     {:else}
       <p class="py-20 text-center text-lg text-gray-300 dark:text-gray-600">
         Add a
