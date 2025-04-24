@@ -1,5 +1,3 @@
-import browser from "webextension-polyfill";
-
 import {
   DECAY_LOG_CACHE_KEY,
   DECAYED_TAB_PREFIX,
@@ -41,7 +39,7 @@ const decayedTabs = () => {
     deSerializeTabBookmarks
   );
 
-  const add = (decayingTab: browser.Tabs.Tab) => {
+  const add = (decayingTab: Browser.tabs.Tab) => {
     update(value =>
       [
         tabToTabBookMark(decayingTab, DECAYED_TAB_PREFIX),

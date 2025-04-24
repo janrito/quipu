@@ -1,7 +1,6 @@
 import { throttle } from "lodash";
 import { writable } from "svelte/store";
-import browser from "webextension-polyfill";
-import { storage } from "wxt/storage";
+import { browser } from "wxt/browser";
 
 function cacheable<T extends object, ST extends object = T>(
   cacheKey: string,

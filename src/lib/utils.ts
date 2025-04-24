@@ -1,6 +1,6 @@
 import { memoize } from "lodash";
 import { URLPattern } from "urlpattern-polyfill";
-import browser from "webextension-polyfill";
+import { browser } from "wxt/browser";
 
 import { BROWSER_TAB_PREFIX } from "./constants.js";
 import type {
@@ -79,7 +79,7 @@ export class InvalidBookmark extends Error implements QuipuError {
  */
 
 export const tabToTabBookMark = (
-  tab: browser.Tabs.Tab,
+  tab: Browser.tabs.Tab,
   prefix: string = BROWSER_TAB_PREFIX
 ): TabBookmarkSchema => {
   if (tab.url === undefined) {
@@ -107,7 +107,7 @@ export const tabToTabBookMark = (
 /**
  * Close a tab
  */
-export const closeTab = (tab: browser.Tabs.Tab | TabBookmarkSchema) => {
+export const closeTab = (tab: Browser.tabs.Tab | TabBookmarkSchema) => {
   if (isTabBookmarkSchema(tab)) {
     browser.tabs.remove(tab.browserTabId);
   } else if (tab.id) {
@@ -258,7 +258,7 @@ export const calculateDelay = (lifetime: number, lastAccessed?: number | undefin
 export const lifetimeIdToTabId = (lifetimeId: string) => Number(lifetimeId);
 export const tabIdToLifetimeId = (tabId: number) => String(tabId);
 
-export const getTabLifetimeId = (tab: browser.Tabs.Tab | TabBookmarkSchema): string | undefined => {
+export const getTabLifetimeId = (tab: Browser.tabs.Tab | TabBookmarkSchema): string | undefined => {
   if (isTabBookmarkSchema(tab)) {
     return String(tab.browserTabId);
   } else if (tab.id) {

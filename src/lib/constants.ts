@@ -1,4 +1,4 @@
-import browser from "webextension-polyfill";
+import { browser } from "wxt/browser";
 
 export const BROWSER_TAB_PREFIX = "tab";
 export const DECAYED_TAB_PREFIX = "decayed-tab";
