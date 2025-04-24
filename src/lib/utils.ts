@@ -143,7 +143,11 @@ const currentTab = memoize(async () => await browser.tabs.getCurrent());
  * Open a url in a new tab next to the current one
  */
 export const newTab = async (url: URL) => {
-  browser.tabs.create({ url: String(url), active: false, index: (await currentTab()).index + 1 });
+  browser.tabs.create({
+    url: String(url),
+    active: false,
+    index: ((await currentTab())?.index || 0) + 1,
+  });
 };
 
 /**
