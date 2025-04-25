@@ -49,8 +49,8 @@ export default readable([], (set: (value: TabBookmarkSchema[][]) => void) => {
 
       set(tabs);
     },
-    1000,
-    { trailing: true }
+    500,
+    { leading: false, trailing: true }
   );
   const attachEvents = () => {
     UPDATE_EVENT_TYPES.forEach(eventType => {
