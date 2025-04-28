@@ -46,9 +46,14 @@ const calculateDecay = (tab: TabBookmarkSchema, lifetime: number) => {
 </script>
 
 <div class="flex h-full flex-col justify-between overflow-x-hidden overflow-y-auto">
-  {#each $browserTabs.entries() as [windowId, tabs]}
+  {#each $browserTabs.entries() as [windowId, tabs], windowIndex}
     {#if tabs && tabs.length}
-      <div class="w-full flex-grow bg-gray-100 p-2 pr-3 dark:bg-gray-800">
+      <div
+        class={[
+          "w-full bg-gray-100 p-2 pr-3 dark:bg-gray-800",
+          // last window should expand to fill space
+          windowIndex + 1 === $browserTabs.size && "flex-grow",
+        ]}>
         <h3 class="pl-5 text-sm font-extralight">
           {#if currentWindowId === windowId}
             Current
