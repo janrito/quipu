@@ -26,13 +26,13 @@ const tabs = ["pinboard", "tab decay", "raw", "cache"];
 let currentTabDecayHalfLife = $state($appSettings.tabDecayHalfLife);
 
 let currentTab = $state(tabs[0]);
-let tabsMatchingLiveExceptions = $derived(
+let URLsMatchingLiveExceptions = $derived.by(() =>
   $browserTabs
-    .flat()
-    .map(tab =>
-      tab.href ? findURLPattern(tab.href, currentTabDecayExemptions) && tab.href : undefined
+    .values()
+    .flatMap(tabs =>
+      tabs.filter(tab => findURLPattern(tab.href, currentTabDecayExemptions)).map(tab => tab.href)
     )
-    .filter(url => url)
+    .toArray()
 );
 
 const updateAllAppSettings = throttle(
@@ -167,7 +167,7 @@ const handleCloseEditor = (event: Event) => {
           </label>
           <p class="mt-4 mb-1 text-sm">Open tabs matching exceptions</p>
           <pre
-            class="h-min-content w-full border-b-2 border-gray-300 bg-gray-50 p-3 text-xs whitespace-pre-wrap text-gray-400 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-500">{tabsMatchingLiveExceptions.join(
+            class="h-min-content w-full border-b-2 border-gray-300 bg-gray-50 p-3 text-xs whitespace-pre-wrap text-gray-400 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-500">{URLsMatchingLiveExceptions.join(
               "\n"
             )}</pre>
         </div>
