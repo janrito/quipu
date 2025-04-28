@@ -75,7 +75,12 @@ const calculateDecay = (tab: TabBookmarkSchema, lifetime: number) => {
     {/if}
   {/each}
   {#if $decayedTabs && $decayedTabs.length}
-    <div class="w-full bg-gray-200 p-2 pr-3 dark:bg-gray-700">
+    <div
+      class={[
+        "w-full bg-gray-200 p-2 pr-3 dark:bg-gray-700",
+        // fill vertical space if no browser tabs
+        $browserTabs.size > 0 || "flex-grow",
+      ]}>
       <h3 class="mt-3 pl-5 text-sm font-extralight">
         Decayed Tabs <span class="text-gray-300 dark:text-gray-600">({$decayedTabs.length})</span>
       </h3>
