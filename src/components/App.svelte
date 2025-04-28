@@ -53,7 +53,7 @@ const toggleAppSettings = () => {
           {/if}
         {/if}
       </div>
-      <div class="h-full w-56 flex-none bg-gray-100 p-2 dark:bg-gray-800"><Tabs /></div>
+      <div class="h-full w-56 flex-none"><Tabs /></div>
     </div>
   </main>
   <footer

@@ -17,13 +17,17 @@ import {
 
 import Bookmark from "./Bookmark.svelte";
 
-onMount(() => {
+let currentWindowId: Number | null = $state(null);
+
+onMount(async () => {
   setTimeout(() => {
     tabLifetimes.sync();
     setInterval(() => {
       tabLifetimes.sync();
     }, UPDATE_DECAY_DISPLAY_INTERVAL);
   }, 500);
+
+  currentWindowId = (await browser.windows.getCurrent())?.id || null;
 });
 
 const getTabLifetime = (tab: TabBookmarkSchema, lifetimes: tabLifetimesSchema) => {
@@ -41,33 +45,42 @@ const calculateDecay = (tab: TabBookmarkSchema, lifetime: number) => {
 };
 </script>
 
-<div class="h-full overflow-x-hidden overflow-y-auto pr-3">
-  {#each $browserTabs as tabs, windowIndex (windowIndex)}
-    <h3 class="pl-5 text-sm font-extralight">
-      {#if windowIndex === 0}Current
-      {/if}Window Tabs
-      <span class="text-gray-300 dark:text-gray-600">({tabs.length})</span>
-    </h3>
-    {#each tabs as tab (tab.id)}
-      {@const lifetime = getTabLifetime(tab, $tabLifetimes)}
-      <Bookmark
-        bookmark={tab}
-        {...lifetime ? { decay: calculateDecay(tab, lifetime) } : {}}
-        openBookmark={() => {
-          switchToWindow(tab);
-          switchToTab(tab);
-        }}
-        closeBookmark={() => closeTab(tab)} />
-    {/each}
+<div class="flex h-full flex-col justify-between overflow-x-hidden overflow-y-auto">
+  {#each $browserTabs.entries() as [windowId, tabs]}
+    {#if tabs && tabs.length}
+      <div class="w-full flex-grow bg-gray-100 p-2 pr-3 dark:bg-gray-800">
+        <h3 class="pl-5 text-sm font-extralight">
+          {#if currentWindowId === windowId}
+            Current
+          {/if} Window Tabs
+          <span class="text-gray-300 dark:text-gray-600">({tabs.length})</span>
+        </h3>
+        {#each tabs as tab (tab.id)}
+          {@const lifetime = getTabLifetime(tab, $tabLifetimes)}
+          <Bookmark
+            bookmark={tab}
+            {...lifetime ? { decay: calculateDecay(tab, lifetime) } : {}}
+            openBookmark={() => {
+              switchToWindow(tab);
+              switchToTab(tab);
+            }}
+            closeBookmark={() => closeTab(tab)} />
+        {/each}
+      </div>
+    {/if}
   {/each}
-  <h3 class="mt-3 pl-5 text-sm font-extralight">
-    Decayed Tabs <span class="text-gray-300 dark:text-gray-600">({$decayedTabs.length})</span>
-  </h3>
+  {#if $decayedTabs && $decayedTabs.length}
+    <div class="w-full bg-gray-200 p-2 pr-3 dark:bg-gray-700">
+      <h3 class="mt-3 pl-5 text-sm font-extralight">
+        Decayed Tabs <span class="text-gray-300 dark:text-gray-600">({$decayedTabs.length})</span>
+      </h3>
 
-  {#each $decayedTabs as decayedTab (decayedTab.id)}
-    <Bookmark
-      bookmark={decayedTab}
-      closeEnabled={false}
-      openBookmark={() => newTab(decayedTab.href)} />
-  {/each}
+      {#each $decayedTabs as decayedTab (decayedTab.id)}
+        <Bookmark
+          bookmark={decayedTab}
+          closeEnabled={false}
+          openBookmark={() => newTab(decayedTab.href)} />
+      {/each}
+    </div>
+  {/if}
 </div>
