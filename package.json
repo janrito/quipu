@@ -25,7 +25,7 @@
     "last 2 Firefox version"
   ],
   "devDependencies": {
-    "@atlaskit/pragmatic-drag-and-drop": "^1.5.2",
+    "@atlaskit/pragmatic-drag-and-drop": "^1.5.3",
     "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.0.3",
     "@fontsource/iosevka": "^5.2.5",
     "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
