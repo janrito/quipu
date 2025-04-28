@@ -57,7 +57,7 @@
     "tailwindcss": "^4.1.4",
     "typescript-eslint": "^8.31.0",
     "urlpattern-polyfill": "^10.0.0",
-    "wxt": "^0.20.3"
+    "wxt": "^0.20.5"
   },
   "webExt": {
     "sourceDir": "dist"
