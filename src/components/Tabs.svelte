@@ -17,7 +17,7 @@ import {
 
 import Bookmark from "./Bookmark.svelte";
 
-let currentWindowId: Number | null = $state(null);
+let currentWindowId: number | null = $state(null);
 
 onMount(async () => {
   setTimeout(() => {
@@ -46,7 +46,7 @@ const calculateDecay = (tab: TabBookmarkSchema, lifetime: number) => {
 </script>
 
 <div class="flex h-full flex-col justify-between overflow-x-hidden overflow-y-auto">
-  {#each $browserTabs.entries() as [windowId, tabs], windowIndex}
+  {#each $browserTabs.entries() as [windowId, tabs], windowIndex (windowId)}
     {#if tabs && tabs.length}
       <div
         class={[
