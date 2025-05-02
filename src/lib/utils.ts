@@ -82,11 +82,17 @@ export const tabToTabBookMark = (
   tab: Browser.tabs.Tab,
   prefix: string = BROWSER_TAB_PREFIX
 ): TabBookmarkSchema => {
+  let url = undefined;
   if (tab.url === undefined) {
     throw new InvalidBookmark(-1, "URL is undefined");
   }
   if (tab.id === undefined) {
     throw new InvalidBookmark(-1, "tab ID is undefined");
+  }
+  try {
+    url = new URL(tab.url);
+  } catch {
+    throw new InvalidBookmark(-1, "tab ULR is invalid");
   }
 
   return {
@@ -94,7 +100,7 @@ export const tabToTabBookMark = (
     id: `${prefix}-${tab.windowId || "[N]"}-${tab.id}`,
     tags: [],
     description: tab.title || "",
-    href: new URL(tab.url),
+    href: url,
     favIconUrl: tab.favIconUrl ? new URL(tab.favIconUrl) : undefined,
     time: new Date().valueOf(),
     lastAccessed: tab.lastAccessed,
