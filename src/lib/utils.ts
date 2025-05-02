@@ -1,4 +1,4 @@
-import { memoize } from "lodash";
+import { debounce, memoize } from "lodash";
 import { URLPattern } from "urlpattern-polyfill";
 import { browser } from "wxt/browser";
 
