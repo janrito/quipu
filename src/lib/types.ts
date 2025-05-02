@@ -72,13 +72,8 @@ export interface TagMap {
   count: number;
 }
 
-export interface TabLifetimeSchema {
-  timerId?: ReturnType<typeof setTimeout>;
-  lifetime: number;
-}
-
 export interface tabLifetimesSchema {
-  [lifetimeId: string]: TabLifetimeSchema;
+  [lifetimeId: string]: number;
 }
 
 export type AllowedDropTargetDropEffect = Exclude<DataTransfer["dropEffect"], "none">;

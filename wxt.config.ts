@@ -14,7 +14,7 @@ export default defineConfig({
           }
         : {};
 
-    const permissions = { permissions: ["storage", "tabs", "*://api.pinboard.in/*"] };
+    const permissions = { permissions: ["storage", "tabs", "alarms", "*://api.pinboard.in/*"] };
     const host_permissions =
       manifestVersion === 3 ? { host_permissions: permissions.permissions } : {};
 
