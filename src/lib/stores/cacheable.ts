@@ -9,7 +9,8 @@ function cacheable<T extends object, ST extends object = T>(
   serialize: (value: T) => ST = value => value as unknown as ST,
   deserialize: (value: ST) => T = value => value as unknown as T
 ) {
-  const cache = storage.defineItem<ST>(`local:cache-${cacheKey}`, {
+  const storageType = "local";
+  const cache = storage.defineItem<ST>(`${storageType}:cache-${cacheKey}`, {
     init: () => initial,
   });
   const reader = (set: (value: T) => void) => async () => {
@@ -46,15 +47,14 @@ function cacheable<T extends object, ST extends object = T>(
   });
   const read = reader(set);
 
-  const updateAndCache = async (fn: (value: T) => T) => {
-    await cache.getValue().then(async value => {
-      const newValue = fn(deserialize(value));
-      await cache.setValue(serialize(newValue)).then(() => {
-        set(newValue);
-      });
-    });
-  };
-
+  const updateAndCache = async (fn: (value: T) => Promise<T>) =>
+    await cache
+      .getValue()
+      .then(value =>
+        fn(deserialize(value)).then(newValue =>
+          cache.setValue(serialize(newValue)).then(() => read())
+        )
+      );
   read();
   return {
     sync: read,
