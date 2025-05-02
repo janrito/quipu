@@ -1,13 +1,13 @@
-import { memoize } from "lodash";
+import { debounce, memoize } from "lodash";
 import { URLPattern } from "urlpattern-polyfill";
 import { browser } from "wxt/browser";
 
 import { BROWSER_TAB_PREFIX } from "./constants.js";
 import type {
+  APIParameters,
   BookmarkOrTab,
   BookmarkSchema,
   BookmarkSchemaInCard,
-  Parameters,
   QuipuError,
   TabBookmarkSchema,
 } from "./types.js";
@@ -44,7 +44,7 @@ export const yesterday = () => {
  * If multiple values in a key, they will be joined by a `+`
  */
 
-export const encodeParameters = (parameters: Parameters): string =>
+export const encodeParameters = (parameters: APIParameters): string =>
   Object.entries(parameters)
     .map(([key, value]) => {
       if (Array.isArray(value)) {
@@ -82,11 +82,17 @@ export const tabToTabBookMark = (
   tab: Browser.tabs.Tab,
   prefix: string = BROWSER_TAB_PREFIX
 ): TabBookmarkSchema => {
+  let url = undefined;
   if (tab.url === undefined) {
     throw new InvalidBookmark(-1, "URL is undefined");
   }
   if (tab.id === undefined) {
     throw new InvalidBookmark(-1, "tab ID is undefined");
+  }
+  try {
+    url = new URL(tab.url);
+  } catch {
+    throw new InvalidBookmark(-1, "tab ULR is invalid");
   }
 
   return {
@@ -94,7 +100,7 @@ export const tabToTabBookMark = (
     id: `${prefix}-${tab.windowId || "[N]"}-${tab.id}`,
     tags: [],
     description: tab.title || "",
-    href: new URL(tab.url),
+    href: url,
     favIconUrl: tab.favIconUrl ? new URL(tab.favIconUrl) : undefined,
     time: new Date().valueOf(),
     lastAccessed: tab.lastAccessed,
@@ -243,7 +249,7 @@ export const pAlive = (lifetime: number, halfLife: number) => 2 ** (-lifetime / 
  * e.g. for a half life of 30 days it produces a random lifetime that equally likely
  * to be shorter than 30 days as is longer than 30 days
  */
-export const sampleLifetime = (halfLife: number) => -(halfLife * Math.log2(Math.random()));
+export const sampleLifetime = (halfLife: number) => -Math.ceil(halfLife * Math.log2(Math.random()));
 
 /**
  * Calculate delay
@@ -253,20 +259,53 @@ export const calculateDelay = (lifetime: number, lastAccessed?: number | undefin
   const currentLifeSpan = lastAccessed ? (now - lastAccessed).valueOf() : 0;
   return lifetime - currentLifeSpan > 0 ? lifetime - currentLifeSpan : 0;
 };
+/**
+ * Memoizes and debounces a function.
+ *
+ * This function combines memoization and debouncing.
+ * So that the function is only called once with the same arguments
+ * but it is called multiple times with different arguments
+ * Mostly adapted from:
+ * https://docs.actuallycolab.org/engineering-blog/memoize-debounce/
+ * https://github.com/lodash/lodash/issues/2403
+ *
+ * @param func The function to memoize and debounce.
+ * @param wait The number of milliseconds to delay for the debounce function.
+ * @param options The options for the debounce function.
+ * @param resolver The resolver for the memoize function.
+ * @returns A memoized and debounced function.
+ */
+export function memoizeDebounce<F extends (...args: Parameters<F>) => ReturnType<F>>(
+  func: F,
+  wait = 0,
+  options?: Parameters<typeof debounce<F>>[2],
+  resolver?: Parameters<
+    typeof memoize<(...args: Parameters<F>) => ReturnType<typeof debounce<F>>>
+  >[1]
+) {
+  const mem = memoize<(...args: Parameters<F>) => ReturnType<typeof debounce<F>>>(function () {
+    return debounce<F>(func, wait, options);
+  }, resolver);
+
+  return function (...args: Parameters<F>) {
+    return mem(...args)(...args);
+  };
+}
 
 /**
  * Convert between tab id (numeric) and lifetime id (strings)
  * tab ids are stored by the browser, we need to use them to interact with a tab
  * lifetime ids are stored in the cache in an object they have to be strings
  */
-export const lifetimeIdToTabId = (lifetimeId: string) => Number(lifetimeId);
-export const tabIdToLifetimeId = (tabId: number) => String(tabId);
+export const tabIdToLifetimeId = (tabId: number) => `lifetime-for-tab-${tabId}`;
+export const lifetimeIdToTabId = (lifetimeId: string) =>
+  Number(lifetimeId.replace("lifetime-for-tab-", ""));
 
 export const getTabLifetimeId = (tab: Browser.tabs.Tab | TabBookmarkSchema): string | undefined => {
   if (isTabBookmarkSchema(tab)) {
-    return String(tab.browserTabId);
+    return tabIdToLifetimeId(tab.browserTabId);
   } else if (tab.id) {
-    return String(tab.id);
+    return tabIdToLifetimeId(tab.id);
   }
 };
 

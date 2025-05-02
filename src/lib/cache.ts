@@ -1,3 +1,4 @@
 export const clearEntireCache = async () => {
-  await storage.clear("local");
+  const storageType = "local";
+  await storage.clear(storageType);
 };

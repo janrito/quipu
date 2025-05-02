@@ -39,8 +39,8 @@ const decayedTabs = () => {
     deSerializeTabBookmarks
   );
 
-  const add = (decayingTab: Browser.tabs.Tab) => {
-    update(value =>
+  const add = async (decayingTab: Browser.tabs.Tab) => {
+    await update(async value =>
       [
         tabToTabBookMark(decayingTab, DECAYED_TAB_PREFIX),
         ...(value ? value.filter(decayedTab => decayingTab.url !== String(decayedTab.href)) : []),

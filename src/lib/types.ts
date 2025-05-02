@@ -1,6 +1,6 @@
-export type ParameterValue = Array<boolean | number | string> | boolean | number | string;
-export type Parameters = {
-  [key: string]: ParameterValue;
+export type APIParameterValue = Array<boolean | number | string> | boolean | number | string;
+export type APIParameters = {
+  [key: string]: APIParameterValue;
 };
 
 export interface PageSchema {
@@ -72,13 +72,8 @@ export interface TagMap {
   count: number;
 }
 
-export interface TabLifetimeSchema {
-  timerId?: ReturnType<typeof setTimeout>;
-  lifetime: number;
-}
-
 export interface tabLifetimesSchema {
-  [lifetimeId: string]: TabLifetimeSchema;
+  [lifetimeId: string]: number;
 }
 
 export type AllowedDropTargetDropEffect = Exclude<DataTransfer["dropEffect"], "none">;

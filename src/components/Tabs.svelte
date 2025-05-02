@@ -25,18 +25,14 @@ onMount(async () => {
     setInterval(() => {
       tabLifetimes.sync();
     }, UPDATE_DECAY_DISPLAY_INTERVAL);
-  }, 500);
+  }, 1000);
 
   currentWindowId = (await browser.windows.getCurrent())?.id || null;
 });
 
 const getTabLifetime = (tab: TabBookmarkSchema, lifetimes: tabLifetimesSchema) => {
   const lifetimeId = getTabLifetimeId(tab);
-  const tabLifetimeMeta = (lifetimeId && lifetimes[lifetimeId]) || {
-    lifetime: undefined,
-  };
-  const { lifetime } = tabLifetimeMeta;
-  return lifetime;
+  return (lifetimeId && lifetimes[lifetimeId]) || undefined;
 };
 
 const calculateDecay = (tab: TabBookmarkSchema, lifetime: number) => {
