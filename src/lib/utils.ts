@@ -259,6 +259,38 @@ export const calculateDelay = (lifetime: number, lastAccessed?: number | undefin
   const currentLifeSpan = lastAccessed ? (now - lastAccessed).valueOf() : 0;
   return lifetime - currentLifeSpan > 0 ? lifetime - currentLifeSpan : 0;
 };
+/**
+ * Memoizes and debounces a function.
+ *
+ * This function combines memoization and debouncing.
+ * So that the function is only called once with the same arguments
+ * but it is called multiple times with different arguments
+ * Mostly adapted from:
+ * https://docs.actuallycolab.org/engineering-blog/memoize-debounce/
+ * https://github.com/lodash/lodash/issues/2403
+ *
+ * @param func The function to memoize and debounce.
+ * @param wait The number of milliseconds to delay for the debounce function.
+ * @param options The options for the debounce function.
+ * @param resolver The resolver for the memoize function.
+ * @returns A memoized and debounced function.
+ */
+export function memoizeDebounce<F extends (...args: Parameters<F>) => ReturnType<F>>(
+  func: F,
+  wait = 0,
+  options?: Parameters<typeof debounce<F>>[2],
+  resolver?: Parameters<
+    typeof memoize<(...args: Parameters<F>) => ReturnType<typeof debounce<F>>>
+  >[1]
+) {
+  const mem = memoize<(...args: Parameters<F>) => ReturnType<typeof debounce<F>>>(function () {
+    return debounce<F>(func, wait, options);
+  }, resolver);
+
+  return function (...args: Parameters<F>) {
+    return mem(...args)(...args);
+  };
+}
 
 /**
  * Convert between tab id (numeric) and lifetime id (strings)
