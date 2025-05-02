@@ -297,14 +297,15 @@ export function memoizeDebounce<F extends (...args: Parameters<F>) => ReturnType
  * tab ids are stored by the browser, we need to use them to interact with a tab
  * lifetime ids are stored in the cache in an object they have to be strings
  */
-export const lifetimeIdToTabId = (lifetimeId: string) => Number(lifetimeId);
-export const tabIdToLifetimeId = (tabId: number) => String(tabId);
+export const tabIdToLifetimeId = (tabId: number) => `lifetime-for-tab-${tabId}`;
+export const lifetimeIdToTabId = (lifetimeId: string) =>
+  Number(lifetimeId.replace("lifetime-for-tab-", ""));
 
 export const getTabLifetimeId = (tab: Browser.tabs.Tab | TabBookmarkSchema): string | undefined => {
   if (isTabBookmarkSchema(tab)) {
-    return String(tab.browserTabId);
+    return tabIdToLifetimeId(tab.browserTabId);
   } else if (tab.id) {
-    return String(tab.id);
+    return tabIdToLifetimeId(tab.id);
   }
 };
 
