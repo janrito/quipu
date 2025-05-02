@@ -249,7 +249,7 @@ export const pAlive = (lifetime: number, halfLife: number) => 2 ** (-lifetime / 
  * e.g. for a half life of 30 days it produces a random lifetime that equally likely
  * to be shorter than 30 days as is longer than 30 days
  */
-export const sampleLifetime = (halfLife: number) => -(halfLife * Math.log2(Math.random()));
+export const sampleLifetime = (halfLife: number) => -Math.ceil(halfLife * Math.log2(Math.random()));
 
 /**
  * Calculate delay
