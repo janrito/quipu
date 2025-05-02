@@ -4,10 +4,10 @@ import { browser } from "wxt/browser";
 
 import { BROWSER_TAB_PREFIX } from "./constants.js";
 import type {
+  APIParameters,
   BookmarkOrTab,
   BookmarkSchema,
   BookmarkSchemaInCard,
-  Parameters,
   QuipuError,
   TabBookmarkSchema,
 } from "./types.js";
@@ -44,7 +44,7 @@ export const yesterday = () => {
  * If multiple values in a key, they will be joined by a `+`
  */
 
-export const encodeParameters = (parameters: Parameters): string =>
+export const encodeParameters = (parameters: APIParameters): string =>
   Object.entries(parameters)
     .map(([key, value]) => {
       if (Array.isArray(value)) {

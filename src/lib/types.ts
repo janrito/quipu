@@ -1,6 +1,6 @@
-export type ParameterValue = Array<boolean | number | string> | boolean | number | string;
-export type Parameters = {
-  [key: string]: ParameterValue;
+export type APIParameterValue = Array<boolean | number | string> | boolean | number | string;
+export type APIParameters = {
+  [key: string]: APIParameterValue;
 };
 
 export interface PageSchema {

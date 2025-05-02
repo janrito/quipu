@@ -1,6 +1,6 @@
 import type {
+  APIParameters,
   BookmarkSchema,
-  Parameters,
   PinBoardAPIBookmarkSchema,
   QuipuError,
   TagMap,
@@ -34,8 +34,8 @@ const handleRequestErrors = (response: Response) => {
   return response;
 };
 
-const fetchAPI = async (apiToken: string, route: string, parameters: Parameters = {}) => {
-  const defaultParameters: Parameters = {
+const fetchAPI = async (apiToken: string, route: string, parameters: APIParameters = {}) => {
+  const defaultParameters: APIParameters = {
     format: "json",
     meta: 1,
   };
@@ -71,7 +71,7 @@ export const postsUpdate = auth(async apiToken =>
   fetchAPI(apiToken, "posts/update").then(data => new Date(data.update_time))
 );
 
-const cachedFetchAPI = async (apiToken: string, route: string, parameters: Parameters = {}) =>
+const cachedFetchAPI = async (apiToken: string, route: string, parameters: APIParameters = {}) =>
   postsUpdate(apiToken).then(async lastUpdate => {
     const cacheKey = `${route}?${encodeParameters(parameters)}`;
     const cachedRoute = storage.defineItem<unknown, { lastUpdate: number; cachedOn: number }>(
