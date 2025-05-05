@@ -40,7 +40,7 @@
     "@wxt-dev/module-svelte": "^2.0.3",
     "eslint": "^9.25.1",
     "eslint-config-prettier": "^10.1.2",
-    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-prettier": "^5.3.1",
     "eslint-plugin-svelte": "^3.5.1",
     "globals": "^16.0.0",
     "lodash": "^4.17.21",
