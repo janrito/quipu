@@ -53,7 +53,7 @@
     "stylelint-config-standard": "^38.0.0",
     "stylelint-prettier": "^5.0.3",
     "svelte": "^5.28.2",
-    "svelte-check": "^4.1.6",
+    "svelte-check": "^4.1.7",
     "tailwindcss": "^4.1.5",
     "typescript-eslint": "^8.31.1",
     "urlpattern-polyfill": "^10.0.0",
