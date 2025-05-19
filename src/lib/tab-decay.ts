@@ -1,4 +1,3 @@
-import { debounce } from "lodash";
 import { get } from "svelte/store";
 
 import { TAB_QUERY } from "~/lib/constants.js";
@@ -13,16 +12,23 @@ import {
   findURLPattern,
   formatTimeDelta,
   getTabLifetimeId,
+  memoizeDebounce,
   sampleLifetime,
 } from "~/lib/utils.js";
 
-const decayTab = debounce(tabId => {
-  browser.tabs.get(tabId).then(async tab => {
-    decayedTabs.add(tab).then(() => {
-      closeTab(tab);
+const decayTab = memoizeDebounce(
+  (tabId: number) => {
+    browser.tabs.get(tabId).then(async tab => {
+      decayedTabs.add(tab).then(() => {
+        closeTab(tab);
+      });
     });
-  });
-}, 100);
+  },
+  100,
+  { leading: true, trailing: true },
+  // resolver for memoisation uses all provided arguments
+  (tabId: number) => `${tabId}`
+);
 
 const getTabDecayExceptions = (appSettings: AppSettingsSchema) => {
   const tabDecayExceptions = appSettings.tabDecayExceptions;
@@ -53,7 +59,7 @@ const getTabLifetime = (
 
 const decayIfLifetimeExpired = (tab: Browser.tabs.Tab, lifetime: number) => {
   const timeToDeath = calculateDelay(lifetime, tab.lastAccessed);
-  if (timeToDeath <= 0) {
+  if (timeToDeath <= 0 && tab.id) {
     // if the time to death is less than 0, decay the tab
     console.warn(
       `Tab ${tab.id} decayed after a lifetime of ${formatTimeDelta(lifetime)}: ${tab.url}`

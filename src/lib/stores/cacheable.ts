@@ -45,7 +45,7 @@ function cacheable<T extends object, ST extends object = T>(
 
     return detachEvents;
   });
-  const read = reader(set);
+  const read = throttle(reader(set), 1000 * 5);
 
   const updateAndCache = async (fn: (value: T) => Promise<T>) =>
     await cache
