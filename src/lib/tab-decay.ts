@@ -81,7 +81,6 @@ export const updateTabLifetimes = async (forceOn: number[] = [], forceOnAll: boo
   tabLifetimes.update(async currentTabLifetimes => {
     const newTabLifetimes: tabLifetimesSchema = {};
     await browser.tabs.query(TAB_QUERY).then(tabs => {
-      console.log(tabs.length, tabs);
       tabs.map(tab => {
         // ignore tabs without ID
         if (!tab.id) return;
