@@ -17,17 +17,20 @@ import {
 
 import Bookmark from "./Bookmark.svelte";
 
+let interval = $state<ReturnType<typeof setInterval> | null>(null);
 let currentWindowId: number | null = $state(null);
 
 onMount(async () => {
-  setTimeout(() => {
-    tabLifetimes.sync();
-    setInterval(() => {
-      tabLifetimes.sync();
-    }, UPDATE_DECAY_DISPLAY_INTERVAL);
-  }, 1000);
+  const currentWindow = await browser.windows.getCurrent();
+  currentWindowId = currentWindow?.id || null;
 
-  currentWindowId = (await browser.windows.getCurrent())?.id || null;
+  interval = setInterval(() => {
+    tabLifetimes.sync();
+  }, UPDATE_DECAY_DISPLAY_INTERVAL);
+});
+
+onDestroy(() => {
+  if (interval) clearInterval(interval);
 });
 
 const getTabLifetime = (tab: TabBookmarkSchema, lifetimes: tabLifetimesSchema) => {
