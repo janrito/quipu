@@ -45,13 +45,16 @@ let highlightedBookmark = $derived(
 let loading = $derived($bookmarksStore.loading);
 let errors = $derived($bookmarksStore.errors);
 
-$effect(() => {
+onMount(() => {
   // this makes it so that detail resets when we update bookmarks
   // - or when a new page is loaded
   highlightedBookmarkId =
     (highlightedBookmarkId &&
       bookmarks.find(bookmark => bookmark.id === highlightedBookmarkId)?.id) ||
     undefined;
+});
+onDestroy(() => {
+  highlightedBookmarkId = undefined;
 });
 
 const filterBookmarksByTag = (bookmarks: BookmarkSchema[], tag: string): BookmarkSchemaInCard[] => {
