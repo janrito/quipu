@@ -41,7 +41,7 @@
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.0",
-    "eslint-plugin-svelte": "^3.8.1",
+    "eslint-plugin-svelte": "^3.9.1",
     "globals": "^16.1.0",
     "lodash": "^4.17.21",
     "lz-string": "^1.5.0",
