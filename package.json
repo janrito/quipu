@@ -52,7 +52,7 @@
     "stylelint": "^16.20.0",
     "stylelint-config-standard": "^38.0.0",
     "stylelint-prettier": "^5.0.3",
-    "svelte": "^5.33.15",
+    "svelte": "^5.33.17",
     "svelte-check": "^4.2.1",
     "tailwindcss": "^4.1.8",
     "typescript-eslint": "^8.33.1",
