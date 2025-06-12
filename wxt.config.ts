@@ -34,5 +34,9 @@ export default defineConfig({
             cors: true,
           }
         : {},
+    build: {
+      sourcemap: true,
+      minify: mode === "production" ? "terser" : "terser",
+    },
   }),
 });
