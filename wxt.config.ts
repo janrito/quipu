@@ -14,13 +14,16 @@ export default defineConfig({
           }
         : {};
 
-    const permissions = { permissions: ["storage", "tabs", "alarms", "*://api.pinboard.in/*"] };
-    const host_permissions =
-      manifestVersion === 3 ? { host_permissions: permissions.permissions } : {};
+    const host_permissions = ["*://api.pinboard.in/*"];
+    const permissions = ["storage", "tabs", "alarms"];
+
+    const all_permissions =
+      manifestVersion === 3
+        ? { permissions: permissions, host_permissions: host_permissions }
+        : { permissions: [...permissions, ...host_permissions] };
 
     return {
-      ...permissions,
-      ...host_permissions,
+      ...all_permissions,
       ...devDefinitions,
     };
   },
