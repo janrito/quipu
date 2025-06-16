@@ -35,7 +35,7 @@
     "@types/lodash": "^4.17.17",
     "@types/webextension-polyfill": "^0.12.3",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
-    "@webext-core/messaging": "^2.2.0",
+    "@webext-core/messaging": "^2.3.0",
     "@wxt-dev/auto-icons": "^1.0.2",
     "@wxt-dev/module-svelte": "^2.0.3",
     "eslint": "^9.28.0",
