@@ -38,7 +38,7 @@
     "@webext-core/messaging": "^2.2.0",
     "@wxt-dev/auto-icons": "^1.0.2",
     "@wxt-dev/module-svelte": "^2.0.3",
-    "eslint": "^9.28.0",
+    "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.1",
     "eslint-plugin-svelte": "^3.9.2",
