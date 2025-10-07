@@ -1,4 +1,7 @@
 import { get } from "svelte/store";
+// import to distinguish it from Node types
+// https://github.com/kenchris/urlpattern-polyfill/issues/135
+import { URLPattern } from "urlpattern-polyfill";
 
 import { TAB_QUERY } from "~/lib/constants.js";
 import appSettings from "~/lib/stores/app-settings.js";
