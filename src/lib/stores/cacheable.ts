@@ -48,13 +48,13 @@ function cacheable<T extends object, ST extends object = T>(
   const read = throttle(reader(set), 1000 * 5);
 
   const updateAndCache = async (fn: (value: T) => Promise<T>) =>
-    await cache
-      .getValue()
-      .then(value =>
+    await cache.getValue().then(value => {
+      if (value !== null) {
         fn(deserialize(value)).then(newValue =>
           cache.setValue(serialize(newValue)).then(() => read())
-        )
-      );
+        );
+      }
+    });
   read();
   return {
     sync: read,

@@ -20,8 +20,10 @@ const storable = () => {
 
   const read = async () => {
     await optionsStorage.getValue().then(value => {
-      currentValue = value;
-      set(value);
+      if (value !== null) {
+        currentValue = value;
+        set(value);
+      }
     });
   };
 
