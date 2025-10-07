@@ -8,3 +8,4 @@ web-ext.config.ts
 .default-settings.json
 
 .envrc
+.aider*
